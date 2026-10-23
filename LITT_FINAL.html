@@ -40,7 +40,7 @@ body[data-mode=club] #bgWall{opacity:0}
 .tile svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.2;flex:0 0 auto}
 .tile b{font-family:var(--display);font-weight:400;font-size:14.5px;letter-spacing:.03em;white-space:nowrap}
 #stage{position:relative;height:clamp(420px,62vh,680px);width:100%;margin-top:2px}
-#venue{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#venue{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;outline:none}
 .hint{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-family:var(--caps);font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink2);opacity:.9;transition:opacity .8s;pointer-events:none}
 .hint.off{opacity:0}
 .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--caps);font-size:10px;letter-spacing:.4em;color:var(--ink2);transition:opacity .6s;pointer-events:none}
@@ -530,7 +530,7 @@ body[data-mode=club] .lampopt{display:flex}
 body.ivp-on{overflow:hidden}
 
 /* the venue inside the invitation, live */
-.ivp-venue{position:relative;height:clamp(280px,46vh,380px);margin:14px -22px 2px;touch-action:none}
+.ivp-venue{position:relative;height:clamp(280px,46vh,380px);margin:14px -22px 2px;touch-action:pan-y}
 .ivp-venue #venue{position:absolute;inset:0;width:100%;height:100%;display:block}
 .ivp-vcap{position:absolute;left:0;right:0;bottom:8px;z-index:2;text-align:center;font-family:var(--caps);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ii);pointer-events:none}
 /* at your table, under the QR */
@@ -2589,14 +2589,16 @@ function program(t, off) {
    strong enough to find from across the room. In the club only the table you look at and the
    table you booked are lit; every other lamp stays dark. */
 function setStates(map) { states = map || {}; refreshTables(); }
+var avail = null;   // after the guest picks night, hour and party: the tables that fit, glowing in their own lamps
+function setAvail(ids) { avail = ids && ids.length ? {} : null; (ids || []).forEach(function (i) { avail[i] = 1; }); refreshTables(); }
 function refreshTables() {
   var club = modeK > 0.5;
   Object.keys(tableObjs).forEach(function (id) {
     var tb = tableObjs[id], st = states[id] || 'free', sel = selected === id, mine = mineId === id, inZone = focusZone === tb.data.zone && st === 'free';
-    var I = sel || mine ? 5 : inZone ? 1.4 : club ? 0.0 : (st === 'free' ? 0.45 : 0.08);
+    var av = avail && avail[id] && st === 'free', I = sel || mine ? 5 : av ? 2.4 : inZone ? 1.4 : avail ? 0.04 : club ? 0.0 : (st === 'free' ? 0.45 : 0.08);
     tb.lampMat.emissiveIntensity = I; tb.lampMat.color.set(I > 0.2 ? 0x5a2e10 : 0x1a1008);
-    tb.lampGlow.material.opacity = sel || mine ? 1 : inZone ? 0.7 : club ? 0 : (st === 'free' ? 0.22 : 0);
-    tb.lampGlow.scale.setScalar(sel || mine ? 2.4 : 0.6);
+    tb.lampGlow.material.opacity = sel || mine ? 1 : av ? 0.85 : inZone ? 0.7 : avail ? 0 : club ? 0 : (st === 'free' ? 0.22 : 0);
+    tb.lampGlow.scale.setScalar(sel || mine ? 2.4 : av ? 1.6 : 0.6); tb.av = av && !sel && !mine;
   });
   placePool(lights.pick, selected); placePool(lights.mine, mineId && mineId !== selected ? mineId : null);
   if (bucketMesh) { Object.keys(bucketIdx).forEach(function (id) { var v = id === selected || id === mineId ? 1.5 : 0.75; bucketMesh.setColorAt(bucketIdx[id], new T.Color(v, v, v)); }); bucketMesh.instanceColor.needsUpdate = true; }
@@ -2624,10 +2626,10 @@ var spin = { idle: 99, hold: false, speed: 0.06, dir: 1, lim: 1.5 };   // never 
 function clampTh(v) { return Math.max(-spin.lim, Math.min(spin.lim, v)); }
 function bindPointer() {
   var down = null, moved = false, pid = null;
-  canvasEl.addEventListener('pointerdown', function (e) { if (pid !== null) return; pid = e.pointerId; canvasEl.setPointerCapture(e.pointerId); down = { x: e.clientX, y: e.clientY, th: cam.tTh, ph: cam.tPh }; moved = false; spin.idle = 0; });
+  canvasEl.addEventListener('pointerdown', function (e) { if (pid !== null) return; pid = e.pointerId; if (e.pointerType === 'mouse') canvasEl.setPointerCapture(e.pointerId); down = { touch: e.pointerType !== 'mouse', x: e.clientX, y: e.clientY, th: cam.tTh, ph: cam.tPh }; moved = false; spin.idle = 0; });
   canvasEl.addEventListener('pointermove', function (e) { if (e.pointerId !== pid || !down) return; var dx = e.clientX - down.x, dy = e.clientY - down.y; if (Math.abs(dx) + Math.abs(dy) > 6) moved = true;
     if (view === 'plan') return;
-    cam.tTh = clampTh(down.th - dx * 0.0085); spin.dir = dx < 0 ? 1 : -1; cam.tPh = Math.max(48 * D2R, Math.min(74 * D2R, down.ph - dy * 0.004)); spin.idle = 0; if (moved && LITT.onInteract) LITT.onInteract(); });
+    cam.tTh = clampTh(down.th - dx * 0.0085); spin.dir = dx < 0 ? 1 : -1; if (!down.touch) cam.tPh = Math.max(48 * D2R, Math.min(74 * D2R, down.ph - dy * 0.004)); /* on a phone an up/down swipe scrolls the page (touch-action: pan-y); only sideways turns the shell */ spin.idle = 0; if (moved && LITT.onInteract) LITT.onInteract(); });
   function up(e) { if (e.pointerId !== pid) return; pid = null; if (down && !moved) tap(e.clientX, e.clientY); down = null; spin.idle = 0; }
   canvasEl.addEventListener('pointerup', up); canvasEl.addEventListener('pointercancel', function (e) { if (e.pointerId === pid) { pid = null; down = null; } });
 }
@@ -3320,6 +3322,7 @@ function frame(forceDt) {
   var side = Math.abs(Math.sin(cam.th)), rr = cam.r * (1 + 0.2 * side), tz = cam.target.z - 1.3 * side;   // from the side the shell is longer: step back and centre on it, train included
   camera.position.set(cam.target.x + rr * Math.sin(cam.ph) * Math.sin(cam.th), cam.target.y + rr * Math.cos(cam.ph), tz + rr * Math.sin(cam.ph) * Math.cos(cam.th)); camera.lookAt(cam.target.x, cam.target.y, tz);
   venue.position.y = Math.sin(t * 0.9) * 0.05; fadeTrees(dt); updateLanterns(dt, t); updatePeople(dt, t);
+  if (avail) Object.keys(tableObjs).forEach(function (id) { var tb = tableObjs[id]; if (!tb.av) return; var k = 0.5 + 0.5 * Math.sin(t * 2.2 + tb.data.x * 0.7); tb.lampGlow.material.opacity = 0.6 + 0.35 * k; tb.lampMat.emissiveIntensity = 1.8 + 1.2 * k; });   // a slow breath, out of step table to table
   if (!spin.hold && !dragging() && view !== 'plan') { spin.idle += dt;
     if (spin.idle > 2.5) { var room = spin.dir > 0 ? spin.lim - cam.tTh : cam.tTh + spin.lim; if (room < 0.004) spin.dir = -spin.dir;
       cam.tTh = clampTh(cam.tTh + spin.dir * dt * spin.speed * Math.min(1, (spin.idle - 2.5) / 2) * Math.max(0.12, Math.min(1, room / 0.4))); } }
@@ -3335,7 +3338,7 @@ function frame(forceDt) {
 }
 
 LITT.scene = {
-  init: init, setMode: function (m) { mode = m; modeTarget = m === 'club' ? 1 : 0; }, setStates: setStates, select: select, clearSelect: clearSelect, focusZone: setFocusZone, setMine: setMine, spin: spin, setView: setView, view: function () { return view; }, setLamps: setLampOpt, lamps: function () { return LAMPS.lanterns.length; },
+  init: init, setMode: function (m) { mode = m; modeTarget = m === 'club' ? 1 : 0; }, setStates: setStates, select: select, clearSelect: clearSelect, focusZone: setFocusZone, setMine: setMine, spin: spin, setView: setView, setAvail: setAvail, view: function () { return view; }, setLamps: setLampOpt, lamps: function () { return LAMPS.lanterns.length; },
   onTap: function (fn) { onTap = fn; },
   mgr: function (on) { PEO.mgrHold = !!on; if (on && PEO.mgr) PEO.mgr.wave = 2.6; spin.hold = !!on || !!selected; if (!on) spin.idle = 0; },
   mgrAnchor: function () { var a = mgrScreen(1.9); return a ? { x: a[0], y: a[1], w: a[2], h: a[3] } : null; }, resize: function () { if (renderer) resize(); }, pause: function (p) { running = !p; },
@@ -3400,6 +3403,7 @@ function computeBooked() {
   S.bookings.forEach(function (b) { if (b.night === S.night && b.mode === S.mode) map[b.table] = 'booked'; });
   S.booked = map;
   L.scene.setStates(map);
+  if (S.availOn) L.scene.setAvail(availIds());
 }
 function isFree(id) { return !S.booked[id]; }
 
@@ -3451,8 +3455,21 @@ function renderPk() {
   $('#pkpIn').innerHTML = h;
   if (pkOpen === 'night') { var on = $('.dcard.on'); if (on) on.parentNode.scrollLeft = Math.max(0, on.offsetLeft - 16); }
 }
+/* the three picks done: the room drops to the plan and the tables that fit the party breathe in their own lamps */
+function setViewUI(v) { L.scene.setView(v); $('#vtog').classList.toggle('plan', v === 'plan'); $$('#vtog button').forEach(function (x) { var on = x.getAttribute('data-v') === v; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+function availIds() { return L.TABLES.filter(function (t) { return isFree(t.id) && t.cap >= S.guests; }).map(function (t) { return t.id; }); }
+function showAvail() {
+  if (document.body.classList.contains('booked') || document.body.classList.contains('ivp-on') || $('#sheet').classList.contains('on')) return;
+  var ids = availIds(); S.availOn = true; L.scene.setAvail(ids); setViewUI('plan');
+  var st = $('#stage').getBoundingClientRect(); if (Math.abs(st.top - 10) > 24) window.scrollTo({ top: window.scrollY + st.top - 10, behavior: 'smooth' });   // the whole room in view
+  var hn = $('#hint'); hn.textContent = ids.length ? ids.length + (ids.length === 1 ? ' table' : ' tables') + ' open for ' + S.guests + ' \u00b7 tap one' : 'Nothing open for ' + S.guests + ' \u00b7 try another hour'; hn.classList.remove('off');
+  clearTimeout(showAvail._t); showAvail._t = setTimeout(function () { hn.classList.add('off'); }, 7000);
+}
 function togglePk(k) {
-  pkOpen = pkOpen === k ? null : k;
+  var wasPk = pkOpen; pkOpen = pkOpen === k ? null : k;
+  if (wasPk === 'guests' && pkOpen !== 'guests') {          // once the picker has folded away
+    var pp = $('#pkp'), done = false, go = function () { if (done) return; done = true; showAvail(); };
+    if (pkOpen) setTimeout(go, 60); else { pp.addEventListener('transitionend', go, { once: true }); setTimeout(go, 650); } }
   $$('#pick .pk').forEach(function (b) { var o = b.getAttribute('data-pk') === pkOpen; b.classList.toggle('open', o); b.setAttribute('aria-expanded', o ? 'true' : 'false'); });
   var p = $('#pkp');
   if (!pkOpen) { p.style.height = p.scrollHeight + 'px'; requestAnimationFrame(function () { p.style.height = '0px'; p.classList.remove('on'); }); return; }
@@ -3648,6 +3665,7 @@ function firstName(b) { var n = ((b.who && b.who.name) || '').trim(); return n &
 function hms(sec) { sec = Math.max(0, Math.floor(sec)); var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), x = sec % 60; return h + ':' + (m < 10 ? '0' : '') + m + ':' + (x < 10 ? '0' : '') + x; }
 function ago(ms) { var s = Math.round((Date.now() - ms) / 1000); return s < 45 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago'; }
 function confirmBooking() {
+  S.availOn = false; L.scene.setAvail(null);
   var t = tableById(S.hold.id), club = S.mode === 'club', dep = club ? depFor(t.min, CFG.depositPct) : 0, now = Date.now();
   var ref = 'LT-' + (now % 100000).toString(36).toUpperCase() + Math.floor(Math.random() * 90 + 10);
   var due = club ? Math.max(now + 30 * 60000, Math.min(now + 12 * 3600000, arrivalAt(S.night, S.time) - 3600000)) : 0;
@@ -4335,7 +4353,7 @@ function mgrTyping() { if ($('#mgbLog .typ')) return; var m = document.createEle
 /* a few seconds of bubble only: hello on arrival, or a word she has to say (the 11pm one) */
 function carlyneSay(text, ms) {
   if (MGR.open) { mgrTyping(); setTimeout(function () { mgrLog(esc(text)); }, 600); return; }
-  if ($('#sheet').classList.contains('on') || document.body.classList.contains('ivp-on') || L.scene.view() !== '3d') return;
+  if ($('#sheet').classList.contains('on') || document.body.classList.contains('ivp-on')) return;
   $('#mgbLog').innerHTML = ''; MGR.greetOnly = true; mgrShow(); mgrTyping();
   setTimeout(function () { if (MGR.greetOnly) mgrLog(esc(text)); }, 650);
   clearTimeout(MGR.t); MGR.t = setTimeout(function () { if (MGR.greetOnly) mgrHide(); }, ms || 5000);
@@ -4514,12 +4532,11 @@ var Cosmos = (function () {
 
 /* ---------------------------------------------------------------- wiring */
 function bind() {
-  $('#vtog').addEventListener('click', function (e) { var b = e.target.closest('[data-v]'); if (!b) return; var v = b.getAttribute('data-v'); L.scene.setView(v); hideBubble();
-    $('#vtog').classList.toggle('plan', v === 'plan'); $$('#vtog button').forEach(function (x) { var on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); }); $('#hint').classList.add('off'); });
+  $('#vtog').addEventListener('click', function (e) { var b = e.target.closest('[data-v]'); if (!b) return; setViewUI(b.getAttribute('data-v')); hideBubble(); $('#hint').classList.add('off'); });
   $('#pick').addEventListener('click', function (e) { var b = e.target.closest('[data-pk]'); if (b) togglePk(b.getAttribute('data-pk')); });
   $('#pkp').addEventListener('click', function (e) {
-    var dn = e.target.closest('[data-night]'); if (dn) { S.night = +dn.getAttribute('data-night'); releaseHold(true); computeBooked(); renderZones(); renderInterested(); renderDates(); setTimeout(function () { togglePk(null); }, 160); return; }
-    var tm = e.target.closest('[data-time]'); if (tm) { var was = S.time; setTime(tm.getAttribute('data-time')); renderTimes(); setTimeout(function () { togglePk(null); }, 160); if (S.time === '23:00' && was !== '23:00') setTimeout(function () { carlyneSay('Booking at 11? ' + CARL_1100, 8000); }, 450); return; }
+    var dn = e.target.closest('[data-night]'); if (dn) { S.night = +dn.getAttribute('data-night'); releaseHold(true); computeBooked(); renderZones(); renderInterested(); renderDates(); setTimeout(function () { togglePk('time'); }, 220); return; }   // night, then the hour, then the party
+    var tm = e.target.closest('[data-time]'); if (tm) { var was = S.time; setTime(tm.getAttribute('data-time')); renderTimes(); setTimeout(function () { togglePk('guests'); }, 220); if (S.time === '23:00' && was !== '23:00') setTimeout(function () { carlyneSay('Booking at 11? ' + CARL_1100, 8000); }, 450); return; }
     var gc = e.target.closest('[data-g]'); if (gc) { S.guests = +gc.getAttribute('data-g'); renderGuests(); setTimeout(function () { togglePk(null); }, 160); return; }
     var gs = e.target.closest('[data-gs]'); if (gs) { S.guests = Math.max(1, Math.min(40, S.guests + +gs.getAttribute('data-gs'))); renderGuests(); fitPk(); return; }
   });
