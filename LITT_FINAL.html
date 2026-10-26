@@ -11,7 +11,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234A3120'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' text-anchor='middle' fill='%23C5A66A'%3EL%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Josefin+Sans:wght@400;600&family=Marcellus&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Josefin+Sans:wght@400;600&family=Marcellus&family=Playfair+Display:wght@500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#C5A66A;--cocoa:#4A3120;--display:'Marcellus','Cormorant Garamond',Georgia,serif;--serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;--caps:'Josefin Sans','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.2,.8,.2,1)}
 :root,body[data-mode=bar]{--ink:#3d2819;--ink2:#7a6142;--paper:rgba(252,247,236,.80);--sheet:#FAF4E8;--line:rgba(122,97,66,.24);--cta:#4A3120;--ctaInk:#F7EEDC;--accent:#9C7637;--logo:#4A3120;--chip:rgba(255,253,247,.62);--chipOn:#4A3120;--chipOnInk:#F7EEDC;--field:rgba(255,255,255,.7);--err:#9b2d1f;--bodybg:#e7d3aa}
@@ -53,8 +53,6 @@ body[data-mode=club] #bgWall{opacity:0}
 .seg button span{font-family:var(--display);font-size:17px;letter-spacing:.06em}
 .seg button i{font-style:normal;font-family:var(--caps);font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;opacity:.75}
 .seg button.on{background:var(--chipOn);color:var(--chipOnInk)}
-.modeLine{margin:6px 22px 14px;font-size:16px;line-height:1.38;color:var(--ink);text-align:center}
-.modeLine em{font-style:italic;color:var(--ink2)}
 .chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:1px 2px 4px;margin:0 -4px;scroll-snap-type:x proximity}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;scroll-snap-align:start;border:1px solid var(--line);background:var(--chip);border-radius:14px;transition:background .3s,color .3s,border-color .3s}
@@ -140,7 +138,7 @@ body[data-mode=club] .inv{background:#1d0f2b;color:#F3E9D6;box-shadow:inset 0 0 
 .inv .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;text-align:left;margin:0 6px 16px}
 .inv .grid small{display:block;font-family:var(--caps);font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;opacity:.65}
 .inv .grid b{font-family:var(--display);font-weight:400;font-size:17px}
-.inv .qr{width:128px;height:128px;margin:4px auto 10px;padding:8px;border-radius:12px;background:#fffdf8}
+.inv .qr{width:128px;height:128px;margin:4px auto 10px;padding:8px;border-radius:12px;background:linear-gradient(145deg,#E6CD93,#C9A65F 55%,#E2C688)}
 .inv .qr img,.inv .qr canvas{width:100%!important;height:100%!important;display:block}
 .inv .ref{font-family:var(--caps);font-size:10px;letter-spacing:.3em}
 .inv .fine{font-size:14px;line-height:1.4;opacity:.75;margin-top:10px}
@@ -366,7 +364,7 @@ body[data-mode=club] .intcard{display:block}
 .bk-badge.ok{background:var(--accent);color:var(--chipOnInk);border-color:transparent}
 .bk-meta b{font-family:var(--display);font-weight:400;color:var(--ink)}
 .bk-qr{display:flex;align-items:center;gap:14px;width:100%;margin-top:10px;padding:12px 14px;border-radius:18px;background:var(--paper);border:1px solid var(--line);text-align:left;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-.bk-qri{flex:0 0 58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fffdf8;overflow:hidden;padding:5px}
+.bk-qri{flex:0 0 58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#E6CD93,#C9A65F 55%,#E2C688);overflow:hidden;padding:5px;box-shadow:0 0 0 1px rgba(201,166,95,.6),0 6px 16px -8px rgba(201,166,95,.6)}
 .bk-qri img,.bk-qri canvas{width:100%!important;height:100%!important;display:block}
 .bk-qr.locked .bk-qri{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:0}
 .bk-qr.locked .bk-qri svg{width:26px;height:26px}
@@ -522,7 +520,7 @@ body[data-mode=club] .lampopt{display:flex}
 .ivp-done h3{margin:10px 0 4px;font-family:var(--display);font-weight:400;font-size:24px}
 .ivp-done p{margin:0 0 14px;font-size:15.5px;line-height:1.4;color:var(--ii)}
 .ivp-done p em{font-style:normal;color:var(--ic)}
-.ivp-qr{width:150px;height:150px;margin:0 auto 14px;padding:9px;border-radius:14px;background:#fffdf8}
+.ivp-qr{width:150px;height:150px;margin:0 auto 14px;padding:9px;border-radius:14px;background:linear-gradient(145deg,#E6CD93,#C9A65F 55%,#E2C688)}
 .ivp-qr img,.ivp-qr canvas{width:100%!important;height:100%!important;display:block}
 .ivp-qr:empty{display:none}
 .ivp-map{display:flex;align-items:center;justify-content:center;text-decoration:none;color:inherit;border-color:var(--il)}
@@ -709,12 +707,297 @@ body.mgr-on #app{padding-bottom:210px}
 .cnote p{margin:0;font-size:15.5px;line-height:1.38}
 .cnote b{display:block;font-family:var(--caps);font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-weight:600}
 
+/* deposit: pay in full first, the split only when opened; folded once it's set, a seal once it's in */
+.dep-open{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:var(--chip);text-align:left}
+.dep-open span{flex:1}.dep-open b{display:block;font-family:var(--caps);font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}.dep-open small{font-size:14px;color:var(--ink2)}
+.dep-splitbox{margin-top:10px;padding:12px;border-radius:18px;border:1px solid var(--line);background:var(--chip)}
+.dep-sbh{display:flex;align-items:center;justify-content:space-between;margin:0 2px 6px}.dep-sbh b{font-family:var(--caps);font-size:9.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}.dep-sbh button{width:28px;height:28px;color:var(--ink2);font-size:12px}
+.dep-alt.one{grid-template-columns:1fr}
+.dep-chev{font-style:normal;font-size:22px;color:var(--accent);line-height:1}
+.dep-ring{flex:0 0 34px;height:34px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--line) 0);-webkit-mask:radial-gradient(circle,transparent 11px,#000 12px);mask:radial-gradient(circle,transparent 11px,#000 12px)}
+.dep-seal{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:999px;border:1px solid var(--accent);background:linear-gradient(100deg,var(--paper),var(--chip));box-shadow:0 0 0 3px rgba(197,166,106,.10),0 10px 24px -16px rgba(0,0,0,.5);text-align:left}
+.dep-seal .dep-ok{flex:0 0 30px;height:30px}
+.dep-st2{flex:1}.dep-st2 small{display:block;font-family:var(--caps);font-size:8.5px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--accent)}.dep-st2 b{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.02em}
+.dep-sn{font-size:12.5px;line-height:1.25;color:var(--ink2);text-align:right}
+.dep-foldbtn{margin-top:8px}
+/* the invitation: caption and the 3D/Plan switch sit under the room, never on it */
+.ivp-vrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 4px}
+.ivp .ivp-vrow .ivp-vcap{position:static;flex:1;text-align:left;line-height:1.5}
+.ivp-vrow .vtog.ivp-vtog{position:relative;right:auto;bottom:auto;flex:0 0 118px}
+/* Apple Pay sheet */
+.apay-fb b{font-weight:700}
+.apay{border-radius:10px;height:50px;font:500 17px/1 -apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Arial,sans-serif;letter-spacing:-.01em}
+.aps-wrap{position:fixed;inset:0;z-index:200;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;pointer-events:none}
+.aps-wrap.on{pointer-events:auto}
+.aps-bg{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .3s}
+.aps-wrap.on .aps-bg{opacity:1}
+.aps{--b:#fff;--t:#000;--s:#8a8a8e;--l:rgba(60,60,67,.18);--f:#f2f2f7;position:absolute;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));max-width:440px;margin:0 auto;padding:16px 16px 14px;border-radius:30px;background:var(--b);color:var(--t);box-shadow:0 20px 60px rgba(0,0,0,.35);transform:translateY(120%);transition:transform .38s cubic-bezier(.2,.9,.25,1)}
+.aps-wrap.dark .aps{--b:#1c1c1e;--t:#fff;--s:#98989f;--l:rgba(84,84,88,.6);--f:#2c2c2e}
+.aps-wrap.on .aps{transform:none}
+.aps-hd{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 14px}
+.aps-brand{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.aps-x{width:30px;height:30px;border-radius:50%;background:var(--f);color:var(--s);font-size:13px;font-weight:700}
+.aps-card{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:14px;background:var(--f);text-align:left;color:var(--t)}
+.aps-art{flex:0 0 46px;height:30px;border-radius:5px;background:linear-gradient(135deg,#2b2b2f,#5a5a62 55%,#1d1d20);position:relative;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.2)}
+.aps-art i{position:absolute;left:6px;top:8px;width:9px;height:7px;border-radius:2px;background:linear-gradient(135deg,#e9d39a,#b8954f)}
+.aps-ci{flex:1}.aps-ci b{display:block;font-size:16px;font-weight:600}.aps-ci small{font-size:14px;color:var(--s)}
+.aps-chev{font-style:normal;color:var(--s);font-size:22px}
+.aps-row{display:flex;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:.5px solid var(--l);font-size:15px}
+.aps-row small{font-size:15px;color:var(--s)}.aps-row span{text-align:right;color:var(--t)}
+.aps-tot{display:flex;justify-content:space-between;align-items:baseline;padding:14px 4px 16px;font-size:16px}
+.aps-tot span{color:var(--s)}.aps-tot b{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.aps-go{position:relative;display:block;width:100%;height:84px;color:var(--t)}
+.aps-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:15px;opacity:0;transition:opacity .25s}
+.aps-go .s0,.aps-go.st1 .s1,.aps-go.st2 .s2{opacity:1}
+.aps-go.st1 .s0,.aps-go.st2 .s0{opacity:0}
+.aps-btn{width:40px;height:40px;border-radius:12px;border:2.5px solid #0a84ff;position:relative}
+.aps-btn:after{content:'';position:absolute;right:-9px;top:6px;width:4px;height:24px;border-radius:2px;background:#0a84ff;animation:apsPulse 1.2s ease-in-out infinite}
+.aps-fid{width:46px;height:46px;color:#0a84ff;animation:apsScan 1.1s ease-in-out}
+.aps-done{width:46px;height:46px;border-radius:50%;border:3px solid #0a84ff;position:relative}
+.aps-done:after{content:'';position:absolute;left:13px;top:8px;width:11px;height:20px;border-right:3px solid #0a84ff;border-bottom:3px solid #0a84ff;transform:rotate(45deg)}
+.aps-demo{margin:2px 0 0;text-align:center;font-size:12px;color:var(--s)}
+.aps-side{position:absolute;right:0;top:22%;width:6px;height:74px;border-radius:4px 0 0 4px;background:#0a84ff;opacity:0;transition:opacity .3s;animation:apsPulse 1.2s ease-in-out infinite}
+.aps-wrap.on .aps-side{opacity:1}
+@keyframes apsPulse{0%,100%{transform:translateX(0);opacity:1}50%{transform:translateX(-3px);opacity:.55}}
+@keyframes apsScan{0%{transform:scale(.85);opacity:.4}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1)}}
+/* Mindset by AlphaMind: the membership, between the photos and the picker */
+body.booked #msCard{display:none}
+.msc{padding:18px 18px 14px;overflow:hidden}
+.ms-head{display:flex;gap:12px;align-items:flex-start}
+.ms-head>div:first-child{flex:1;min-width:0}
+.ms-head h2{margin:2px 0 4px;font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.04em}
+.ms-sub{margin:0;font-size:15px;line-height:1.35;color:var(--ink2)}
+.ms-fan{position:relative;flex:0 0 104px;height:96px;margin-top:2px}
+.ms-fan .ms-art{position:absolute;width:62px;height:88px;padding:7px 6px;box-shadow:0 8px 18px -8px rgba(0,0,0,.5)}
+.ms-fan .ms-art:nth-child(1){left:0;top:8px;transform:rotate(-12deg)}
+.ms-fan .ms-art:nth-child(2){left:21px;top:2px;transform:rotate(-2deg);z-index:1}
+.ms-fan .ms-art:nth-child(3){left:42px;top:6px;transform:rotate(9deg);z-index:2}
+.ms-fan .ms-art b{font-size:9px;letter-spacing:.12em}.ms-fan .ms-art em,.ms-fan .ms-brand{display:none}
+.ms-art{position:relative;overflow:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;padding:12px}
+.ms-art b{font-family:var(--caps);font-weight:600;letter-spacing:.2em;text-transform:uppercase;font-size:13px;line-height:1}
+.ms-art em{font-family:var(--serif);font-style:italic;font-size:13px;opacity:.85}
+.ms-brand{position:absolute;left:12px;top:10px;font-family:var(--caps);font-size:7.5px;letter-spacing:.32em;text-transform:uppercase;opacity:.75}
+.ms-sheen{position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.28) 47%,transparent 56%);transform:translateX(-30%);pointer-events:none}
+.ms-art::before{content:'';position:absolute;inset:6px;border-radius:8px;border:1px solid currentColor;opacity:.22;pointer-events:none}
+.ms-gold{background:linear-gradient(150deg,#FBF3D6,#EBD8A2 60%,#F6E9BE);color:#6B1C22}
+.ms-platinum{background:linear-gradient(150deg,#7E2630,#5A1519 60%,#6E1F27);color:#F3E6DA}
+.ms-black{background:linear-gradient(150deg,#2C3560,#171D38 60%,#232B50);color:#F4E9C9}
+.ms-art.big{height:178px;padding:16px;align-items:flex-start;justify-content:flex-end;text-align:left;box-shadow:0 18px 36px -18px rgba(0,0,0,.6)}
+.ms-art.big b{font-size:24px;letter-spacing:.18em}.ms-art.big em{font-size:16px}
+.ms-art.big .ms-brand{font-size:9px;left:16px;top:14px}
+.ms-art.big .ms-sheen{animation:msSheen 6s ease-in-out infinite}
+@keyframes msSheen{0%,55%{transform:translateX(-60%)}85%,100%{transform:translateX(60%)}}
+.ms-who{position:absolute;right:16px;top:12px;font-family:var(--display);font-size:16px;letter-spacing:.04em}
+.ms-pts{margin-top:8px;font-size:13.5px;opacity:.9}.ms-pts b{font-family:var(--caps);font-weight:600;letter-spacing:.06em}
+.ms-q{margin:16px 0 10px;font-family:var(--display);font-size:20px;letter-spacing:.02em}
+.ms-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ms-btns .cta,.ms-btns .ghost{margin:0}
+.ms-more{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:12px;padding:10px 2px 2px;border-top:1px solid var(--line);font-family:var(--caps);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.ms-more i{font-style:normal;font-size:20px;line-height:1}
+.ms-ph{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 6px}
+.ms-ph b{font-family:var(--caps);font-size:9.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2)}
+.ms-ph span{font-family:var(--caps);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.ms-perks{display:flex;flex-direction:column}
+.ms-perk{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ms-perk:last-child{border-bottom:0}
+.ms-perk>i{flex:0 0 30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.ms-perk>div{flex:1;min-width:0}.ms-perk b{display:block;font-size:16px;font-weight:600}.ms-perk span{font-size:14px;line-height:1.3;color:var(--ink2)}
+.ms-perk button{flex:0 0 auto;padding:7px 12px;border-radius:999px;background:var(--cta);color:var(--ctaInk);font-family:var(--caps);font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+.ms-perk em{flex:0 0 auto;font-style:normal;font-family:var(--caps);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);padding:5px 9px;border-radius:999px;border:1px solid var(--line)}
+.ms-perk.off{opacity:.5}.ms-perk.off>i{color:var(--ink2);box-shadow:0 0 0 1px var(--line) inset}
+.ms-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.ms-demo{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.ms-demo span{font-family:var(--caps);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);margin-right:2px}
+.ms-demo button{padding:5px 9px;border-radius:999px;border:1px solid var(--line);font-family:var(--caps);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase}
+.ms-demo button.on{background:var(--chipOn);color:var(--chipOnInk);border-color:transparent}
+.ms-out{font-family:var(--caps);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);text-decoration:underline;text-underline-offset:3px}
+.ms-lock{display:flex;gap:14px;align-items:center;margin:12px 0 14px}
+.ms-lock .ms-art{flex:0 0 64px;height:90px;padding:6px}.ms-lock .ms-art em,.ms-lock .ms-brand{display:none}.ms-lock .ms-art b{font-size:8.5px;letter-spacing:.1em}
+.ms-lock b{display:block;font-family:var(--display);font-weight:400;font-size:19px;margin-bottom:3px}.ms-lock span{font-size:15px;line-height:1.35;color:var(--ink2)}
+.ms-yours{display:flex;gap:8px;align-items:center;margin:10px 0;padding:9px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--accent);font-size:15px}
+.ms-yours i{font-style:normal;color:var(--accent)}
+.ms-earn{margin:8px 0;font-size:14.5px;color:var(--ink2)}.ms-earn b{color:var(--accent);font-weight:600}
+.ms-how{display:flex;flex-direction:column;gap:10px;margin:14px 0 18px}
+.ms-how div{display:flex;gap:12px;align-items:center}
+.ms-how b{flex:0 0 28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:400;color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.ms-how span{font-size:16px;line-height:1.35}
+.ms-tiers{display:flex;flex-direction:column;gap:12px}
+.ms-tier{display:flex;gap:14px;align-items:center}
+.ms-tier .ms-art{flex:0 0 96px;height:126px;padding:8px}.ms-tier .ms-art .ms-brand{display:none}.ms-tier .ms-art b{font-size:11px;letter-spacing:.14em}.ms-tier .ms-art em{font-size:11px}
+.ms-tier b{display:block;font-family:var(--caps);font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}.ms-tier span{font-size:15px;line-height:1.38;color:var(--ink2)}
+.ms-tagline{margin:20px 0 14px;text-align:center;font-family:var(--display);font-size:19px;font-style:italic;color:var(--accent)}
+.ms-code{margin:6px 0 12px}
+.ms-boxes{display:grid;grid-template-columns:repeat(4,52px);gap:10px;justify-content:center;margin-top:6px}
+.ms-boxes input{height:58px;border-radius:14px;border:1px solid var(--line);background:var(--field);text-align:center;font-family:var(--display);font-size:26px;outline:none}
+.ms-boxes input:focus{border-color:var(--accent)}
+.ms-fan .ms-art:not(:nth-child(3)) b{visibility:hidden}
+.ms-out{white-space:nowrap}
+.ms-demo{flex-wrap:nowrap}
+
+/* Mindset, compact: one line, opening underneath on demand */
+.msc{padding:10px 12px}
+.ms-row{display:flex;align-items:center;gap:10px}
+.ms-fan.sm{flex:0 0 46px;height:40px;margin:0}
+.ms-fan.sm .ms-art{width:26px;height:38px;padding:0;border-radius:5px;box-shadow:0 4px 10px -5px rgba(0,0,0,.5)}
+.ms-fan.sm .ms-art:nth-child(1){left:0;top:3px}.ms-fan.sm .ms-art:nth-child(2){left:9px;top:0}.ms-fan.sm .ms-art:nth-child(3){left:18px;top:2px}
+.ms-fan.sm .ms-art b,.ms-fan.sm .ms-art::before{display:none}
+.ms-mini{flex:0 0 30px}.ms-mini .ms-art{width:30px;height:42px;padding:0;border-radius:6px}.ms-mini .ms-art b,.ms-mini .ms-art em,.ms-mini .ms-brand,.ms-mini .ms-art::before{display:none}
+.ms-rt{flex:1;min-width:0;line-height:1.2}
+.ms-rt b{display:block;font-family:var(--display);font-weight:400;font-size:17px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-rt b span{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink2)}
+.ms-rt small{font-size:13.5px;color:var(--ink2)}
+.ms-acts{display:flex;gap:6px;flex:0 0 auto}
+.ms-b{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);font-family:var(--caps);font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+.ms-b.on{background:var(--cta);color:var(--ctaInk);border-color:transparent}
+.ms-tog{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);font-family:var(--caps);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent)}
+.ms-tog i,.ms-pv i{font-style:normal;font-size:16px;line-height:1;display:inline-block;transition:transform .3s var(--ease)}
+.ms-tog.open i,.ms-pv.open i{transform:rotate(90deg)}
+.ms-pv{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);font-family:var(--caps);font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+.ms-x{margin-top:10px;animation:msIn .35s var(--ease)}
+@keyframes msIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.ms-p{margin:0 0 4px;font-size:15px;line-height:1.4}
+.ms-x .ms-how{margin:10px 0 14px}.ms-x .ms-tiers{gap:10px}.ms-x .ms-tier .ms-art{flex:0 0 72px;height:96px}
+.ms-x .ms-tagline{margin:14px 0 4px;font-size:17px}
+.ms-rt small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+/* tier names sized so PLATINUM sits inside its card like GOLD and BLACK */
+.ms-art b{letter-spacing:.12em}
+.ms-art.big b{font-size:20px;letter-spacing:.14em}
+.ms-tier .ms-art b,.ms-x .ms-tier .ms-art b{font-size:9px;letter-spacing:.08em}
+.ms-tier .ms-art em,.ms-x .ms-tier .ms-art em{font-size:10px}
+.ms-lock .ms-art b{font-size:7.5px;letter-spacing:.06em}
+
+/* Mindset in gold: the lockup set like their wordmark, a gold hairline round the widget */
+#msCard{border:1px solid transparent;background:linear-gradient(var(--paper),var(--paper)) padding-box,linear-gradient(120deg,#E8CF94,#B8913F 35%,#F3DFA6 55%,#A9822F 80%,#E2C27C) border-box;box-shadow:0 0 0 3px rgba(197,166,106,.08),0 12px 28px -18px rgba(120,86,30,.55)}
+.ms-logo{font-family:'Playfair Display',var(--display)!important;font-weight:500!important;font-size:17px!important;letter-spacing:-.015em!important;background:linear-gradient(100deg,#B8913F,#E9D08F 45%,#A47E2E 75%,#D9B66C);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ms-logo span{font-family:'Playfair Display',var(--display)!important;font-style:normal!important;font-size:17px!important;color:transparent!important}
+#msCard .ms-rt small{color:var(--accent)}
+#msCard .ms-b{border-color:#C5A66A;color:var(--accent)}
+#msCard .ms-b.on{border-color:transparent;background:linear-gradient(120deg,#E3C885,#B48B3A 55%,#D9B970);color:#2a1a0c}
+#msCard .ms-pv{border-color:#C5A66A}
+#msCard .ms-tog{border-top-color:rgba(197,166,106,.45)}
+body[data-mode=club] #msCard .ms-b.on{color:#170B20}
+#msCard{background:linear-gradient(#FBF5E8,#F6EEDC) padding-box,linear-gradient(120deg,#E8CF94,#B8913F 35%,#F3DFA6 55%,#A9822F 80%,#E2C27C) border-box}
+body[data-mode=club] #msCard{background:linear-gradient(#1b0d2a,#130920) padding-box,linear-gradient(120deg,#E8CF94,#B8913F 35%,#F3DFA6 55%,#A9822F 80%,#E2C27C) border-box}
+.ms-logo,.ms-logo span{font-size:15.5px!important}
+#msCard .ms-b{padding:0 10px}
+#msCard .ms-acts{gap:5px}
+body[data-mode=bar] .ms-logo{background:linear-gradient(100deg,#8A6526,#B8913F 45%,#7E5A1F 75%,#A8813A);-webkit-background-clip:text;background-clip:text}
+
+/* ---- BUBL tables. LITT leads: its paper, gold hairlines, Marcellus and italics. BUBL signs it with one thing,
+   its bubble: a clear sphere with an iridescent rim (lilac, rose, champagne). Seats are bubbles; a joined seat
+   is filled with amethyst glass. In the room the tables glow violet. */
+.bm-defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+.bm{display:inline-block;flex:0 0 auto;width:14px;height:14px;vertical-align:middle;overflow:visible}
+.bm .bf-a,.bm .bf-b,.bm .bf-glint{transform-box:view-box;transform-origin:32px 32px}
+.bm.live{filter:drop-shadow(0 1px 4px rgba(60,30,90,.25))}
+.bm.live .bf-a{animation:bspin 14s linear infinite}
+.bm.live .bf-b{animation:bspin 21s linear infinite reverse}
+.bm.live .bf-glint{animation:bglint 6.5s cubic-bezier(.45,.05,.2,1) infinite}
+.bm.live .bf-spec{animation:bspec 5.2s ease-in-out infinite}
+.bm.off .bm-f{opacity:0}
+.bm.off .bm-rim{stroke-opacity:.55}
+body[data-mode=bar] .bm.off{filter:drop-shadow(0 0 .6px rgba(74,49,32,.35))}
+.bm.bms{width:13px;height:13px}
+@keyframes bspin{to{transform:rotate(360deg)}}
+@keyframes bglint{0%{transform:rotate(-20deg);opacity:0}8%{opacity:1}42%{transform:rotate(340deg);opacity:1}50%,100%{transform:rotate(340deg);opacity:0}}
+@keyframes bspec{0%,100%{opacity:.9}50%{opacity:.7}}
+@keyframes bfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px)}}
+.bq{display:inline-flex;flex:0 0 auto;gap:3px;align-items:center;flex-wrap:nowrap}
+.bq.sm{gap:2px}.bq.sm .bm{width:10px;height:10px}
+.byb{display:inline-flex;align-items:center;gap:6px;font-family:var(--caps);font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink2)}
+.byb b{font-weight:600;color:var(--accent);letter-spacing:.3em}
+.byb .bm{width:16px;height:16px}
+/* the pill on the room */
+.bub{position:absolute;right:12px;top:7px;z-index:3;display:flex;align-items:center;gap:8px;height:32px;padding:0 13px 0 9px;border-radius:999px;background:var(--paper);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-family:var(--caps);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);transition:border-color .3s}
+.bub[hidden]{display:none}
+.bub.on{border-color:var(--accent)}
+.bub .bm{width:20px;height:20px;animation:bfloat 5.2s ease-in-out infinite}
+.bub-k{color:var(--accent);font-weight:600;letter-spacing:.28em}
+.bub-k+span{padding-left:8px;border-left:1px solid var(--line)}
+/* the list it opens */
+.bubp{position:absolute;right:10px;top:46px;z-index:5;width:min(370px,calc(100% - 20px));max-height:calc(100% - 104px);display:flex;flex-direction:column;background:var(--sheet);border:1px solid var(--line);border-radius:20px;box-shadow:0 22px 44px -16px rgba(0,0,0,.45);opacity:0;transform:translateY(-6px) scale(.985);transform-origin:top right;pointer-events:none;visibility:hidden;transition:opacity .25s,transform .3s var(--ease),visibility 0s .3s}
+.bubp.on{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .25s,transform .3s var(--ease)}
+.bubp::before{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.7}
+.bubp-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:15px 16px 11px}
+.bubp-h .byb{margin-bottom:6px}
+.bubp-h #bubT{display:block;font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.01em}
+.bubp-x{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);font-size:11px;color:var(--ink2)}
+.bubp-l{overflow-y:auto;padding:0 16px 4px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.bubp-g{display:flex;align-items:center;gap:10px;font-family:var(--caps);font-size:8.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink2);margin:10px 0 2px}
+.bubp-g::after{content:"";flex:1;height:1px;background:var(--line)}
+.bubp-g.cur{color:var(--accent)}
+.bubr{display:flex;width:100%;gap:12px;align-items:flex-start;text-align:left;padding:11px 0 12px;border-bottom:1px solid var(--line);color:inherit}
+.bubr:last-child{border-bottom:0}
+.bubr-m{flex:1;min-width:0}
+.bubr-m b{display:block;font-family:var(--display);font-weight:400;font-size:17.5px;line-height:1.2}
+.bubr-m small{display:block;font-style:italic;font-size:15px;color:var(--ink2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bubr-s{display:flex;align-items:center;gap:9px;margin-top:7px;min-width:0}
+.bubr-s em{font-style:normal;font-family:var(--caps);font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bubr-r{flex:0 0 auto;text-align:right;padding-top:1px}
+.bubr-r b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--ink)}
+.bubr-r b i{font-style:normal;font-size:14px;color:var(--accent)}
+.bubr-r small{display:block;font-family:var(--caps);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-top:3px}
+.bubp-f{margin:0;padding:10px 16px 13px;border-top:1px solid var(--line);font-style:italic;font-size:14px;color:var(--ink2);text-align:center}
+/* a forming table among the zones */
+.tbchip.bv{border-color:var(--accent)}
+.tbchip.bv small{display:flex;align-items:center;gap:5px;color:var(--accent);opacity:1}
+.tbchip.bv small .bm{width:11px;height:11px}
+/* the forming table's card */
+.fm-sub{margin-top:2px}
+.fm-fill{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:14px 0 12px;font-size:15.5px;color:var(--ink2)}
+.fm-fill b{font-family:var(--display);font-weight:400;color:var(--ink)}
+.fm-gen{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fm-gen span{padding:9px 2px 8px;text-align:center;border-left:1px solid var(--line);font-family:var(--caps);font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.fm-gen span:first-child{border-left:0}
+.fm-gen b{display:block;font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:0;text-transform:none;color:var(--ink);margin-bottom:2px}
+.fm-tags{margin:10px 0 0;font-family:var(--caps);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);text-align:center}
+.fm-priv .bm{width:15px;height:15px}
+.fm-priv{display:flex;gap:9px;align-items:center;margin:10px 0 10px;font-size:15px;font-style:italic;color:var(--ink2)}
+.fm-ext{margin-top:0}
+.fm-state{margin:8px 0 0;padding:12px 13px;border-radius:14px;background:var(--chip);border:1px solid var(--line);font-size:15.5px;line-height:1.38}
+.fm-state b{display:flex;align-items:center;gap:7px;font-family:var(--caps);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;font-weight:600}
+.fm-fine{margin:9px 0 0;font-size:14px;font-style:italic;line-height:1.35;color:var(--ink2);text-align:center}
+.fm-at{position:relative}
+.fm-at span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--ink2);pointer-events:none}
+.fm-at input{padding-left:30px!important}
+.field .opt{font-family:var(--serif);font-style:italic;text-transform:none;letter-spacing:0;font-size:12.5px;opacity:.8;margin-left:4px}
+.fm-sent{text-align:center;padding:16px 0 4px}
+.fm-sent .ivp-ok{color:var(--accent);border:1.5px solid var(--accent)}
+.fm-sent h3{margin:10px 0 6px;font-family:var(--display);font-weight:400;font-size:25px}
+.fm-sent p{margin:0 0 6px;font-size:16px;line-height:1.42;color:var(--ink2)}
+.fm-sent p b{font-weight:400;color:var(--ink)}
+.fm-sent .cta{margin-top:10px}
+/* the invitation BUBL sends, in LITT's hand */
+.ivp-bubl .ivp-g .bm{flex:0 0 14px;width:14px;height:14px}
+.bv-mix{margin:6px 0 0;font-style:italic;font-size:17px;color:var(--ii)}
+.bv-by{display:flex;justify-content:center;margin:12px 0 0}
+.ivp .byb{color:var(--ii)}.ivp .byb b{color:var(--ic)}
+.bv-why p,.bv-priv{margin:10px 0 0;font-size:15.5px;line-height:1.42;color:var(--ii)}
+.bv-priv{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;font-style:italic}
+.bv-priv .bm{margin-top:3px;width:15px;height:15px}
+.bv-ext{margin-top:14px;padding:13px 14px;border-radius:14px;border:1px solid var(--il);background:var(--if)}
+.bv-ext b{display:block;font-family:var(--caps);font-size:8.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ic);margin-bottom:4px;font-weight:600}
+.ivp-dep .bv-ext p{margin:0}
+.bv-no{display:block;margin:14px auto 0;font-family:var(--caps);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ii);text-decoration:underline;text-underline-offset:3px}
+
 </style>
 </head>
 <body data-mode="bar">
 <canvas id="bgWall" class="bg" aria-hidden="true"></canvas>
 <canvas id="bgCosmos" class="bg" aria-hidden="true"></canvas>
 <canvas id="bgStars" class="bg" aria-hidden="true"></canvas>
+<svg class="bm-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>
+<radialGradient id="lbGlass" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".015"/><stop offset=".7" stop-color="#fff" stop-opacity=".03"/><stop offset=".88" stop-color="#E6D6FF" stop-opacity=".16"/><stop offset=".965" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity=".62"/></radialGradient>
+<radialGradient id="lbRimM" cx="50%" cy="50%" r="50%"><stop offset=".58" stop-color="#000"/><stop offset=".84" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></radialGradient>
+<mask id="lbRim"><circle cx="32" cy="32" r="28" fill="url(#lbRimM)"/></mask>
+<radialGradient id="lbF1" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#D9B774"/><stop offset="1" stop-color="#D9B774" stop-opacity="0"/></radialGradient>
+<radialGradient id="lbF2" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#9A63F0" stop-opacity=".95"/><stop offset="1" stop-color="#9A63F0" stop-opacity="0"/></radialGradient>
+<radialGradient id="lbF3" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E8A2BE" stop-opacity=".95"/><stop offset="1" stop-color="#E8A2BE" stop-opacity="0"/></radialGradient>
+<radialGradient id="lbF4" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#F3E2B8" stop-opacity=".95"/><stop offset="1" stop-color="#F3E2B8" stop-opacity="0"/></radialGradient>
+<radialGradient id="lbSpec" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".45" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="lbCaus" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFF1D8" stop-opacity=".6"/><stop offset="1" stop-color="#FFF1D8" stop-opacity="0"/></radialGradient>
+<linearGradient id="lbGlint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<clipPath id="lbClip"><circle cx="32" cy="32" r="28"/></clipPath>
+</defs></svg>
 <div id="app">
   <header class="top">
     <svg class="wm wmBig" viewBox="0 0 189.94 34.7" role="img" aria-label="LITT"><path d="M24.29 29.92C24.08 29.85 23.94 29.81 23.87 29.82C23.79 29.83 23.68 29.94 23.54 30.15C23.4 30.36 23.2 30.55 22.94 30.72C22.46 31.09 21.43 31.27 19.83 31.27L10.35 31.27C7.8 31.16 5.77 29.06 5.77 26.48L5.76 3.71C5.76 3.23 5.86 2.75 6.06 2.28C6.26 1.81 6.44 1.48 6.62 1.3C6.8 1.13 6.94 1.01 7.06 0.97C7.17 0.92 7.26 0.87 7.32 0.82C7.38 0.77 7.42 0.62 7.42 0.37C7.42 0.13 7.32 0 7.14 0L0.28 0C0.09 0 0 0.14 0 0.4C0 0.67 0.09 0.85 0.28 0.93C0.46 1.02 0.58 1.09 0.64 1.15C1.31 1.82 1.65 2.68 1.65 3.71L1.65 31C1.65 31.48 1.55 31.95 1.36 32.43C1.16 32.9 0.97 33.22 0.79 33.4C0.62 33.58 0.47 33.69 0.36 33.74C0.25 33.79 0.16 33.84 0.1 33.89C0.03 33.94 0 34.09 0 34.33C0 34.58 0.09 34.7 0.28 34.7L22.73 34.7C22.89 34.63 23.01 34.43 23.1 34.1C23.19 33.77 23.37 33.29 23.62 32.65L24.3 30.93C24.5 30.44 24.6 30.16 24.6 30.11C24.6 30.05 24.5 29.99 24.29 29.92"/><path d="M59.66 2.28C59.85 1.81 60.04 1.48 60.22 1.3C60.39 1.13 60.54 1.01 60.65 0.96C60.77 0.92 60.85 0.87 60.92 0.82C60.98 0.77 61.01 0.62 61.01 0.37C61.01 0.12 60.92 0 60.74 0L53.87 0C53.69 0 53.6 0.14 53.6 0.4C53.6 0.67 53.69 0.85 53.87 0.93C54.06 1.02 54.18 1.09 54.23 1.14C54.91 1.82 55.25 2.68 55.25 3.71L55.25 31C55.25 31.48 55.15 31.95 54.95 32.43C54.76 32.9 54.57 33.22 54.39 33.4C54.22 33.58 54.07 33.69 53.96 33.74C53.84 33.79 53.76 33.84 53.69 33.89C53.63 33.94 53.6 34.09 53.6 34.33C53.6 34.58 53.69 34.7 53.87 34.7L60.74 34.7C60.92 34.7 61.01 34.57 61.01 34.3C61.01 34.03 60.92 33.86 60.74 33.77C60.55 33.69 60.43 33.62 60.38 33.56C59.7 32.88 59.36 32.03 59.36 31L59.36 3.71C59.36 3.23 59.46 2.75 59.66 2.28"/><path d="M126.96 2.06C126.71 1.41 126.53 0.9 126.43 0.54C126.33 0.18 126.21 0 126.07 0L92.3 0C92.14 0.07 92.02 0.27 91.93 0.6C91.84 0.94 91.67 1.42 91.41 2.06L90.73 3.77C90.53 4.27 90.44 4.54 90.44 4.6C90.44 4.65 90.54 4.72 90.74 4.79C90.95 4.86 91.09 4.89 91.18 4.88C91.26 4.88 91.4 4.73 91.6 4.45C92.01 3.77 93.21 3.43 95.2 3.43L102.74 3.43C105.14 3.63 107.03 5.58 107.13 8L107.13 31C107.13 31.48 107.03 31.95 106.83 32.43C106.64 32.9 106.45 33.22 106.27 33.4C106.1 33.58 105.95 33.69 105.84 33.74C105.73 33.79 105.64 33.84 105.57 33.89C105.51 33.94 105.48 34.09 105.48 34.33C105.48 34.58 105.57 34.7 105.75 34.7L112.62 34.7C112.8 34.7 112.89 34.57 112.89 34.3C112.89 34.03 112.8 33.86 112.62 33.77C112.43 33.69 112.31 33.62 112.26 33.56C111.58 32.88 111.24 32.03 111.24 31L111.24 3.43L123.17 3.43C124.76 3.43 125.74 3.57 126.1 3.86C126.46 4.14 126.72 4.38 126.87 4.59C127.01 4.79 127.14 4.89 127.24 4.89C127.29 4.89 127.42 4.86 127.63 4.79C127.83 4.72 127.94 4.65 127.94 4.6C127.94 4.54 127.84 4.27 127.64 3.77L126.96 2.06"/><path d="M189.64 3.77L188.97 2.06C188.71 1.41 188.54 0.9 188.44 0.54C188.34 0.18 188.22 0 188.08 0L154.3 0C154.15 0.07 154.03 0.27 153.93 0.6C153.84 0.94 153.67 1.42 153.42 2.06L152.74 3.77C152.54 4.27 152.44 4.54 152.44 4.6C152.44 4.65 152.54 4.72 152.75 4.79C152.95 4.86 153.1 4.89 153.18 4.88C153.27 4.88 153.41 4.73 153.61 4.45C154.02 3.77 155.22 3.43 157.21 3.43L164.74 3.43C167.15 3.63 169.05 5.6 169.14 8.03L169.14 31C169.14 31.48 169.04 31.95 168.84 32.43C168.64 32.9 168.45 33.22 168.28 33.4C168.1 33.58 167.96 33.69 167.84 33.74C167.73 33.79 167.64 33.84 167.58 33.89C167.51 33.94 167.48 34.09 167.48 34.33C167.48 34.58 167.57 34.7 167.76 34.7L174.62 34.7C174.81 34.7 174.9 34.57 174.9 34.3C174.9 34.03 174.81 33.86 174.62 33.77C174.44 33.69 174.32 33.62 174.26 33.56C173.58 32.88 173.25 32.03 173.25 31L173.25 3.43L185.17 3.43C186.77 3.43 187.75 3.57 188.11 3.86C188.47 4.14 188.72 4.38 188.87 4.59C189.02 4.79 189.14 4.89 189.24 4.89C189.3 4.89 189.43 4.86 189.63 4.79C189.84 4.72 189.94 4.65 189.94 4.6C189.94 4.54 189.84 4.27 189.64 3.77"/></svg>
@@ -726,6 +1009,7 @@ body.mgr-on #app{padding-bottom:210px}
   </section>
   <button class="mine" id="minePill" hidden></button>
   <section class="bk" id="bk" hidden></section>
+  <section class="card msc" id="msCard" aria-label="Mindset by AlphaMind"></section>
   <section class="pick" id="pick" aria-label="Night, arrival and guests">
     <button class="pk" type="button" data-pk="night" aria-expanded="false"><span class="pkl">Night</span><b id="pkNight">Tonight</b><i class="chev"></i></button>
     <button class="pk" type="button" data-pk="time" aria-expanded="false"><span class="pkl">Arrival</span><b id="pkTime">10:00 pm</b><i class="chev"></i></button>
@@ -738,9 +1022,10 @@ body.mgr-on #app{padding-bottom:210px}
     <div class="loading" id="loading">LITT</div>
     <div class="hint" id="hint">Drag to turn · Tap a table</div>
     <div class="vtog" id="vtog" role="group" aria-label="View"><button type="button" data-v="3d" class="on" aria-pressed="true">3D</button><button type="button" data-v="plan" aria-pressed="false">Plan</button><i class="vtk"></i></div>
+    <button class="bub" id="bub" type="button" aria-expanded="false" aria-controls="bubp" hidden><i class="bm-slot" data-bm="live"></i><span class="bub-k">BUBL</span><span id="bubN">forming</span></button>
+    <div class="bubp" id="bubp" role="dialog" aria-label="Tables BUBL is forming"><div class="bubp-h"><div><span class="byb">Composed by <i class="bm-slot" data-bm=""></i><b>BUBL</b></span><b id="bubT">Forming tonight</b></div><button class="bubp-x" id="bubX" type="button" aria-label="Close">✕</button></div><div class="bubp-l" id="bubL"></div><p class="bubp-f">By invitation. Names stay with the invited.</p></div>
     <div class="mgb" id="mgb" role="dialog" aria-label="Carlyne, LITT's manager"><div class="mgb-h"><span class="cav">C</span><span class="mgb-n">Carlyne<small>Manager · LITT</small></span><button class="mgb-x" id="mgbX" type="button" aria-label="Close">✕</button></div><div class="mgb-log" id="mgbLog"></div></div>
   </section>
-  <p class="modeLine" id="modeLine"></p>
   <section class="hostp" id="hostp" hidden></section>
   <section class="card" id="zonesCard">
     <div class="lbl">Where you sit</div>
@@ -1878,7 +2163,7 @@ function buildPillars() {                                   // marble drum under
 var NSF = 96, RIMF = [];
 (function () { for (var i = 0; i < NSF; i++) { var t = -Math.PI / 2 + Math.PI * 2 * i / NSF; RIMF.push({ t: t, p: rim(t) }); } })();
 var RIM_LEN = (function () { var s = 0; for (var i = 0; i < NSF; i++) s += RIMF[i].p.distanceTo(RIMF[(i + 1) % NSF].p); return s; })();
-var GLOW_C = 'rgb(255,168,72)';
+var GLOW_C = 'rgb(228,178,142)';   // champagne with a blush of rose: mellow, not yellow
 var trees = [], haloMats = [];
 
 /* ---- painting one raffia piece onto colour (g), glow (e) and cut-out (a) canvases */
@@ -2135,8 +2420,9 @@ function buildTrees() {
 function fadeTrees(dt) {                                    // a tree standing between the camera and the room fades back so it never blocks the tables
   var cd = new T.Vector3(camera.position.x - cam.target.x, 0, camera.position.z - cam.target.z).normalize();
   trees.forEach(function (tr) {
-    var d = tr.out.dot(cd), want = 1 - 0.94 * Math.min(1, Math.max(0, (d + 0.02) / 0.3)); tr.op += (want - tr.op) * Math.min(1, dt * 6);
-    tr.mats.forEach(function (m) { m.opacity = tr.op; });
+    var d = tr.out.dot(cd), want = 1 - ss01((d - 0.0) / 0.22); tr.op += (want - tr.op) * Math.min(1, dt * 6);
+    // fading, it stops hiding what's behind it (no darker patch where its plane blocked the glow) and goes all the way, no ghost
+    tr.mats.forEach(function (m) { m.opacity = tr.op; m.depthWrite = tr.op > 0.97; }); tr.g.visible = tr.op > 0.03;
   });
 }
 
@@ -2553,11 +2839,11 @@ function applyMode(k) {
   MAT.floor.color.copy(a.floor).lerp(b.floor, k);
   // the relief: raffia on plaster by day, black with only the light between the layers after midnight
   var dark = new T.Color(1, 1, 1).lerp(C('#0b0705'), k);
-  [MAT.hedge, MAT.bowl].forEach(function (m) { m.color.copy(dark); m.emissiveIntensity = lerpN(0.1, 1.15, k); });
+  [MAT.hedge, MAT.bowl].forEach(function (m) { m.color.copy(dark); m.emissiveIntensity = lerpN(0.1, 0.9, k); m.emissive.copy(new T.Color(1, 1, 1).lerp(C('#f0dcef'), k)); });   // after midnight the bowl's light goes soft champagne, a touch of mauve
   MAT.plaster.color.copy(new T.Color(1, 1, 1).lerp(C('#070404'), k));
   trees.forEach(function (tr) { tr.mats[0].color.copy(dark); tr.mats[0].emissiveIntensity = lerpN(0.1, 1.05, k); });
   treeU.value = k; if (poolMat) poolMat.opacity = lerpN(0, 0.42, k);
-  haloMats.forEach(function (m) { m.opacity = lerpN(0.1, 0.85, k); });
+  haloMats.forEach(function (m) { m.opacity = lerpN(0.1, 0.55, k); });
   // the bar calms down; the lanterns glow only at their edges
   MAT.ledGlow.color.copy(C('#ffb060').lerp(C('#4a2008'), k)); MAT.backbar.color.copy(new T.Color(1, 1, 1).lerp(C('#3a2a1e'), k));
   MAT.rope.color.copy(new T.Color(1, 1, 1).lerp(C('#2a190b'), k)); MAT.rope.emissiveIntensity = lerpN(0.45, 1.5, k); MAT.rope.emissive.copy(C('#ffb862').lerp(C('#ff9a3a'), k));
@@ -2576,12 +2862,12 @@ function applyMode(k) {
   MAT.rope.envMapIntensity = lerpN(0.7, 0, k); MAT.rope.roughness = lerpN(0.85, 1, k);   // in the club the cord itself goes dark; only the rims glow
   refreshTables();
 }
-var RED = C('#ff2014'), ORANGE = C('#ff6c12'), WHITE = C('#ffffff'), WARM = C('#ffd29a'), GLOWW = C('#ffc884');
+var RED = C('#ff2014'), ORANGE = C('#ff6c12'), DEEP = C('#ff5016'), PURPLE = C('#9b45ff'), WHITE = C('#ffffff'), WARM = C('#ffd29a'), GLOWW = C('#ffc884');
+var LCYC = [ORANGE, DEEP, RED, PURPLE];                    // the lamps' colours, in turn: orange, a deeper orange, red, purple; no strobe
 function program(t, off) {
-  var p = (t + off) % 14, col = RED.clone(), I = 3.2, strobe = false;
-  if (p < 4.5) { I = 2.6 + Math.sin(p * 2.1) * 0.9; } else if (p < 6.0) { strobe = true; } else if (p < 10.5) { col = ORANGE.clone(); I = 2.8 + Math.sin(p * 1.7) * 0.8; } else if (p < 11.4) { strobe = true; } else { col = RED.clone().lerp(ORANGE, (p - 11.4) / 2.6); I = 3.0; }
-  if (strobe) { var on = Math.floor((t + off) * 12) % 2 === 0; col = WHITE.clone(); I = on ? 6 : 0.05; }
-  return { c: col, i: I, strobe: strobe };
+  var seg = 5, fade = 1.6, p = ((t + off) % (seg * LCYC.length) + seg * LCYC.length) % (seg * LCYC.length), i = Math.floor(p / seg), f = p - i * seg;
+  var col = LCYC[i].clone(); if (f > seg - fade) col.lerp(LCYC[(i + 1) % LCYC.length], ss01((f - seg + fade) / fade));
+  return { c: col, i: 2.8 + Math.sin(p * 1.3) * 0.5, strobe: false };
 }
 
 /* ============================================================== selection
@@ -2589,8 +2875,20 @@ function program(t, off) {
    strong enough to find from across the room. In the club only the table you look at and the
    table you booked are lit; every other lamp stays dark. */
 function setStates(map) { states = map || {}; refreshTables(); }
-var avail = null;   // after the guest picks night, hour and party: the tables that fit, glowing in their own lamps
+var avail = null, AVG = new T.Color(0xffb05a), AVP = new T.Color(0xb27aff);   // after the guest picks night, hour and party: the tables that fit, glowing in their own lamps
 function setAvail(ids) { avail = ids && ids.length ? {} : null; (ids || []).forEach(function (i) { avail[i] = 1; }); refreshTables(); }
+/* BUBL's tables: the ones BUBL is putting together from the guests likely in tonight. Their own lamp burns violet,
+   the glow round it turns violet and the gold trim warms toward lilac. No markers; the table itself says it. */
+var forming = null, FMP = new T.Color(0xa86bff), FMP2 = new T.Color(0xe0c4ff), AMB = new T.Color(0xff7a10), GOLDT = new T.Color(0xffc56b), PICKW = new T.Color(0xffb85c), PICKP = new T.Color(0xb27aff);
+function haloFor(tb) {                                     // violet light spilling onto the floor round the table: added light in the club, a tinted wash on the bar's pale floor
+  if (tb.halo) return tb.halo;
+  var hi = tb.data.kind === 'high', d = hi ? 3.0 : 4.2, g = new T.PlaneGeometry(d, hi ? d : d * 1.12); g.rotateX(-Math.PI / 2);
+  var add = new T.Mesh(g, new T.MeshBasicMaterial({ map: TX.glow, color: 0x8a48ff, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false }));
+  var wash = new T.Mesh(g, new T.MeshBasicMaterial({ map: TX.glow, color: 0x6326d0, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+  [add, wash].forEach(function (m, i) { m.position.set(0, 0.025 + i * 0.004, hi ? 0 : 0.35); m.renderOrder = 2; m.userData.furn = true; tb.root.add(m); });
+  return (tb.halo = { add: add, wash: wash });
+}
+function setForming(ids) { forming = ids && ids.length ? {} : null; (ids || []).forEach(function (i) { forming[i] = 1; }); refreshTables(); }
 function refreshTables() {
   var club = modeK > 0.5;
   Object.keys(tableObjs).forEach(function (id) {
@@ -2598,8 +2896,14 @@ function refreshTables() {
     var av = avail && avail[id] && st === 'free', I = sel || mine ? 5 : av ? 2.4 : inZone ? 1.4 : avail ? 0.04 : club ? 0.0 : (st === 'free' ? 0.45 : 0.08);
     tb.lampMat.emissiveIntensity = I; tb.lampMat.color.set(I > 0.2 ? 0x5a2e10 : 0x1a1008);
     tb.lampGlow.material.opacity = sel || mine ? 1 : av ? 0.85 : inZone ? 0.7 : avail ? 0 : club ? 0 : (st === 'free' ? 0.22 : 0);
-    tb.lampGlow.scale.setScalar(sel || mine ? 2.4 : av ? 1.6 : 0.6); tb.av = av && !sel && !mine;
+    tb.lampGlow.scale.setScalar(sel || mine ? 2.4 : av ? 1.6 : 0.6); tb.av = av && !sel && !mine; if (!tb.av) tb.lampGlow.material.color.set(0xffb05a);
+    tb.fm = !!(forming && forming[id]);
+    var wantB = tb.fm ? T.NormalBlending : T.CustomBlending; if (tb.lampGlow.material.blending !== wantB) { tb.lampGlow.material.blending = wantB; tb.lampGlow.material.needsUpdate = true; }
+    if (tb.fm) { tb.av = false; tb.lampMat.emissive.copy(FMP); tb.lampMat.color.set(0x2a1240); tb.lampMat.emissiveIntensity = sel || mine ? 4.2 : 2.6;
+      tb.lampGlow.material.color.copy(FMP); tb.lampGlow.material.opacity = sel || mine ? 1 : 0.8; tb.lampGlow.scale.setScalar(sel || mine ? 2.4 : 1.9); tb.trims.forEach(function (m) { m.emissive.copy(FMP2); }); haloFor(tb); }
+    else { tb.lampMat.emissive.copy(AMB); tb.trims.forEach(function (m) { m.emissive.copy(GOLDT); }); if (tb.halo) { tb.halo.add.material.opacity = 0; tb.halo.wash.material.opacity = 0; } }
   });
+  lights.pick.color.copy(selected && forming && forming[selected] ? PICKP : PICKW); lights.mine.color.copy(mineId && forming && forming[mineId] ? PICKP : PICKW);
   placePool(lights.pick, selected); placePool(lights.mine, mineId && mineId !== selected ? mineId : null);
   if (bucketMesh) { Object.keys(bucketIdx).forEach(function (id) { var v = id === selected || id === mineId ? 1.5 : 0.75; bucketMesh.setColorAt(bucketIdx[id], new T.Color(v, v, v)); }); bucketMesh.instanceColor.needsUpdate = true; }
 }
@@ -2618,8 +2922,13 @@ function setFocusZone(z) { focusZone = z; refreshTables(); }
 var view = '3d', saved3d = null;
 function setView(v, room) {                                 // Plan: straight down onto the room, the whole shell in frame; 3D: back where you were
   if (v === view) return; view = v;
-  if (v === 'plan') { saved3d = { th: cam.tTh, ph: cam.tPh }; cam.tTh = 0; cam.tPh = 0.035; cam.tTarget.set(0, 0, -1.3); cam.tR = planR() * (room || 1); }
+  if (v === 'plan') { saved3d = { th: cam.tTh, ph: cam.tPh }; cam.tTh = 0; cam.tPh = 0.035; planRoom = room || 0; planFrame(); }
   else { cam.tTh = saved3d ? saved3d.th : 0; cam.tPh = saved3d ? saved3d.ph : DEF.ph; cam.tTarget.copy(DEF.target); cam.tR = DEF.r; spin.idle = 0; }
+}
+var planRoom = 0;
+function planFrame() {                                       // on the page the switch sits under the shell, so the plan leaves it a clear band at the bottom
+  var m = planRoom ? 0 : Math.min(0.2, 64 / Math.max(200, H)), R = planR() * (planRoom || 1) / (1 - m);
+  cam.tR = R; cam.tTarget.set(0, 0, -1.3 + m / 2 * 2 * R * Math.tan(17 * D2R));
 }
 function planR() { var vh = 34 * D2R, hh = 2 * Math.atan(Math.tan(vh / 2) * camera.aspect); return Math.max(10.8 / Math.tan(vh / 2), 8.4 / Math.tan(hh / 2)); }
 var spin = { idle: 99, hold: false, speed: 0.06, dir: 1, lim: 1.5 };   // never far enough round to see behind the train
@@ -3310,7 +3619,7 @@ function resize() {
   renderer.setSize(W, H, false); camera.aspect = W / H; camera.fov = 34; camera.updateProjectionMatrix();
   var hf = 2 * Math.atan(Math.tan(17 * D2R) * camera.aspect);
   DEF.r = Math.max(22, Math.min(48, 9.1 / Math.tan(Math.min(hf, 34 * D2R) / 2)));
-  cam.tR = view === 'plan' ? planR() : DEF.r;
+  if (view === 'plan') planFrame(); else cam.tR = DEF.r;
 }
 var dragFlag = false; function dragging() { return dragFlag; }
 function loop() { requestAnimationFrame(loop); if (!running) return; frame(); }
@@ -3322,7 +3631,9 @@ function frame(forceDt) {
   var side = Math.abs(Math.sin(cam.th)), rr = cam.r * (1 + 0.2 * side), tz = cam.target.z - 1.3 * side;   // from the side the shell is longer: step back and centre on it, train included
   camera.position.set(cam.target.x + rr * Math.sin(cam.ph) * Math.sin(cam.th), cam.target.y + rr * Math.cos(cam.ph), tz + rr * Math.sin(cam.ph) * Math.cos(cam.th)); camera.lookAt(cam.target.x, cam.target.y, tz);
   venue.position.y = Math.sin(t * 0.9) * 0.05; fadeTrees(dt); updateLanterns(dt, t); updatePeople(dt, t);
-  if (avail) Object.keys(tableObjs).forEach(function (id) { var tb = tableObjs[id]; if (!tb.av) return; var k = 0.5 + 0.5 * Math.sin(t * 2.2 + tb.data.x * 0.7); tb.lampGlow.material.opacity = 0.6 + 0.35 * k; tb.lampMat.emissiveIntensity = 1.8 + 1.2 * k; });   // a slow breath, out of step table to table
+  if (forming) Object.keys(forming).forEach(function (id) { var tb = tableObjs[id]; if (!tb || !tb.fm) return; var k = 0.5 + 0.5 * Math.sin(t * 1.5 + tb.data.z * 0.9), on = selected === id || mineId === id; tb.lampGlow.material.opacity = on ? 0.85 : 0.5 + 0.3 * k; tb.lampMat.emissiveIntensity = (on ? 3.6 : 1.8) + 1.4 * k; tb.lampGlow.material.color.copy(FMP).lerp(FMP2, 0.05 + 0.2 * k);
+    if (tb.halo) { var hk = (on ? 1 : 0.7 + 0.3 * k); tb.halo.add.material.opacity = hk * (0.35 + 0.65 * modeK); tb.halo.wash.material.opacity = hk * 0.95 * (1 - modeK); } });   // slower than the open tables, and violet
+  if (avail) Object.keys(tableObjs).forEach(function (id) { var tb = tableObjs[id]; if (!tb.av) return; var k = 0.5 + 0.5 * Math.sin(t * 2.2 + tb.data.x * 0.7); tb.lampGlow.material.opacity = 0.6 + 0.35 * k; tb.lampMat.emissiveIntensity = 1.8 + 1.2 * k; tb.lampGlow.material.color.copy(AVG).lerp(AVP, 0.25 + 0.4 * k); });   // a slow breath, out of step table to table
   if (!spin.hold && !dragging() && view !== 'plan') { spin.idle += dt;
     if (spin.idle > 2.5) { var room = spin.dir > 0 ? spin.lim - cam.tTh : cam.tTh + spin.lim; if (room < 0.004) spin.dir = -spin.dir;
       cam.tTh = clampTh(cam.tTh + spin.dir * dt * spin.speed * Math.min(1, (spin.idle - 2.5) / 2) * Math.max(0.12, Math.min(1, room / 0.4))); } }
@@ -3333,12 +3644,12 @@ function frame(forceDt) {
   if (Math.abs(modeTarget - modeK) < 0.02 && mirrorMode !== (modeTarget > 0.5 ? 1 : 0) && mirrorRT) captureMirror();
   lights.dj.intensity = 0.5 * modeK * (0.7 + 0.3 * Math.sin(t * 8));
   [lights.pick, lights.mine].forEach(function (L, i) { var want = L.userData.on ? lerpN(3.2, 6.5, modeK) * (i ? 0.85 + 0.15 * Math.sin(t * 2.2) : 1) : 0; L.intensity += (want - L.intensity) * Math.min(1, dt * 5); });
-  Object.keys(tableObjs).forEach(function (id) { var tb = tableObjs[id], target = selected === id ? 0.45 + 0.3 * Math.sin(t * 3.2) : mineId === id ? 0.5 : (focusZone === tb.data.zone && (states[id] || 'free') === 'free' ? 0.12 : 0); tb.trims.forEach(function (m) { m.emissiveIntensity += (target - m.emissiveIntensity) * Math.min(1, dt * 6); }); });
+  Object.keys(tableObjs).forEach(function (id) { var tb = tableObjs[id], target = selected === id ? 0.45 + 0.3 * Math.sin(t * 3.2) : mineId === id ? 0.5 : tb.fm ? 0.45 + 0.2 * Math.sin(t * 1.5 + tb.data.z * 0.9) : (focusZone === tb.data.zone && (states[id] || 'free') === 'free' ? 0.12 : 0); tb.trims.forEach(function (m) { m.emissiveIntensity += (target - m.emissiveIntensity) * Math.min(1, dt * 6); }); });
   renderer.render(scene, camera);
 }
 
 LITT.scene = {
-  init: init, setMode: function (m) { mode = m; modeTarget = m === 'club' ? 1 : 0; }, setStates: setStates, select: select, clearSelect: clearSelect, focusZone: setFocusZone, setMine: setMine, spin: spin, setView: setView, setAvail: setAvail, view: function () { return view; }, setLamps: setLampOpt, lamps: function () { return LAMPS.lanterns.length; },
+  init: init, setMode: function (m) { mode = m; modeTarget = m === 'club' ? 1 : 0; }, setStates: setStates, select: select, clearSelect: clearSelect, focusZone: setFocusZone, setMine: setMine, spin: spin, setView: setView, setAvail: setAvail, setForming: setForming, view: function () { return view; }, setLamps: setLampOpt, lamps: function () { return LAMPS.lanterns.length; },
   onTap: function (fn) { onTap = fn; },
   mgr: function (on) { PEO.mgrHold = !!on; if (on && PEO.mgr) PEO.mgr.wave = 2.6; spin.hold = !!on || !!selected; if (!on) spin.idle = 0; },
   mgrAnchor: function () { var a = mgrScreen(1.9); return a ? { x: a[0], y: a[1], w: a[2], h: a[3] } : null; }, resize: function () { if (renderer) resize(); }, pause: function (p) { running = !p; },
@@ -3390,22 +3701,27 @@ function toast(msg) { var t = $('#toast'); t.textContent = msg; t.classList.add(
 function seeded(seed) { var s = seed >>> 0 || 7; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
 /* -------------------------------------------------------- availability */
-function computeBooked() {
-  var d = nightDate(S.night), r = seeded((d.getFullYear() * 1000 + d.getMonth() * 40 + d.getDate() + (S.mode === 'club' ? 500 : 0)) * 2654435761); r(); r();
+function bookedFor(night, mode, base) {
+  var d = nightDate(night), r = seeded((d.getFullYear() * 1000 + d.getMonth() * 40 + d.getDate() + (mode === 'club' ? 500 : 0)) * 2654435761); r(); r();
   // every night some tables are already taken, in every part of the room (the backstage most of all after
   // midnight), and at least two stay open in each part for the guest
-  var map = {}, club = S.mode === 'club', want = club ? { vip: 3, lounge: 2, high: 2 } : { vip: 2, lounge: 2, high: 1 };
+  var map = {}, club = mode === 'club', want = club ? { vip: 3, lounge: 2, high: 2 } : { vip: 2, lounge: 2, high: 1 };
   Object.keys(want).forEach(function (z) {
     var ids = L.TABLES.filter(function (t) { return t.zone === z; }).map(function (t) { return t.id; });
     for (var i = ids.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), x = ids[i]; ids[i] = ids[j]; ids[j] = x; }
     ids.slice(0, Math.max(0, Math.min(ids.length - 2, want[z] + (r() < 0.45 ? 1 : 0)))).forEach(function (id) { map[id] = 'booked'; });
   });
-  S.bookings.forEach(function (b) { if (b.night === S.night && b.mode === S.mode) map[b.table] = 'booked'; });
-  S.booked = map;
-  L.scene.setStates(map);
+  if (!base) S.bookings.forEach(function (b) { if (b.night === night && b.mode === mode) map[b.table] = 'booked'; });
+  return map;
+}
+function computeBooked() {
+  var map = bookedFor(S.night, S.mode);
+  S.booked = map; bublApply();
+  msPickReserve();
+  L.scene.setStates(map); renderMindset();
   if (S.availOn) L.scene.setAvail(availIds());
 }
-function isFree(id) { return !S.booked[id]; }
+function isFree(id) { return !S.booked[id] && !(S.fm && S.fm[id]); }
 
 /* ------------------------------------------------------------- modes */
 function applyMode(m) {
@@ -3414,7 +3730,7 @@ function applyMode(m) {
   L.scene.setMode(m);
   $('#modeName').textContent = m === 'bar' ? 'The Bar' : 'The Club';
   $('#modeHours').textContent = m === 'bar' ? '9pm – 12am' : '12am – 3am';
-  $('#modeLine').innerHTML = m === 'bar'
+  if ($('#modeLine')) $('#modeLine').innerHTML = m === 'bar'
     ? 'Soft light and signature cocktails. <em>The bar is walk-in; tables are by reservation with no minimum spend.</em>'
     : 'The lamps take over the room. <em>Entry by guestlist; tables are secured with a deposit against the minimum spend.</em>';
   var mt = document.querySelector('meta[name=theme-color]'); if (mt) mt.setAttribute('content', m === 'bar' ? '#e7d3aa' : '#08040e');
@@ -3457,7 +3773,7 @@ function renderPk() {
 }
 /* the three picks done: the room drops to the plan and the tables that fit the party breathe in their own lamps */
 function setViewUI(v) { L.scene.setView(v); $('#vtog').classList.toggle('plan', v === 'plan'); $$('#vtog button').forEach(function (x) { var on = x.getAttribute('data-v') === v; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
-function availIds() { return L.TABLES.filter(function (t) { return isFree(t.id) && t.cap >= S.guests; }).map(function (t) { return t.id; }); }
+function availIds() { return L.TABLES.filter(function (t) { return isFree(t.id) && resOk(t.id) && t.cap >= S.guests; }).map(function (t) { return t.id; }); }
 function showAvail() {
   if (document.body.classList.contains('booked') || document.body.classList.contains('ivp-on') || $('#sheet').classList.contains('on')) return;
   var ids = availIds(); S.availOn = true; L.scene.setAvail(ids); setViewUI('plan');
@@ -3492,8 +3808,9 @@ function renderZones() {
     h += '<div class="zone' + (S.open === z ? ' open' : '') + '" data-z="' + z + '"><button class="zrow"><div><h3>' + Z.name + '<span class="chev">›</span></h3><p>' + Z.sub + '</p></div><div class="zr"><div class="price">' + zonePrice(z) + '</div><div class="free">' + freeTxt + '</div></div></button><div class="ztables">';
     if (z === 'bar') h += '<button class="chip tbchip" data-bar="1">The counter<small>Walk-in · first come</small></button>';
     tabs.forEach(function (t) {
-      var f = isFree(t.id);
-      h += '<button class="chip tbchip' + (S.sel === t.id ? ' on' : '') + '" data-id="' + t.id + '"' + (f ? '' : ' disabled') + '>' + t.name.replace('VIP ', '') + '<small>' + (f ? (S.mode === 'club' ? aed(t.min) : 'Up to ' + t.cap) : 'Reserved') + '</small></button>';
+      var f = isFree(t.id), fm = S.fm && S.fm[t.id];
+      if (fm) { h += '<button class="chip tbchip bv' + (S.sel === t.id ? ' on' : '') + '" data-id="' + t.id + '">' + t.name.replace('VIP ', '') + '<small>' + bublMark() + 'BUBL · ' + fm.joined.length + ' of ' + fm.seats + '</small></button>'; return; }
+      h += '<button class="chip tbchip' + (S.sel === t.id ? ' on' : '') + '" data-id="' + t.id + '"' + (f ? '' : ' disabled') + '>' + t.name.replace('VIP ', '') + '<small>' + (f ? (S.reserve && S.reserve[t.id] ? (resOk(t.id) ? 'Mindset · yours' : 'Mindset ' + (S.reserve[t.id] === 2 ? 'Black' : 'Platinum')) : (S.mode === 'club' ? aed(t.min) : 'Up to ' + t.cap)) : 'Reserved') + '</small></button>';
     });
     h += '</div></div>';
   });
@@ -3545,12 +3862,20 @@ function wmSVG(cls) { return '<svg class="' + (cls || 'wm') + '" viewBox="0 0 18
 function carlyneNote(txt) { return '<div class="cnote"><span class="cav">C</span><p><b>Carlyne</b>' + txt + '</p></div>'; }
 function openTable(id) {
   var t = tableById(id); if (!t) return;
+  if (S.fm && S.fm[id]) return openForming(S.fm[id]);
   S.sel = id; L.scene.select(id); renderZones();
   var Z = L.ZONES[t.zone], free = isFree(id), club = S.mode === 'club';
   var h = '<div class="tl-h"><div><div class="sz">' + Z.name + '</div><h2>' + t.name + '</h2></div></div>';
   var close = function (sw) { if (!sw && !S.hold) { S.sel = null; L.scene.clearSelect(); renderZones(); } };
+  if (free && !resOk(id)) {                                  // kept back for Mindset members
+    var need = S.reserve[id] === 2 ? 'Black' : 'Platinum and Black';
+    h += '<div class="ms-lock">' + msCardArt(S.reserve[id] === 2 ? 'black' : 'platinum') + '<div><b>Kept for Mindset ' + need + '</b><span>Every night one lounge is held back for members. ' + (S.member ? 'Your ' + MS[S.member.tier].name + ' tier opens the rest of the room.' : 'Log in, or join and move up the tiers.') + '</span></div></div>';
+    h += S.member ? '<button class="ghost" data-ms="about">See the tiers</button>' : '<div class="ms-btns"><button type="button" class="cta" data-ms="login">Log in</button><button type="button" class="ghost" data-ms="join">Join Mindset</button></div>';
+    openSheet(h, { lite: true, onClose: close });
+    return;
+  }
   if (!free) {
-    var alts = L.TABLES.filter(function (x) { return x.zone === t.zone && isFree(x.id); });
+    var alts = L.TABLES.filter(function (x) { return x.zone === t.zone && isFree(x.id) && resOk(x.id); });
     h += '<p class="note" style="margin-top:8px">Taken for the night.' + (alts.length ? ' Still open in ' + Z.name + ':' : ' Try another part of the room.') + '</p><div class="alts">';
     alts.forEach(function (a) { h += '<button class="chip tbchip" data-alt="' + a.id + '">' + a.name.replace('VIP ', '') + '<small>' + (club ? aed(a.min) : 'Up to ' + a.cap) + '</small></button>'; });
     h += '</div>';
@@ -3559,6 +3884,8 @@ function openTable(id) {
   }
   h += '<div class="tl-row"><span>Up to <b>' + t.cap + '</b> guests</span><span>' + nightLabel(S.night).replace('Tonight, ', 'Tonight · ') + ', <b>' + fmtTime(S.time) + '</b></span>' + (club ? '<span>Minimum <b>' + aed(t.min) + '</b></span>' : '<span><b>No minimum</b></span>') + '</div>';
   h += '<p class="note">' + (club ? 'A deposit of 25% (' + aed(depFor(t.min, 25)) + ') or 50% (' + aed(depFor(t.min, 50)) + ') secures it, split across your guests, and comes off your bill. Table guests skip the list.' : 'Free to hold, and kept for you 20 minutes after your arrival.') + '</p>';
+  if (S.reserve && S.reserve[id]) h += '<p class="ms-yours"><i>◈</i>Kept back tonight for Mindset members. It’s yours to book.</p>';
+  if (S.member) h += '<p class="ms-earn"><b>+' + msPoints(t).toLocaleString('en-US') + ' Mindset points</b> · ' + MS[S.member.tier].cash + '% cashback · held ' + msHold() + ' min</p>';
   if (!club && S.time === '23:00') h += carlyneNote('At 12 the club begins and new guests arrive for this table, so it’s yours from 11 until midnight.');
   if (S.guests > t.cap) h += '<p class="warn">This table seats up to ' + t.cap + '. Choose a larger one, or lower your party.</p>';
   if (S.guests >= 20) h += '<p class="note">For 20 guests or more, the events team builds a package: litt.sales@alphamind-group.com</p>';
@@ -3612,7 +3939,7 @@ function openDJ() {
 /* --------------------------------------------------------------- hold */
 var holdTimer = null;
 function startHold(id) {
-  S.hold = { id: id, until: Date.now() + CFG.holdMinutes * 60000 };
+  S.hold = { id: id, until: Date.now() + msHold() * 60000 };
   $('#hold').classList.add('on'); tickHold(); clearInterval(holdTimer); holdTimer = setInterval(tickHold, 1000);
 }
 function tickHold() {
@@ -3666,6 +3993,7 @@ function hms(sec) { sec = Math.max(0, Math.floor(sec)); var h = Math.floor(sec /
 function ago(ms) { var s = Math.round((Date.now() - ms) / 1000); return s < 45 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago'; }
 function confirmBooking() {
   S.availOn = false; L.scene.setAvail(null);
+  if (S.member) { var pts = msPoints(tableById(S.hold.id)); S.member.points += pts; msSave(); setTimeout(function () { toast('+' + pts.toLocaleString('en-US') + ' Mindset points'); }, 2600); }
   var t = tableById(S.hold.id), club = S.mode === 'club', dep = club ? depFor(t.min, CFG.depositPct) : 0, now = Date.now();
   var ref = 'LT-' + (now % 100000).toString(36).toUpperCase() + Math.floor(Math.random() * 90 + 10);
   var due = club ? Math.max(now + 30 * 60000, Math.min(now + 12 * 3600000, arrivalAt(S.night, S.time) - 3600000)) : 0;
@@ -3741,18 +4069,27 @@ function pctHTML(b) {                                     // 25% or 50% of the m
 function depHTML(b) {
   if (!b.dep) return '';
   var d = b.dep, n = b.guests, left = holdLeft(b), sec = depSecured(b), clock = '<span class="dep-clock' + (left < 3600 && !sec ? ' late' : '') + '" id="depClock">' + (sec ? 'Table confirmed' : left > 0 ? hms(left) + ' to secure your table' : 'The hold has run out') + '</span>';
-  if (sec && !d.open) return '<section class="bk-sec bk-dep folded" id="bkDep"><button type="button" class="dep-fold" data-d="open"><span class="dep-ok">' + IC.check + '</span><span class="dep-ft"><b>' + aed(d.total) + ' secured</b><small>' + (d.how === 'host' ? 'You covered the deposit. Tap to see it.' : 'Everyone has paid. Tap to see who paid what.') + '</small></span><i class="dep-chev">›</i></button></section>';
+  if (sec && !d.open) {                                      // paid in full: just a small seal
+    var split = d.how !== 'host';
+    return '<section class="bk-sec bk-dep folded" id="bkDep"><' + (split ? 'button type="button" data-d="open"' : 'div') + ' class="dep-seal"><span class="dep-ok">' + IC.check + '</span><span class="dep-st2"><small>Deposit secured</small><b>' + aed(d.total) + '</b></span><span class="dep-sn">' + (split ? 'Paid by the table' : 'Off your bill') + '<br>on the night</span>' + (split ? '<i class="dep-chev">›</i>' : '') + '</' + (split ? 'button' : 'div') + '></section>';
+  }
   depEnsure(b);
+  if (d.sent && !sec && !d.open) {                           // split confirmed: the payment folds away, one line to open it again
+    var paidN = people(b).filter(function (_, i) { return d.paid[i] || !shareAmt(b, i); }).length, cin = depIn(b);
+    return '<section class="bk-sec bk-dep folded" id="bkDep"><button type="button" class="dep-fold" data-d="open"><span class="dep-ring" style="--p:' + Math.round(cin / d.total * 100) + '"></span><span class="dep-ft"><b>Deposit split · ' + paidN + ' of ' + b.guests + ' paid</b><small>' + aed(cin) + ' of ' + aed(d.total) + ' in · ' + (left > 0 ? hms(left) + ' left' : 'hold ended') + (d.paid[0] ? '' : ' · your part ' + aed(shareAmt(b, 0))) + '</small></span><i class="dep-chev">›</i></button></section>';
+  }
   var h = '<section class="bk-sec bk-dep" id="bkDep"><div class="bk-hrow"><h3 class="bk-h">Deposit</h3>' + clock + '</div>';
   if (!d.sent) {                                            // locked until the host chooses: confirm the split, or pay the whole deposit
     h += '<div class="dep-amt"><b>' + aed(d.total) + '</b><small>deposit against your ' + aed(b.min) + ' minimum, off the bill on the night</small></div>' + pctHTML(b);
     h += '<p class="dep-lock"><i>' + IC.lock + '</i><span>' + (n > 1 ? 'Locked until you choose: confirm the split, or pay the full deposit. Your invite link opens once you have.' : 'Locked until the deposit is paid. Your entry QR opens with it.') + '</span></p>';
     if (n > 1) {
       var ppl0 = people(b), ev0 = isEven(d.shares);
-      h += '<div class="dep-top">' + pieSVG(b, d.shares) + '<div class="dep-mid"><b>' + aed(shareAmt(b, 0)) + '</b><span>' + (ev0 ? 'a seat, split evenly across all ' + n : 'your part, as you set it') + '</span></div></div><div class="dep-list pre">';
+      h += '<button type="button" class="dep-split" data-d="all"><b>Pay full deposit</b><small>' + aed(d.total) + ' now, and your guests pay nothing</small></button>';
+      if (!d.splitOpen) { h += '<button type="button" class="dep-open" data-d="splitopen"><span><b>Split it with your table</b><small>' + aed(Math.ceil(d.total / n)) + ' a seat across ' + n + ', or set your own</small></span><i class="dep-chev">›</i></button>'; return h + '</section>'; }
+      h += '<div class="dep-splitbox"><div class="dep-sbh"><b>Split the deposit</b><button type="button" data-d="splitclose" aria-label="Close the split">✕</button></div><div class="dep-top">' + pieSVG(b, d.shares) + '<div class="dep-mid"><b>' + aed(shareAmt(b, 0)) + '</b><span>' + (ev0 ? 'a seat, split evenly across all ' + n : 'your part, as you set it') + '</span></div></div><div class="dep-list pre">';
       ppl0.forEach(function (nm, i) { h += '<div class="dep-row"><i style="background:' + PAL[b.mode][i % 12] + '"></i><span class="dep-n">' + esc(nm) + (i === 0 ? ' <em>you</em>' : '') + '</span><span class="dep-v">' + aed(shareAmt(b, i)) + '<small>' + Math.round(d.shares[i]) + '%</small></span><span class="dep-st">' + (i === 0 ? 'You' : 'On their invite') + '</span></div>'; });
       h += '</div><button type="button" class="dep-split" data-d="split"><b>Confirm split</b><small>' + (ev0 ? aed(shareAmt(b, 1)) + ' a seat, on every invite' : 'your custom split, on every invite') + '</small></button>';
-      h += '<div class="dep-alt"><button type="button" data-d="custom">Custom split</button><button type="button" data-d="all">Pay full deposit, ' + aed(d.total) + '</button></div>';
+      h += '<div class="dep-alt one"><button type="button" data-d="custom">Custom split</button></div></div>';
     } else h += '<button type="button" class="dep-split" data-d="all"><b>Pay the deposit</b><small>' + aed(d.total) + ', secured by Stripe, refundable up to 48 hours before</small></button>';
     return h + '</section>';
   }
@@ -3763,8 +4100,8 @@ function depHTML(b) {
   ppl.forEach(function (nm, i) { var a = shareAmt(b, i), pd = !!d.paid[i], st = pd ? '<span class="dep-st ok">Paid</span>' : !a ? '<span class="dep-st">Covered</span>' : i === 0 ? '<button type="button" class="dep-pay" data-d="pay">Pay my part</button>' : nm.indexOf('Seat ') === 0 ? '<span class="dep-st">Open seat</span>' : '<span class="dep-st">On their invite</span>';
     h += '<div class="dep-row"><i style="background:' + PAL[b.mode][i % 12] + '"></i><span class="dep-n">' + esc(nm) + (i === 0 ? ' <em>you</em>' : '') + '</span><span class="dep-v">' + (aedM ? aed(a) : Math.round(d.shares[i]) + '%') + '<small>' + (aedM ? Math.round(d.shares[i]) + '%' : aed(a)) + '</small></span>' + st + '</div>'; });
   h += '</div>';
-  if (sec) h += '<button type="button" class="ghost" data-d="hide">Hide</button>';
-  else { h += d.paid[0] ? '<button type="button" class="dep-cover" data-d="cover">Cover what\'s left, ' + aed(d.total - col) + '</button>' : '<button type="button" class="dep-cover alt" data-d="all">Pay it all instead, ' + aed(d.total - col) + '</button>'; h += '<div class="dep-ft2"><button type="button" data-d="nudge">Nudge who hasn\'t paid</button><button type="button" data-d="custom">Change the split</button></div>'; }
+  if (!sec) { h += d.paid[0] ? '<button type="button" class="dep-cover" data-d="cover">Cover what\'s left, ' + aed(d.total - col) + '</button>' : '<button type="button" class="dep-cover alt" data-d="all">Pay it all instead, ' + aed(d.total - col) + '</button>'; h += '<div class="dep-ft2"><button type="button" data-d="nudge">Nudge who hasn\'t paid</button><button type="button" data-d="custom">Change the split</button></div>'; }
+  h += '<button type="button" class="ghost dep-foldbtn" data-d="hide">Fold away</button>';
   return h + '</section>';
 }
 function decHTML(b) {
@@ -3790,7 +4127,7 @@ function renderBooked() {
   h += depHTML(b) + guestsHTML(b) + tableListHTML(b);       // the deposit sits right under the entry QR; who is coming follows the link
   h += '<div class="bk-acts">' + (b.guests > 1 ? '<button type="button" data-h="invite">Invite guests</button>' : '') + '<button type="button" data-h="change">' + (b.change ? 'Change requested' : 'Request table change') + '</button></div>';
   $('#bk').hidden = false; $('#bk').innerHTML = h;
-  if (ok) { var q = $('#bkQr'); try { new QRCode(q, { text: 'LITT|' + b.ref + '|' + b.table, width: 120, height: 120, colorDark: club ? '#1d0f2b' : '#3d2819', colorLight: '#fffdf8', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { q.textContent = b.ref; } }
+  if (ok) { var q = $('#bkQr'); try { new QRCode(q, { text: 'LITT|' + b.ref + '|' + b.table, width: 120, height: 120, colorDark: '#1c0a28', colorLight: '#D9BE82', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { q.textContent = b.ref; } }
   var m = decHTML(b) + '<button class="ghost" id="another">Make another reservation</button>';      // tonight's small decisions sit under the venue
   $('#hostp').hidden = false; $('#hostp').innerHTML = m;
 }
@@ -3823,12 +4160,31 @@ setInterval(function () {
 /* paying: Apple Pay first, or a card added on the spot. The same block runs in the host's sheet and on
    the invitation. It is a demo checkout: nothing is charged and card details never leave the form. */
 function payBlock(amount) {
-  var h = '<div class="pay"><button type="button" class="apay" data-pay="apple" aria-label="Pay ' + aed(amount) + ' with Apple Pay"><span class="apay-fb">Pay with Apple Pay</span></button>';
+  var h = '<div class="pay"><button type="button" class="apay" data-pay="apple" data-amt="' + amount + '" aria-label="Pay ' + aed(amount) + ' with Apple Pay"><span class="apay-fb">Pay with <b>Apple Pay</b></span></button>';
   h += '<div class="pay-or"><span>or pay by card</span></div><button type="button" class="pay-add" data-pay="add" aria-expanded="false"><i>+</i><span>Add card</span><small>Visa · Mastercard · Amex</small></button>';
   h += '<form class="pay-card" novalidate autocomplete="off" hidden><div class="field"><label>Card number</label><div class="pay-num"><input name="num" inputmode="numeric" autocomplete="off" placeholder="1234 5678 9012 3456" maxlength="23"><em class="pay-brand"></em></div><div class="e">Check the card number</div></div>';
   h += '<div class="pay-2"><div class="field"><label>Expiry</label><input name="exp" inputmode="numeric" autocomplete="off" placeholder="MM / YY" maxlength="7"><div class="e">Check the date</div></div><div class="field"><label>CVC</label><input name="cvc" inputmode="numeric" autocomplete="off" placeholder="123" maxlength="4"><div class="e">3 or 4 digits</div></div></div>';
   h += '<div class="field"><label>Name on card</label><input name="nm" autocomplete="off"><div class="e">Add the name on the card</div></div><button class="cta" type="submit">Pay ' + aed(amount) + '</button></form>';
   return h + '<p class="pay-demo">Demo checkout. Nothing is charged, and card details are not stored or sent.</p></div>';
+}
+/* the Apple Pay sheet, as iOS draws it: slides up over the page, the card, the total, "Confirm with Side Button";
+   a tap stands in for the double-click, Face ID scans, Done. A demo: nothing is charged. */
+function applePay(amount, done) {
+  var dark = S.mode === 'club' || document.querySelector('.ivp.ivp-club'), old = $('#aps'); if (old) old.remove();
+  var w = document.createElement('div'); w.id = 'aps'; w.className = 'aps-wrap' + (dark ? ' dark' : '');
+  var fid = '<svg viewBox="0 0 60 60" class="aps-fid"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 18V12a8 8 0 0 1 8-8h6M42 4h6a8 8 0 0 1 8 8v6M56 42v6a8 8 0 0 1-8 8h-6M18 56h-6a8 8 0 0 1-8-8v-6"/><path d="M21 22v4M39 22v4M30 23v10h-3M22 41c4.5 3.5 11.5 3.5 16 0"/></g></svg>';
+  w.innerHTML = '<div class="aps-bg"></div><div class="aps" role="dialog" aria-label="Apple Pay"><div class="aps-hd"><span class="aps-brand">Apple Pay</span><button type="button" class="aps-x" aria-label="Cancel">✕</button></div>' +
+    '<button type="button" class="aps-card"><span class="aps-art"><i></i></span><span class="aps-ci"><b>LITT Demo Card</b><small>•••• 4242</small></span><i class="aps-chev">›</i></button>' +
+    '<div class="aps-row"><small>Contact</small><span>Shared with LITT for this booking</span></div>' +
+    '<div class="aps-tot"><span>Pay LITT</span><b>' + aed(amount) + '</b></div>' +
+    '<button type="button" class="aps-go"><span class="aps-state s0"><span class="aps-btn"></span>Confirm with Side Button</span><span class="aps-state s1">' + fid + 'Face ID</span><span class="aps-state s2"><span class="aps-done"></span>Done</span></button>' +
+    '<p class="aps-demo">Demo checkout · nothing is charged</p></div><i class="aps-side"></i>';
+  document.body.appendChild(w); void w.offsetWidth; w.classList.add('on');
+  function close() { w.classList.remove('on'); setTimeout(function () { w.remove(); }, 320); }
+  w.querySelector('.aps-x').onclick = close; w.querySelector('.aps-bg').onclick = close;
+  var go = w.querySelector('.aps-go'), used = false;
+  function confirm() { if (used) return; used = true; go.className = 'aps-go st1'; setTimeout(function () { go.className = 'aps-go st2'; setTimeout(function () { close(); done(); }, 750); }, 1100); }
+  go.onclick = confirm; w.querySelector('.aps-side').onclick = confirm;
 }
 function luhn(n) { var s = 0, alt = false; for (var i = n.length - 1; i >= 0; i--) { var d = +n[i]; if (alt) { d *= 2; if (d > 9) d -= 9; } s += d; alt = !alt; } return s % 10 === 0; }
 function cardBrand(n) { return /^4/.test(n) ? 'Visa' : /^(5[1-5]|2[2-7])/.test(n) ? 'Mastercard' : /^3[47]/.test(n) ? 'Amex' : ''; }
@@ -3836,7 +4192,7 @@ function bindPay(root, done) {
   var P = root.querySelector('.pay'); if (!P) return;
   var ap = P.querySelector('.apay'), add = P.querySelector('.pay-add'), f = P.querySelector('.pay-card'), busy = false;
   function finish(how, bt) { busy = true; bt.classList.add('busy'); bt.disabled = true; bt.innerHTML = '<span class="spin"></span>'; setTimeout(function () { if (f) f.reset(); done(how); }, 1100); }
-  ap.onclick = function () { if (!busy) finish('Apple Pay', ap); };
+  ap.onclick = function () { if (busy) return; applePay(+ap.getAttribute('data-amt') || 0, function () { finish('Apple Pay', ap); }); };
   add.onclick = function () { var open = f.hidden; f.hidden = !open; add.setAttribute('aria-expanded', open ? 'true' : 'false'); add.classList.toggle('on', open); if (open) { var n = f.elements.num; try { n.focus({ preventScroll: true }); } catch (e) {} f.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } };
   var num = f.elements.num, exp = f.elements.exp, cvc = f.elements.cvc, br = P.querySelector('.pay-brand');
   num.addEventListener('input', function () { var d = num.value.replace(/\D/g, '').slice(0, 19); num.value = d.replace(/(\d{4})(?=\d)/g, '$1 '); br.textContent = cardBrand(d); num.closest('.field').classList.remove('bad'); });
@@ -3865,8 +4221,8 @@ function depPct(p) {
 }
 function depAction(k) {
   var b = S.booking, d = b.dep; if (!d) return;
-  if (k === 'open') d.open = true; else if (k === 'hide') d.open = false;
-  else if (k === 'split') { depEnsure(b); var ev = isEven(d.shares); goLive(b, ev ? 'even' : 'custom'); toast(ev ? 'Split confirmed · every invite asks for ' + aed(shareAmt(b, 1)) : 'Split confirmed · each invite shows that seat\'s part'); }
+  if (k === 'open') d.open = true; else if (k === 'hide') d.open = false; else if (k === 'splitopen') d.splitOpen = true; else if (k === 'splitclose') d.splitOpen = false;
+  else if (k === 'split') { depEnsure(b); var ev = isEven(d.shares); goLive(b, ev ? 'even' : 'custom'); d.open = false; toast(ev ? 'Split confirmed · every invite asks for ' + aed(shareAmt(b, 1)) : 'Split confirmed · each invite shows that seat\'s part'); }
   else if (k === 'custom') { openSplit(); return; }
   else if (k === 'all') { payNow({ amount: d.total - depIn(b), title: 'The table\'s deposit', sub: tableById(b.table).name + ', ' + nightLabel(b.night).replace('Tonight, ', ''), onDone: function () { depEnsure(b); d.how = 'host'; d.sent = true; people(b).forEach(function (_, i) { d.paid[i] = true; }); secure(b); renderBooked(); } }); return; }
   else if (k === 'pay') { payNow({ amount: shareAmt(b, 0), title: 'Your part of the deposit', sub: tableById(b.table).name, onDone: function () { d.paid[0] = true; if (depSecured(b)) secure(b); renderBooked(); } }); return; }
@@ -3934,7 +4290,7 @@ function invCard(b) {
 }
 function drawQR(b) {
   var el = $('#qr'); if (!el || el.childNodes.length) return;
-  try { new QRCode(el, { text: 'LITT|' + b.ref + '|' + b.table + '|' + nightDate(b.night).toISOString().slice(0, 10) + '|' + b.time, width: 220, height: 220, colorDark: b.mode === 'club' ? '#1d0f2b' : '#3d2819', colorLight: '#fffdf8', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { el.textContent = b.ref; }
+  try { new QRCode(el, { text: 'LITT|' + b.ref + '|' + b.table + '|' + nightDate(b.night).toISOString().slice(0, 10) + '|' + b.time, width: 220, height: 220, colorDark: '#1c0a28', colorLight: '#D9BE82', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { el.textContent = b.ref; }
 }
 function openQR() { var b = S.booking; openSheet('<div class="sz">At the door</div><h2>Entry QR</h2>' + invCard(b) + '<button class="ghost" id="doneInv">Done</button>', { keep: true }); drawQR(b); }
 function openChange() {
@@ -3976,7 +4332,7 @@ function openInvitation(I, preview) {
   rows += '<div class="ivp-g you"><i></i><b>You</b><span class="gold">Waiting for you</span></div>';
   for (var k = 2 + I.conf.length; k < I.guests; k++) rows += '<div class="ivp-g"><i></i><b class="muted">Open place</b><span></span></div>';
   var h = '<button class="ivp-x" type="button" aria-label="Close">✕</button><div class="ivp-scroll"><main class="ivp-page">' + (preview ? '<div class="ivp-flag">Preview · what each guest sees</div>' : '');
-  h += '<div class="ivp-to">Invitation to</div>' + wmSVG('ivp-wm') + '<div class="ivp-host">' + esc(I.host) + '\'s table</div><button type="button" class="ivp-claimbtn" id="ivpClaimBtn"><span>Claim your spot</span><i></i></button><div class="ivp-venue" id="ivpVenue"><span class="ivp-vcap">' + esc(I.table) + ' glows for you · drag to turn</span><div class="vtog ivp-vtog" role="group" aria-label="View"><button type="button" data-iv="3d" class="on" aria-pressed="true">3D</button><button type="button" data-iv="plan" aria-pressed="false">Plan</button><i class="vtk"></i></div></div>';
+  h += '<div class="ivp-to">Invitation to</div>' + wmSVG('ivp-wm') + '<div class="ivp-host">' + esc(I.host) + '\'s table</div><button type="button" class="ivp-claimbtn" id="ivpClaimBtn"><span>Claim your spot</span><i></i></button><div class="ivp-venue" id="ivpVenue"></div><div class="ivp-vrow"><span class="ivp-vcap">' + esc(I.table) + ' glows for you · drag to turn</span><div class="vtog ivp-vtog" role="group" aria-label="View"><button type="button" data-iv="3d" class="on" aria-pressed="true">3D</button><button type="button" data-iv="plan" aria-pressed="false">Plan</button><i class="vtk"></i></div></div>';
   h += '<div class="ivp-facts"><div><small>Night</small><p>' + I.when + '</p></div><div><small>Arrive by</small><p>' + I.time + '</p></div><div><small>Table</small><p>' + esc(I.table) + '</p></div></div>';
   h += '<p class="ivp-line">' + (I.mode === 'club' ? 'The Club · midnight to 3am' : 'The Bar · 9pm to midnight') + '. Smart elegant.</p>';
   h += '<section class="ivp-sec"><div class="ivp-th"><b>At the table</b><span>' + (1 + I.conf.length) + ' of ' + I.guests + ' confirmed</span></div><div class="ivp-guests">' + rows + '</div></section>';
@@ -4020,7 +4376,7 @@ function openInvitation(I, preview) {
       var dn = R.querySelector('.ivp-done'); dn.hidden = false; dn.querySelector('h3').textContent = 'You\'re on the table, ' + nm + '.';
       dn.querySelector('p').innerHTML = (preview ? 'This is what your guests see once they claim and pay. In the preview nothing is sent or charged.' : '<em>' + esc(I.host) + '</em> can see you are coming.' + (I.share ? ' Your part, ' + aed(I.share) + ', is paid' + (paidBy ? ' by ' + esc(paidBy) : '') + '.' : '') + ' Show this at the door with your ID.');
       var you = R.querySelector('.ivp-g.you'); if (you) { you.querySelector('i').className = 'on'; you.querySelector('b').textContent = nm; you.querySelector('span').textContent = 'Confirmed'; you.querySelector('span').className = ''; }
-      try { new QRCode($('#ivpQr', R), { text: 'LITT|' + I.ref + '|' + I.tid + '|' + I.date + '|' + I.at + '|' + nm, width: 200, height: 200, colorDark: I.mode === 'club' ? '#1d0f2b' : '#3d2819', colorLight: '#fffdf8', correctLevel: QRCode.CorrectLevel.M }); } catch (er) {}
+      try { new QRCode($('#ivpQr', R), { text: 'LITT|' + I.ref + '|' + I.tid + '|' + I.date + '|' + I.at + '|' + nm, width: 200, height: 200, colorDark: '#1c0a28', colorLight: '#D9BE82', correctLevel: QRCode.CorrectLevel.M }); } catch (er) {}
       dn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       toast(preview ? 'Preview · nothing was sent or charged' : 'Your spot is claimed');
     })();
@@ -4091,7 +4447,7 @@ function letterSVG(k, L) {
     '<rect width="' + W + '" height="' + H + '" fill="url(#pap' + k + ')"/>' +
     '<rect x="5" y="5" width="' + (W - 10) + '" height="' + (H - 10) + '" rx="4" fill="none" stroke="url(#gi' + k + ')" stroke-width="5"/><rect x="13" y="13" width="' + (W - 26) + '" height="' + (H - 26) + '" rx="2" fill="none" stroke="url(#gi' + k + ')" stroke-width=".8" opacity=".7"/>' +
     '<g transform="translate(' + (cx - wmW / 2).toFixed(1) + ' ' + Math.round(H * .1) + ') scale(' + wmS.toFixed(4) + ')" fill="url(#gi' + k + ')">' + WM + '</g>' +
-    '<text x="' + cx + '" y="' + Math.round(H * .1 + wmW * .183 + 34) + '" text-anchor="middle" font-family="Marcellus,Cormorant Garamond,Georgia,serif" font-size="21" letter-spacing=".6" fill="' + th.ink + '" opacity=".92">' + (L.from ? 'A letter from ' + esc(L.first) : 'A letter for ' + esc(L.first)) + '</text>' +
+    '<text x="' + cx + '" y="' + Math.round(H * .1 + wmW * .183 + 34) + '" text-anchor="middle" font-family="Marcellus,Cormorant Garamond,Georgia,serif" font-size="21" letter-spacing=".6" fill="' + th.ink + '" opacity=".92">' + (L.line ? esc(L.line) : L.from ? 'A letter from ' + esc(L.first) : 'A letter for ' + esc(L.first)) + '</text>' +
     '<g class="lt-hintg" opacity=".95"><text x="' + (cx + 15) + '" y="' + hy + '" text-anchor="middle" font-family="Josefin Sans,Helvetica Neue,Arial,sans-serif" font-size="11" letter-spacing="2.2" fill="' + th.sub + '">SWIPE ACROSS THE SEAL</text>' +
     '<path d="M' + (cx - 118) + ' ' + (hy - 4) + ' h20 m-5 -4.5 l5 4.5 -5 4.5" fill="none" stroke="url(#gi' + k + ')" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></g>' +
     sealSVG(k, cx, cy, s, L.ini) + '</svg>';
@@ -4142,7 +4498,7 @@ function showLetter(o) {
   R.innerHTML = '<div class="lt-spill"></div><div class="lt-env" role="button" tabindex="0" aria-label="Swipe across the seal to open the invitation"><div class="lt-piece lt-pb"><div class="lt-clip"></div></div><div class="lt-piece lt-pt"><div class="lt-clip"></div></div>' +
     '<svg class="lt-whole" aria-hidden="true"></svg><svg class="lt-trail" aria-hidden="true"></svg><div class="lt-trail lt-track" aria-hidden="true"><i class="lt-spark"></i></div></div><button class="lt-x" type="button" aria-label="Close">✕</button>';
   document.body.appendChild(R); document.body.classList.add('lt-on');
-  var L = { R: R, mode: o.mode === 'club' ? 'club' : 'bar', first: o.first || 'You', ini: ini, from: !!o.from, onOpen: o.onOpen, stt: 'sealed', dir: 0, p: 0, cracked: false, drag: false };
+  var L = { R: R, mode: o.mode === 'club' ? 'club' : 'bar', first: o.first || 'You', ini: ini, from: !!o.from, line: o.line || '', onOpen: o.onOpen, stt: 'sealed', dir: 0, p: 0, cracked: false, drag: false };
   LT = L; buildLetter(L);
   L.onResize = function () { if (LT.R === R && L.stt === 'sealed' && !L.dir) buildLetter(L); }; window.addEventListener('resize', L.onResize);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { L.onResize(); });
@@ -4223,7 +4579,7 @@ function shareInvite() {
 function openGuestlist(n) {
   if (S.mode !== 'club') { setTime('00:00'); }
   n = n || 0;
-  var h = '<div class="sz">' + nightLabel(S.night) + ' · after midnight</div><h2>Guestlist request</h2><p class="ssub">Every guest needs a handle and a number</p><form id="gf" novalidate style="margin-top:16px">';
+  var h = '<div class="sz">' + nightLabel(S.night) + ' · after midnight</div><h2>Guestlist request</h2><p class="ssub">Every guest needs a handle and a number</p>' + (msRank() >= 1 ? '<p class="ms-yours"><i>→</i>Mindset ' + MS[S.member.tier].name + ': you and your guests go on the members’ line, no queue.</p>' : '') + '<form id="gf" novalidate style="margin-top:16px">';
   h += '<div class="glrow"><div class="sz">You</div>';
   h += '<div class="field" data-f="g0n"><label>Full name</label><input name="g0n" autocomplete="name"><div class="e">Add your name.</div></div>';
   h += '<div class="field" data-f="g0i"><label>Instagram</label><input name="g0i" placeholder="@handle" autocapitalize="off" autocorrect="off"><div class="e">Add your Instagram handle.</div></div>';
@@ -4263,6 +4619,253 @@ function openGuestlist(n) {
     openSheet(d, { keep: true });
     toast('Guestlist request sent');
   });
+}
+
+/* ------------------------------------------------------------ BUBL tables
+   BUBL fills the tables nobody has booked. From the guests likely to be in on a night it builds a table
+   around one mix (founders, creators, finance…), invites the people who fit by email and WhatsApp, and
+   lets anyone browsing ask to join. In the room those tables burn violet in their own lamps. Names stay
+   with the invited, first names only: everyone else sees the shape of the table, never who. */
+var BP = [
+  { k: 'founders', name: 'The Founders’ Table', mix: 'Founders & operators', lo: 28, hi: 38, tags: ['Tech', 'Venture', 'Fintech', 'Product'], fields: ['Tech', 'Venture', 'Fintech', 'Product'],
+    dd: [['Company & role', 'e.g. Co-founder, a fintech'], ['LinkedIn', 'linkedin.com/in/…']], why: 'You build companies, and so does everyone BUBL is seating here.' },
+  { k: 'creators', name: 'Creators After Dark', mix: 'Creators, fashion & music', lo: 24, hi: 32, tags: ['Fashion', 'Music', 'Film', 'Beauty'], fields: ['Fashion', 'Music', 'Film', 'Beauty'],
+    dd: [['What you make', 'e.g. Stylist, DJ, director'], ['Main platform', 'Instagram, TikTok, YouTube…']], why: 'You make things people watch, and the table is built around that.' },
+  { k: 'finance', name: 'The Late Close', mix: 'Finance, law & consulting', lo: 30, hi: 42, tags: ['Banking', 'Private equity', 'Law', 'Consulting'], fields: ['Banking', 'Private equity', 'Law', 'Consulting'],
+    dd: [['Firm & role', 'e.g. VP, private equity'], ['LinkedIn', 'linkedin.com/in/…']], why: 'The week closes late in your line of work. This table closes it properly.' },
+  { k: 'new', name: 'New in Dubai', mix: 'Professionals new to the city', lo: 26, hi: 35, tags: ['Tech', 'Marketing', 'Hospitality', 'Architecture'], fields: ['Tech', 'Marketing', 'Hospitality', 'Architecture'],
+    dd: [['In Dubai since', 'e.g. March 2026'], ['What you do', 'e.g. Brand manager']], why: 'You arrived in the city this year, like everyone at this table.' },
+  { k: 'design', name: 'Art & Design', mix: 'Architects, designers & gallerists', lo: 27, hi: 38, tags: ['Architecture', 'Interiors', 'Art', 'Product design'], fields: ['Architecture', 'Interiors', 'Art', 'Product design'],
+    dd: [['Studio & role', 'e.g. Associate, an architecture studio'], ['Portfolio or LinkedIn', 'yourstudio.com']], why: 'You work in design, and the table is full of people who notice the details.' },
+  { k: 'gulf', name: 'The Weekenders', mix: 'In for the weekend from the Gulf', lo: 27, hi: 36, tags: ['Riyadh', 'Doha', 'Kuwait City', 'Manama'], fields: ['Tech', 'Finance', 'Consulting', 'Energy', 'Creative'],
+    dd: [['Where you’re in from', 'e.g. Riyadh'], ['What you do', 'e.g. Consultant']], why: 'You’re in for the weekend from across the Gulf, like the rest of the table.' }
+];
+var FNF = ['Layla', 'Nadia', 'Maya', 'Dana', 'Sara', 'Lina', 'Reem', 'Hind', 'Yara', 'Tala', 'Noor', 'Rania', 'Ines', 'Amira', 'Sofia', 'Leah', 'Mira', 'Chloé'];
+var FNM = ['Omar', 'Karim', 'Rami', 'Tariq', 'Jad', 'Zayd', 'Faris', 'Adam', 'Sami', 'Hadi', 'Luca', 'Marc', 'Elias', 'Nabil', 'Theo', 'Yusuf', 'Ali', 'Max'];
+var BUBL_C = {}; S.bublReq = {}; S.bublIn = {};
+function pl(n, a, b) { return n === 1 ? a : b; }
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function ymd(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function nightIdx(ds) { return Math.round((new Date(ds + 'T12:00:00') - nightDate(0)) / 864e5); }
+function b64u(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function unb64u(x) { try { var s2 = x.replace(/-/g, '+').replace(/_/g, '/'); while (s2.length % 4) s2 += '='; return JSON.parse(decodeURIComponent(escape(atob(s2)))); } catch (e) { return null; } }
+function bublFor(night) {                                   // the same tables, people and prices for a given night on every device
+  if (BUBL_C[night]) return BUBL_C[night];
+  var d = nightDate(night), r = seeded((d.getFullYear() * 1000 + d.getMonth() * 40 + d.getDate()) * 40503 + 77); r(); r();
+  var pats = BP.slice(); for (var i = pats.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), x = pats[i]; pats[i] = pats[j]; pats[j] = x; }
+  var out = { bar: [], club: [] }, pi = 0;
+  [['bar', r() < 0.5 ? ['lounge', 'high'] : ['vip', 'lounge'], ['21:30', '22:00', '22:30']], ['club', ['vip', 'lounge', 'high'], ['00:00', '00:30']]].forEach(function (S0) {
+    var mode = S0[0], booked = bookedFor(night, mode, true);
+    S0[1].forEach(function (z) {
+      var free = L.TABLES.filter(function (t) { return t.zone === z && !booked[t.id]; }); if (free.length < 2) return;
+      var t = free[Math.floor(r() * free.length)], p = pats[pi++ % pats.length], seats = t.cap, n = Math.max(1, Math.min(seats - 1, Math.round(seats * (0.35 + 0.4 * r()))));
+      var joined = [], used = {}, f = 0, m = 0;
+      for (var k = 0; k < n; k++) {
+        var g = f < m || (f === m && r() < 0.5) ? 'f' : 'm', pool = g === 'f' ? FNF : FNM, nm; do { nm = pool[Math.floor(r() * pool.length)]; } while (used[nm]); used[nm] = 1; if (g === 'f') f++; else m++;
+        joined.push({ n: nm, g: g, a: p.lo + Math.floor(r() * (p.hi - p.lo + 1)), tag: p.tags[Math.floor(r() * p.tags.length)] });
+      }
+      out[mode].push({ key: ymd(d) + '-' + mode + '-' + t.id, night: night, mode: mode, id: t.id, t: t, time: S0[2][Math.floor(r() * S0[2].length)], p: p, seats: seats, joined: joined,
+        price: mode === 'club' ? Math.round(t.min / seats / 50) * 50 : ({ vip: 400, lounge: 300, high: 250 })[z], ext: mode === 'bar' ? Math.round(t.min * 0.5 / 500) * 500 : 0, nat: Math.min(n, 2 + Math.floor(r() * 3)) });
+    });
+  });
+  return (BUBL_C[night] = out);
+}
+function fmFind(night, mode, id) { return (bublFor(night)[mode] || []).filter(function (f) { return f.id === id; })[0] || null; }
+function fmGen(ft) {                                        // what anyone may see: counts, ages, fields. Never a name.
+  var f = 0, sum = 0, cnt = {}, ord = [];
+  ft.joined.forEach(function (g) { if (g.g === 'f') f++; sum += g.a; if (!cnt[g.tag]) { cnt[g.tag] = 0; ord.push(g.tag); } cnt[g.tag]++; });
+  ord.sort(function (a, b) { return cnt[b] - cnt[a]; });
+  return { f: f, m: ft.joined.length - f, avg: Math.round(sum / Math.max(1, ft.joined.length)), tags: ord, nat: ft.nat };
+}
+function genLine(G, n) { return G.f + ' ' + pl(G.f, 'woman', 'women') + ' · ' + G.m + ' ' + pl(G.m, 'man', 'men') + ' · avg ' + G.avg + ' · ' + G.tags.slice(0, n || 2).join(', '); }
+function bublApply() {
+  var list = bublFor(S.night)[S.mode] || []; S.fm = {};
+  list.forEach(function (ft) { S.fm[ft.id] = ft; });
+  if (L.scene.setForming) L.scene.setForming(Object.keys(S.fm));
+  renderBub();
+}
+/* BUBL's mark, the real one: a glass bubble, colour blooming inside its rim, a glint running round and a
+   highlight. In LITT the blooms are LITT's gold, amethyst, rose and champagne. An open seat is the bubble
+   with nothing in it yet. */
+function bublMark(cls) {
+  return '<svg class="bm' + (cls ? ' ' + cls : '') + '" viewBox="0 0 64 64" aria-hidden="true"><g clip-path="url(#lbClip)"><g class="bm-f" mask="url(#lbRim)">'
+    + '<g class="bf-a"><ellipse cx="46" cy="18" rx="20" ry="14" fill="url(#lbF1)"/><ellipse cx="14" cy="44" rx="18" ry="16" fill="url(#lbF3)"/></g>'
+    + '<g class="bf-b"><ellipse cx="48" cy="46" rx="17" ry="15" fill="url(#lbF2)"/><ellipse cx="18" cy="16" rx="12" ry="10" fill="url(#lbF4)"/></g></g>'
+    + '<circle cx="32" cy="32" r="28" fill="url(#lbGlass)"/><ellipse cx="41" cy="45" rx="7" ry="4.5" fill="url(#lbCaus)" transform="rotate(-35 41 45)"/></g>'
+    + '<circle class="bm-rim" cx="32" cy="32" r="27.8" fill="none" stroke="#C8A46C" stroke-opacity=".75" stroke-width="1.1"/>'
+    + '<g class="bf-glint"><path d="M32 4.2A27.8 27.8 0 0 1 52.6 13.2" fill="none" stroke="url(#lbGlint)" stroke-width="1.4" stroke-linecap="round"/></g>'
+    + '<ellipse class="bf-spec" cx="21.5" cy="18.5" rx="8.5" ry="4.6" fill="url(#lbSpec)" transform="rotate(-38 21.5 18.5)"/><circle cx="16.8" cy="25.4" r="1.5" fill="#fff" opacity=".85"/></svg>';
+}
+function bo(on) { return bublMark(on ? 'bms' : 'bms off'); }
+function seatBubbles(ft, small) { var h = '<span class="bq' + (small ? ' sm' : '') + '" aria-hidden="true">'; for (var i = 0; i < ft.seats; i++) h += bo(i < ft.joined.length); return h + '</span>'; }
+var BYB = '<span class="byb">Composed by ' + bublMark('live') + '<b>BUBL</b></span>';
+
+/* the widget: a small pill on the room, open it for every table BUBL is forming tonight, bar and club */
+function renderBub() {
+  var b = $('#bub'); if (!b) return;
+  var all = bublFor(S.night), n = all.bar.length + all.club.length;
+  $('#bubN').textContent = n + ' forming'; b.hidden = !n;
+  if ($('#bubp').classList.contains('on')) renderBubList();
+}
+function renderBubList() {
+  var all = bublFor(S.night), h = '';
+  $('#bubT').textContent = S.night === 0 ? 'Forming tonight' : 'Forming ' + shortDay(S.night);
+  [['bar', 'The Bar · from 9pm'], ['club', 'The Club · from 12am']].forEach(function (g) {
+    if (!all[g[0]].length) return;
+    h += '<div class="bubp-g' + (S.mode === g[0] ? ' cur' : '') + '">' + g[1] + '</div>';
+    all[g[0]].forEach(function (ft) {
+      var G = fmGen(ft);
+      h += '<button type="button" class="bubr" data-fm="' + ft.mode + ':' + ft.id + '"><span class="bubr-m"><b>' + esc(ft.p.name) + '</b><small>' + esc(ft.p.mix) + ', ' + ft.p.lo + '–' + ft.p.hi + '</small><span class="bubr-s">' + seatBubbles(ft, 1) + '<em>' + esc(genLine(G)) + '</em></span></span>'
+        + '<span class="bubr-r"><b>' + ft.joined.length + '<i> / ' + ft.seats + '</i></b><small>' + fmtTime(ft.time).replace(':00', '') + '</small></span></button>';
+    });
+  });
+  $('#bubL').innerHTML = h;
+}
+function bubToggle(on) {
+  var p = $('#bubp'), b = $('#bub'); if (on === undefined) on = !p.classList.contains('on');
+  if (on) renderBubList();
+  p.classList.toggle('on', on); b.classList.toggle('on', on); b.setAttribute('aria-expanded', on ? 'true' : 'false');
+  if (on) { $('#hint').classList.add('off'); hideBubble(); }
+}
+function goForming(mode, id) {
+  bubToggle(false);
+  var ft = fmFind(S.night, mode, id); if (!ft) return;
+  var st = $('#stage').getBoundingClientRect(); if (Math.abs(st.top - 10) > 24) window.scrollTo({ top: window.scrollY + st.top - 10, behavior: 'smooth' });
+  if (mode !== S.mode) { setTime(ft.time); setTimeout(function () { openForming(ft); }, 380); } else openForming(ft);
+}
+
+/* browsing a forming table: its shape, never its names, and a request to join */
+function openForming(ft) {
+  var t = ft.t, G = fmGen(ft), left = ft.seats - ft.joined.length, rq = S.bublReq[ft.key], mine = S.bublIn[ft.key];
+  S.sel = ft.id; L.scene.select(ft.id); renderZones();
+  var h = '<div class="tl-h"><div><div class="sz">Composed by BUBL · ' + (ft.night === 0 ? 'tonight' : shortDay(ft.night)) + ', ' + fmtTime(ft.time) + '</div><h2>' + esc(ft.p.name) + '</h2></div></div>';
+  h += '<p class="ssub fm-sub">' + esc(ft.p.mix) + ' · ' + ft.p.lo + '–' + ft.p.hi + ' · ' + esc(t.name) + '</p>';
+  h += '<div class="fm-fill">' + seatBubbles(ft) + '<span><b>' + ft.joined.length + ' of ' + ft.seats + '</b> seated · ' + left + ' ' + pl(left, 'seat', 'seats') + ' left</span></div>';
+  h += '<div class="fm-gen"><span><b>' + G.f + '</b>' + pl(G.f, 'woman', 'women') + '</span><span><b>' + G.m + '</b>' + pl(G.m, 'man', 'men') + '</span><span><b>' + G.avg + '</b>average age</span><span><b>' + G.nat + '</b>nationalities</span></div>';
+  h += '<p class="fm-tags">' + G.tags.map(esc).join(' · ') + '</p>';
+  h += '<p class="fm-priv">' + bublMark() + 'Names show only to the guests BUBL invites to this table, and only first names.</p>';
+  h += '<div class="tl-row"><span>Your seat <b>' + aed(ft.price) + '</b></span><span>Paid in full, credited to the table’s bill</span></div>';
+  if (ft.ext) h += '<div class="cnote fm-ext"><p><b>After midnight</b>The table can stay on into the club with ' + aed(ft.ext) + ' minimum on top, decided together on the night.</p></div>';
+  if (mine) h += '<p class="fm-state"><b>You’re at this table</b>Your seat is paid. Your first name shows to the others.</p>';
+  else if (rq) h += '<p class="fm-state"><b>Request sent as @' + esc(rq.h) + '</b>BUBL answers by WhatsApp and email. If you’re seated, the invitation is a link: open it, take the seat, pay it in full.</p><button type="button" class="ghost" data-fmprev="' + ft.mode + ':' + ft.id + '">Preview the invitation</button>';
+  else if (!left) h += '<p class="fm-state"><b>The table is full</b>BUBL keeps a short waitlist for each table.</p>';
+  else h += '<button type="button" class="cta" id="fmReq">Request a seat</button><p class="fm-fine">Invitation only. BUBL checks each request against the table’s mix; nothing is charged unless you’re seated.</p>';
+  openSheet(h, { lite: true, onClose: function (sw) { if (!sw) { S.sel = null; L.scene.clearSelect(); renderZones(); } } });
+  var rb = $('#fmReq'); if (rb) rb.onclick = function () { fmForm(ft); };
+}
+function fmForm(ft) {
+  var t = ft.t, p = ft.p;
+  function chips(k, arr) { return '<div class="occ" data-pick="' + k + '">' + arr.map(function (x) { return '<button type="button" class="chip" data-v="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>'; }
+  var h = '<div class="sz">' + esc(p.name) + ' · ' + esc(t.name) + '</div><h2>Request a seat</h2><p class="ssub">BUBL places you against the table’s mix: ' + esc(p.mix.toLowerCase()) + ', ' + p.lo + '–' + p.hi + '.</p><form id="fmf" novalidate style="margin-top:16px">';
+  h += '<div class="field"><label>Instagram handle</label><div class="fm-at"><span>@</span><input name="h" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="yourhandle"></div><div class="e">A handle is needed to join a BUBL table</div></div>';
+  h += '<div class="field"><label>First name</label><input name="fn" autocomplete="given-name"><div class="e">Add your first name</div></div>';
+  h += '<div class="field" data-f="age"><label>Age</label>' + chips('age', ['Under 25', '25–29', '30–34', '35–39', '40+']) + '<div class="e">Choose your age</div></div>';
+  h += '<div class="field" data-f="fld"><label>Your field</label>' + chips('fld', p.fields.concat('Other')) + '<div class="e">Choose the closest</div></div>';
+  p.dd.forEach(function (d, i) { h += '<div class="field"><label>' + esc(d[0]) + (i ? ' <span class="opt">optional</span>' : '') + '</label><input name="dd' + i + '" placeholder="' + esc(d[1]) + '" autocapitalize="off"><div class="e">BUBL needs this to place you</div></div>'; });
+  h += '<div class="field"><label>WhatsApp, for the answer</label><div class="phone">' + ccSelect('cc') + '<input name="ph" inputmode="tel" autocomplete="tel-national"></div><div class="e">Add your number</div></div>';
+  h += '<div class="field"><label>Email <span class="opt">optional</span></label><input name="em" type="email" inputmode="email" autocomplete="email"></div>';
+  h += '<p class="note">Nothing is charged now. If BUBL seats you, the invitation arrives by email and WhatsApp, and your seat, ' + aed(ft.price) + ', is paid in full when you accept.</p>';
+  h += '<button class="cta" type="submit">Send request</button></form>';
+  openSheet(h, { keep: true, onClose: function (sw) { if (!sw) { S.sel = null; L.scene.clearSelect(); renderZones(); } } });
+  var F = $('#fmf');
+  $$('[data-pick] .chip', F).forEach(function (b) { b.onclick = function () { $$('.chip', b.parentNode).forEach(function (x) { x.classList.toggle('on', x === b); }); b.closest('.field').classList.remove('bad'); }; });
+  $$('input', F).forEach(function (i) { i.addEventListener('input', function () { i.closest('.field').classList.remove('bad'); }); });
+  bindForm(F, function () {
+    var v = function (n) { return (F.elements[n].value || '').trim(); }, ok = true, first = null;
+    function bad(el, b) { var fd = el.closest ? el.closest('.field') : el; fd.classList.toggle('bad', b); if (b) { ok = false; if (!first) first = fd; } }
+    var hd = v('h').replace(/^@/, '');
+    bad(F.elements.h, !/^[a-z0-9._]{2,30}$/i.test(hd)); bad(F.elements.fn, !v('fn'));
+    bad($('[data-f=age]', F), !$('[data-pick=age] .chip.on', F)); bad($('[data-f=fld]', F), !$('[data-pick=fld] .chip.on', F));
+    bad(F.elements.dd0, !v('dd0')); bad(F.elements.ph, v('ph').replace(/\D/g, '').length < 7);
+    if (!ok) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    var bt = F.querySelector('.cta'); bt.disabled = true; bt.innerHTML = '<span class="spin"></span>';
+    S.bublReq[ft.key] = { h: hd.toLowerCase(), fn: v('fn').split(/\s+/)[0], at: Date.now() };
+    setTimeout(function () {
+      var rq = S.bublReq[ft.key];
+      $('#sb').innerHTML = '<div class="fm-sent"><span class="ivp-ok">' + IC.check + '</span><h3>Request sent</h3><p>@' + esc(rq.h) + ' is with BUBL for <b>' + esc(p.name) + '</b>, ' + (ft.night === 0 ? 'tonight' : shortDay(ft.night)) + ' at ' + fmtTime(ft.time) + '. The answer comes by WhatsApp and email. If you’re seated, the invitation is a link: open it, take the seat, pay it in full.</p>'
+        + '<button type="button" class="ghost" data-fmprev="' + ft.mode + ':' + ft.id + '">Preview the invitation</button><button type="button" class="cta" id="fmDone">Done</button></div>';
+      $('#fmDone').onclick = closeSheet; renderZones(); toast('Request sent to BUBL');
+    }, 800);
+  });
+}
+
+/* ---------------------------------------- the invitation BUBL sends: a link, by email and WhatsApp */
+function bublParams(ft, first) { return { t: ft.id, d: ymd(nightDate(ft.night)), m: ft.mode, a: ft.time, n: first || '' }; }
+function bublLink(ft, first) {
+  var base = /^https?:/.test(location.href) ? location.href.split('#')[0] : 'https://hmd96nk42y-dev.github.io/Bbb/LITT_FINAL.html';
+  return base + '#bubl=' + b64u(bublParams(ft, first));
+}
+function bublFromHash() { var m = /#bubl=([A-Za-z0-9_-]+)/.exec(location.hash); return m ? unb64u(m[1]) : null; }
+function openBublInvite(q, preview) {
+  var ni = nightIdx(q.d), ft = fmFind(ni, q.m, q.t); if (!ft) { toast('This table has closed'); return; }
+  var t = ft.t, p = ft.p, first = (q.n || '').trim(), club = ft.mode === 'club', d = nightDate(ni), seat = ft.joined.length, mine = S.bublIn[ft.key];
+  var old = $('#ivp'); if (old) old.parentNode.removeChild(old);
+  var R = document.createElement('div'); R.id = 'ivp'; R.className = 'ivp ivp-bubl ivp-' + (club ? 'club' : 'bar'); R.setAttribute('role', 'dialog'); R.setAttribute('aria-modal', 'true'); R.setAttribute('aria-label', 'Invitation from BUBL');
+  var rows = '';
+  ft.joined.forEach(function (g) { rows += '<div class="ivp-g' + (g.me ? ' you' : '') + '">' + (g.me ? '<i class="on"></i>' : bo(1)) + '<b>' + esc(g.n) + '</b><span>' + (g.me ? 'You' : g.a + ' · ' + esc(g.tag)) + '</span></div>'; });
+  if (!mine) rows += '<div class="ivp-g you"><i></i><b>' + (first ? esc(first) : 'You') + '</b><span class="gold">Seat ' + (seat + 1) + ' · held for you</span></div>';
+  for (var k = seat + (mine ? 0 : 1); k < ft.seats; k++) rows += '<div class="ivp-g">' + bo(0) + '<b class="muted">Open seat</b><span>BUBL is inviting</span></div>';
+  var G = fmGen(ft), when = (ni === 0 ? 'Tonight' : DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]);
+  var h = '<button class="ivp-x" type="button" aria-label="Close">✕</button><div class="ivp-scroll"><main class="ivp-page">' + (preview ? '<div class="ivp-flag">Preview · what BUBL sends</div>' : '');
+  h += '<div class="ivp-to">A table made for ' + (first ? esc(first) : 'you') + '</div>' + wmSVG('ivp-wm') + '<div class="ivp-host">' + esc(p.name) + '</div><p class="bv-mix">' + esc(p.mix) + ', ' + p.lo + '–' + p.hi + '</p><div class="bv-by">' + BYB + '</div>';
+  h += '<button type="button" class="ivp-claimbtn" id="ivpClaimBtn"><span>Take your seat</span><i></i></button><div class="ivp-venue" id="ivpVenue"></div><div class="ivp-vrow"><span class="ivp-vcap">' + esc(t.name) + ' glows violet · drag to turn</span><div class="vtog ivp-vtog" role="group" aria-label="View"><button type="button" data-iv="3d" class="on" aria-pressed="true">3D</button><button type="button" data-iv="plan" aria-pressed="false">Plan</button><i class="vtk"></i></div></div>';
+  h += '<div class="ivp-facts"><div><small>Night</small><p>' + when + '</p></div><div><small>From</small><p>' + fmtTime(ft.time) + '</p></div><div><small>Table</small><p>' + esc(t.name) + '</p></div></div>';
+  h += '<p class="ivp-line">' + (club ? 'The Club · midnight to 3am' : 'The Bar · 9pm to midnight') + '. Smart elegant.</p>';
+  h += '<section class="ivp-sec bv-why"><div class="ivp-th"><b>Why you</b><span>Picked by BUBL</span></div><p>' + esc(p.why) + ' BUBL put the table together from the guests most likely to be at LITT ' + (ni === 0 ? 'tonight' : 'that night') + ', and you fit it.</p></section>';
+  h += '<section class="ivp-sec"><div class="ivp-th"><b>Who’s in</b><span>' + ft.joined.length + ' of ' + ft.seats + ' joined</span></div><div class="ivp-guests">' + rows + '</div><p class="bv-priv">' + bublMark() + '<span>First names only, and only to the people invited to this table. ' + esc(genLine(G, 3)) + '.</span></p></section>';
+  h += '<section class="ivp-sec ivp-dep"><div class="ivp-th"><b>Your seat</b><span>' + aed(ft.price) + '</span></div><p>Paid in full when you accept, by Apple Pay or card, and credited to the table’s bill on the night.' + (club ? ' Together the seats cover the table’s ' + aed(t.min) + ' minimum.' : ' The bar has no minimum.') + '</p>';
+  if (ft.ext) h += '<div class="bv-ext"><b>Stay for the club?</b><p>At 12 the table can carry on into the club with ' + aed(ft.ext) + ' minimum on top, shared by whoever stays. The table decides together, on the spot.</p></div>';
+  h += '</section>';
+  h += '<section class="ivp-sec ivp-claim"><h2>Take your seat</h2><p class="ivp-why">Your full name stays with LITT for the door. The table only ever sees <em>' + (first ? esc(first) : 'your first name') + '</em>.</p>';
+  h += '<form id="bif" novalidate><div class="field"><label>Your name</label><input name="n" autocomplete="name" placeholder="First and last name" value="' + esc(first) + '"><div class="e">Add your name</div></div>';
+  h += '<div class="field"><label>Instagram handle</label><div class="fm-at"><span>@</span><input name="h" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="yourhandle"></div><div class="e">A handle is needed to join a BUBL table</div></div>';
+  h += '<div class="field"><label>Mobile</label><div class="phone">' + ccSelect('c') + '<input name="p" inputmode="tel" autocomplete="tel-national"></div></div>';
+  h += '<button class="cta" type="submit">Accept & pay ' + aed(ft.price) + '</button><button type="button" class="bv-no" id="bvNo">Not this time</button></form>';
+  h += '<div class="ivp-pay" hidden><h3>Your seat, ' + aed(ft.price) + '</h3><p>Paid in full, credited to the table’s bill.</p>' + payBlock(ft.price) + '</div>';
+  h += '<div class="ivp-done" hidden><span class="ivp-ok">' + IC.check + '</span><h3></h3><p></p><div class="ivp-qr" id="ivpQr"></div><button class="cta" type="button" id="ivpDone">Done</button></div></section>';
+  h += '<section class="ivp-sec ivp-where"><div class="ivp-th"><b>Where</b><span>Jumeirah</span></div><p>Jumeirah Marsa Al Arab Hotel, Jumeirah St, Dubai. Complimentary valet at the hotel entrance.</p><a class="ghost ivp-map" href="https://maps.apple.com/?q=Jumeirah%20Marsa%20Al%20Arab%20Dubai" target="_blank" rel="noopener">Open in Maps</a></section>';
+  h += '<p class="ivp-foot">Tables composed by BUBL</p></main></div>';
+  R.innerHTML = h; document.body.appendChild(R); document.body.classList.add('ivp-on');
+  requestAnimationFrame(function () { R.classList.add('on'); });
+  if (mine) { R.querySelector('#bif').hidden = true; R.querySelector('.ivp-claim h2').hidden = true; R.querySelector('.ivp-why').hidden = true; R.querySelector('#ivpClaimBtn').remove(); }
+  var cv = $('#venue'), vh = $('#ivpVenue', R), prevView = L.scene.view();
+  if (cv && vh) { vh.insertBefore(cv, vh.firstChild); L.scene.setForming(Object.keys(S.fm || {}).concat(ft.id)); L.scene.setMine(ft.id); L.scene.setView('3d'); L.scene.resize(); }
+  var ivt = R.querySelector('.ivp-vtog');
+  ivt.addEventListener('click', function (e) { var bt = e.target.closest('[data-iv]'); if (!bt) return; var v = bt.getAttribute('data-iv'); L.scene.setView(v, 1.28);
+    ivt.classList.toggle('plan', v === 'plan'); ivt.querySelectorAll('button').forEach(function (x) { var on = x === bt; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    R.querySelector('.ivp-vcap').textContent = t.name + (v === 'plan' ? ' glows violet · from above' : ' glows violet · drag to turn'); });
+  function close() { R.classList.remove('on'); document.body.classList.remove('ivp-on');
+    if (cv) { var st = $('#stage'); st.insertBefore(cv, st.firstChild); L.scene.setView(prevView); L.scene.resize(); if (!(S.booking && document.body.classList.contains('booked'))) L.scene.setMine(window.__guestTable || null); bublApply(); }
+    setTimeout(function () { if (R.parentNode) R.parentNode.removeChild(R); }, 340); }
+  R.querySelector('.ivp-x').onclick = close;
+  var cb = R.querySelector('#ivpClaimBtn'); if (cb) cb.onclick = function () { var cl = R.querySelector('.ivp-claim'), sc = R.querySelector('.ivp-scroll'); sc.scrollTo({ top: cl.offsetTop - 70, behavior: 'smooth' }); };
+  R.querySelector('#bvNo').onclick = function () { toast(preview ? 'Preview · nothing was sent' : 'Thank you. Your seat goes back to BUBL'); close(); };
+  var F = R.querySelector('#bif');
+  $$('input', F).forEach(function (i) { i.addEventListener('input', function () { var fd = i.closest('.field'); if (fd) fd.classList.remove('bad'); }); });
+  bindForm(F, function () {
+    var nmFull = (F.elements.n.value || '').trim(), hd = (F.elements.h.value || '').trim().replace(/^@/, ''), ok = true;
+    F.elements.n.closest('.field').classList.toggle('bad', !nmFull); if (!nmFull) ok = false;
+    var hb = !/^[a-z0-9._]{2,30}$/i.test(hd); F.elements.h.closest('.field').classList.toggle('bad', hb); if (hb) ok = false;
+    if (!ok) return;
+    var nm = nmFull.split(/\s+/)[0], bt = F.querySelector('.cta'); bt.disabled = true; bt.innerHTML = '<span class="spin"></span>';
+    setTimeout(function () {
+      F.hidden = true; R.querySelector('.ivp-why').hidden = true; R.querySelector('.ivp-claim h2').hidden = true; var c2 = R.querySelector('#ivpClaimBtn'); if (c2) c2.remove();
+      var pv = R.querySelector('.ivp-pay'), sc = R.querySelector('.ivp-scroll'); pv.hidden = false; sc.scrollTo({ top: sc.scrollTop + pv.getBoundingClientRect().top - sc.getBoundingClientRect().top - 70, behavior: 'smooth' });
+      bindPay(pv, function (how) { pv.hidden = true; seated(nm, hd, how); });
+    }, 650);
+  });
+  function seated(nm, hd, how) {
+    if (!preview) { S.bublIn[ft.key] = { n: nm, h: hd }; ft.joined.push({ n: nm, g: '', a: 0, tag: '', me: true }); renderZones(); renderBub(); }
+    var dn = R.querySelector('.ivp-done'); dn.hidden = false; dn.querySelector('h3').textContent = 'You’re at the table, ' + nm + '.';
+    dn.querySelector('p').innerHTML = preview ? 'This is what a guest sees once they accept and pay. In the preview nothing is sent or charged.' : 'Your seat is paid in full' + (how ? ' by ' + esc(how) : '') + '. <em>' + esc(nm) + '</em> now shows to the others at ' + esc(p.name) + '. Show this at the door with your ID.';
+    var you = R.querySelector('.ivp-g.you'); if (you) { you.querySelector('i').className = 'on'; you.querySelector('b').textContent = nm; var sp = you.querySelector('span'); sp.textContent = 'Joined · @' + hd; sp.className = ''; }
+    var th = R.querySelectorAll('.ivp-th span')[1]; if (th && !preview) th.textContent = ft.joined.length + ' of ' + ft.seats + ' joined';
+    try { new QRCode($('#ivpQr', R), { text: 'LITT|BUBL|' + ft.key + '|' + nm, width: 200, height: 200, colorDark: '#1c0a28', colorLight: '#D9BE82', correctLevel: QRCode.CorrectLevel.M }); } catch (er) {}
+    dn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast(preview ? 'Preview · nothing was sent or charged' : 'You’re at the table');
+  }
+  R.querySelector('#ivpDone').onclick = close;
+  showLetter({ first: first || 'you', name: '', mode: ft.mode, from: false, line: 'A seat for ' + (first || 'you'), onOpen: function () { R.classList.add('in'); } });
 }
 
 /* ------------------------------------------------------------ interested */
@@ -4322,6 +4925,115 @@ function openMenu(tab) {
   openSheet(h, { keep: true });
 }
 
+/* ------------------------------------------------------------ Mindset by AlphaMind
+   The group's membership, in LITT's letters, between the photos and the picker. Logged out: "Already a
+   Mindset member?" with Log in and Join, and the programme in brief. Logged in: the member's card, points
+   and cashback, and the privileges that only members get here, working for real: a longer hold, the
+   members' lounge kept back each night (Platinum and Black), a backstage lounge kept for Black, the
+   members' line after midnight, points on every reservation. Demo accounts; nothing is sent. */
+var MS = {
+  gold: { name: 'Gold', line: 'brings you in', head: 'Your entry into Mindset', txt: 'Earn points and cashback, and member benefits from your very first visit.', hold: 15, mult: 1, cash: 2 },
+  platinum: { name: 'Platinum', line: 'unlocks your inner circle', head: 'Unlock more as you move up', txt: 'Enhanced rewards, tailored offers and priority access on every visit.', hold: 30, mult: 1.5, cash: 3 },
+  black: { name: 'Black', line: 'opens doors others don’t see', head: 'Designed for those on the inside', txt: 'Priority tables, personal privileges and invitation-only nights.', hold: 45, mult: 2, cash: 5 }
+};
+var MS_ORDER = ['gold', 'platinum', 'black'], MS_KEY = 'litt_mindset';
+function msRank() { return S.member ? MS_ORDER.indexOf(S.member.tier) : -1; }
+function msHold() { return S.member ? MS[S.member.tier].hold : CFG.holdMinutes; }
+function msSave() { try { if (S.member) localStorage.setItem(MS_KEY, JSON.stringify(S.member)); else localStorage.removeItem(MS_KEY); } catch (e) {} }
+function msLoad() { try { var m = JSON.parse(localStorage.getItem(MS_KEY) || 'null'); if (m && MS[m.tier]) S.member = m; } catch (e) {} }
+/* each night one front-stage lounge is kept back for Platinum and Black, and one backstage lounge for Black */
+function msPickReserve() {
+  S.reserve = {}; var d = nightDate(S.night), r = seeded(d.getDate() * 131 + d.getMonth() * 7 + (S.mode === 'club' ? 3 : 1));
+  [['lounge', 1], ['vip', 2]].forEach(function (z) {
+    var c = L.TABLES.filter(function (t) { return t.zone === z[0] && isFree(t.id) && !S.bookings.some(function (b) { return b.table === t.id && b.night === S.night && b.mode === S.mode; }); });
+    if (c.length > 2) S.reserve[c[Math.floor(r() * c.length)].id] = z[1];
+  });
+}
+function resOk(id) { var need = S.reserve && S.reserve[id]; return !need || msRank() >= need; }
+function msPoints(t) { var m = S.member ? MS[S.member.tier].mult : 1; return Math.round((S.mode === 'club' ? t.min / 10 : 250) * m); }
+function msCardArt(tier, big) {
+  var T = MS[tier];
+  return '<div class="ms-art ms-' + tier + (big ? ' big' : '') + '"><i class="ms-sheen"></i><span class="ms-brand">Mindset</span><b>' + T.name + '</b><em>' + T.line + '</em></div>';
+}
+function renderMindset() {
+  var el = $('#msCard'); if (!el) return;
+  var h, open = !!S.msOpen;
+  if (!S.member) {                                           // one slim line; how it works opens underneath
+    h = '<div class="ms-row"><div class="ms-fan sm">' + msCardArt('gold') + msCardArt('platinum') + msCardArt('black') + '</div><div class="ms-rt"><b class="ms-logo">Mindset <span>by AlphaMind</span></b><small>Already a member?</small></div><div class="ms-acts"><button type="button" class="ms-b on" data-ms="login">Log in</button><button type="button" class="ms-b" data-ms="join">Join</button></div></div>';
+    h += '<button type="button" class="ms-tog' + (open ? ' open' : '') + '" data-ms="toggle"><span>How it works</span><i>›</i></button>';
+    if (open) h += '<div class="ms-x">' + msAboutHTML() + '</div>';
+  } else {
+    var m = S.member, T = MS[m.tier];
+    h = '<div class="ms-row"><div class="ms-mini">' + msCardArt(m.tier) + '</div><div class="ms-rt"><b class="ms-logo">Mindset <span>by AlphaMind</span></b><small>' + esc(m.name) + ' · ' + T.name + ' · ' + m.points.toLocaleString('en-US') + ' pts</small></div><button type="button" class="ms-pv' + (open ? ' open' : '') + '" data-ms="toggle">Privileges<i>›</i></button></div>';
+    if (open) h += '<div class="ms-x">' + msPerksHTML() + '</div>';
+  }
+  el.innerHTML = h;
+}
+function msPerksHTML() {
+  var m = S.member, T = MS[m.tier], rk = msRank(), lounge = Object.keys(S.reserve || {}).filter(function (id) { return S.reserve[id] === 1; })[0], back = Object.keys(S.reserve || {}).filter(function (id) { return S.reserve[id] === 2; })[0], h = '<div class="ms-perks">';
+  function perk(on, ic, t, s, act) { h += '<div class="ms-perk' + (on ? '' : ' off') + '"><i>' + ic + '</i><div><b>' + t + '</b><span>' + s + '</span></div>' + (on && act ? '<button type="button" data-ms="' + act[0] + '">' + act[1] + '</button>' : !on ? '<em>' + act + '</em>' : '') + '</div>'; }
+  perk(true, '✦', 'Points on every reservation', T.mult + '× points and ' + T.cash + '% cashback, across every AlphaMind venue', null);
+  perk(true, '⧗', 'A longer hold', 'Tables you pick are held ' + T.hold + ' minutes instead of 10', null);
+  perk(rk >= 1, '◈', 'The members’ lounge', lounge ? tableById(lounge).name + ' is kept back tonight for Platinum and Black' : 'A front-stage lounge kept back each night', rk >= 1 ? (lounge ? ['res:' + lounge, 'See it'] : null) : 'Platinum');
+  perk(rk >= 1, '→', 'The members’ line', 'After midnight you skip the guestlist queue', rk >= 1 ? null : 'Platinum');
+  perk(rk >= 2, '★', 'Backstage, held for you', back ? tableById(back).name + ' is held for Black members tonight' : 'A backstage lounge kept for Black each night', rk >= 2 ? (back ? ['res:' + back, 'See it'] : null) : 'Black');
+  perk(rk >= 2, '✉', 'Invitation-only nights', rk >= 2 ? 'The LITT Circus, Saturday 31 October: a private table before the doors open' : 'Private tables before the doors open on the big nights', rk >= 2 ? ['inv', 'Request'] : 'Black');
+  return h + '</div><div class="ms-foot"><div class="ms-demo"><span>Demo, view as</span>' + MS_ORDER.map(function (k) { return '<button type="button" data-ms="tier:' + k + '"' + (k === m.tier ? ' class="on"' : '') + '>' + MS[k].name + '</button>'; }).join('') + '</div><button type="button" class="ms-out" data-ms="logout">Log out</button></div>';
+}
+function msAboutHTML() {
+  var h = '<p class="ms-p">Your entry into the AlphaMind world: dinners at CLAP and KIRA, late nights at Raspoutine and LITT, lunches at Son of a Fish, sunsets at Bar du Port. One membership, and every visit counts.</p>';
+  h += '<div class="ms-how"><div><b>1</b><span>Join in the app, or log in</span></div><div><b>2</b><span>Earn points and cashback from your first visit</span></div><div><b>3</b><span>Move up the tiers for priority access and moments others don’t get</span></div></div>';
+  h += '<div class="ms-tiers">' + MS_ORDER.map(function (k) { var T = MS[k]; return '<div class="ms-tier">' + msCardArt(k) + '<div><b>' + T.head + '</b><span>' + T.txt + '</span></div></div>'; }).join('') + '</div>';
+  return h + '<p class="ms-tagline">This isn’t just loyalty. This is access, redefined.</p>';
+}
+function msAbout() {
+  var h = '<div class="sz">AlphaMind</div><h2>Mindset</h2>' + msAboutHTML();
+  h += S.member ? '' : '<div class="ms-btns"><button type="button" class="cta" data-ms="login">Log in</button><button type="button" class="ghost" data-ms="join">Join Mindset</button></div>';
+  openSheet(h);
+}
+function msLogin() {
+  var h = '<div class="sz">Mindset by AlphaMind</div><h2>Log in</h2><p class="ssub">With the mobile number on your membership</p><form id="msf" novalidate style="margin-top:16px">';
+  h += '<div class="field" data-f="p"><label>Mobile</label><div class="phone">' + ccSelect('c') + '<input name="p" inputmode="tel" autocomplete="tel-national"></div><div class="e">Add your mobile number.</div></div>';
+  h += '<div class="ms-code" hidden><label class="lbl">The code we sent you</label><div class="ms-boxes">' + [0, 1, 2, 3].map(function (i) { return '<input inputmode="numeric" maxlength="1" data-ci="' + i + '" aria-label="Digit ' + (i + 1) + '">'; }).join('') + '</div><p class="note">Demo: any four digits.</p></div>';
+  h += '<button class="cta" type="submit">Send code</button></form>';
+  openSheet(h, { keep: true });
+  var f = $('#msf'), step = 0;
+  $$('#msf [data-ci]').forEach(function (b, i, all) { b.addEventListener('input', function () { b.value = b.value.replace(/\D/g, '').slice(0, 1); if (b.value && all[i + 1]) all[i + 1].focus(); if (all.every(function (x) { return x.value; })) go(); }); });
+  function go() {
+    var btn = f.querySelector('.cta'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    setTimeout(function () { msSignIn({ name: (S.draft && S.draft.name && S.draft.name !== 'Guest' ? S.draft.name.split(' ')[0] : 'Sam'), tier: 'platinum', points: 18450, cash: 1240 }, 'Welcome back · Mindset Platinum'); }, 700);
+  }
+  bindForm(f, function (e) {
+    e.preventDefault();
+    if (step === 0) { var p = f.elements.p.value.replace(/\D/g, ''); f.querySelector('[data-f=p]').classList.toggle('bad', p.length < 7); if (p.length < 7) return; step = 1; f.querySelector('.ms-code').hidden = false; f.querySelector('.cta').textContent = 'Log in'; var b0 = f.querySelector('[data-ci="0"]'); try { b0.focus(); } catch (x) {} return; }
+    if ($$('#msf [data-ci]').every(function (x) { return x.value; })) go();
+  });
+}
+function msJoin() {
+  var h = '<div class="sz">Mindset by AlphaMind</div><h2>Join Mindset</h2><p class="ssub">Free to join. You start on Gold and earn from tonight.</p>' + msCardArt('gold', true) + '<form id="mjf" novalidate style="margin-top:16px">';
+  h += '<div class="field" data-f="n"><label>Full name</label><input name="n" autocomplete="name"><div class="e">Add your name.</div></div>';
+  h += '<div class="field" data-f="p"><label>Mobile</label><div class="phone">' + ccSelect('c') + '<input name="p" inputmode="tel" autocomplete="tel-national"></div><div class="e">Add your mobile number.</div></div>';
+  h += '<div class="field"><label>Email</label><input name="e" type="email" inputmode="email" autocomplete="email"></div>';
+  h += '<button class="cta" type="submit">Join and start earning</button><p class="note">Demo: nothing is sent.</p></form>';
+  openSheet(h, { keep: true });
+  bindForm($('#mjf'), function (e) {
+    e.preventDefault(); var f = $('#mjf'), n = f.elements.n.value.trim(), p = f.elements.p.value.replace(/\D/g, ''), ok = true;
+    f.querySelector('[data-f=n]').classList.toggle('bad', !n); f.querySelector('[data-f=p]').classList.toggle('bad', p.length < 7); if (!n || p.length < 7) return;
+    var btn = f.querySelector('.cta'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    setTimeout(function () { msSignIn({ name: n.split(/\s+/)[0], tier: 'gold', points: 500, cash: 0 }, 'Welcome to Mindset · 500 points to start'); }, 700);
+  });
+}
+function msSignIn(m, msg) { S.member = m; S.msOpen = false; msSave(); closeSheet(); msRefresh(); toast(msg); setTimeout(function () { carlyneSay('Welcome, ' + m.name + '. As a Mindset ' + MS[m.tier].name + ' member your tables are held ' + MS[m.tier].hold + ' minutes' + (msRank() >= 1 ? ', and the members’ lounge is yours to book.' : '.'), 6500); }, 600); }
+function msRefresh() { renderMindset(); renderZones(); if (S.availOn) L.scene.setAvail(availIds()); }
+function msAction(k) {
+  if (k === 'toggle') { S.msOpen = !S.msOpen; renderMindset(); return; }
+  if (k === 'login') return msLogin(); if (k === 'join') return msJoin(); if (k === 'about') return msAbout();
+  if (k === 'logout') { S.member = null; msSave(); msRefresh(); toast('Logged out of Mindset'); return; }
+  if (k.indexOf('tier:') === 0) { S.member.tier = k.slice(5); msSave(); msRefresh(); return; }
+  if (k.indexOf('res:') === 0) { var id = k.slice(4); $('#stage').scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { openTable(id); }, 450); return; }
+  if (k === 'inv') { toast('Request sent · the team confirms your private table on WhatsApp'); return; }
+}
+
 /* ------------------------------------------------------------ Carlyne
    LITT's manager, in the room: she walks the floor in the 3D venue. On arrival she says hello in a bubble
    for five seconds; tap her and she stops, turns to you and waves, the bubble opens as a chat and a bar
@@ -4359,6 +5071,7 @@ function carlyneSay(text, ms) {
   clearTimeout(MGR.t); MGR.t = setTimeout(function () { if (MGR.greetOnly) mgrHide(); }, ms || 5000);
 }
 function greet() {
+  if (S.member) return carlyneSay('Good evening, ' + S.member.name + '. Lovely to have a Mindset ' + MS[S.member.tier].name + ' member with us. Tap me for anything.', 5500);
   carlyneSay(S.mode === 'bar' ? 'Good evening, I’m Carlyne, LITT’s manager. Tap me for anything tonight.' : 'Good evening, I’m Carlyne. The club is on: tap me for a table, the list or Mario’s set.', 5000);
 }
 function hideBubble() { if (MGR.open) carlyneClose(); else if (MGR.greetOnly) mgrHide(); }
@@ -4390,7 +5103,7 @@ function bestTable() {
   var club = S.mode === 'club', n = S.guests;
   var order = club ? (n >= 7 ? ['vip', 'lounge', 'high'] : n <= 3 ? ['high', 'lounge', 'vip'] : ['lounge', 'vip', 'high']) : (n <= 2 ? ['high', 'lounge', 'vip'] : ['lounge', 'vip', 'high']);
   for (var i = 0; i < order.length; i++) {
-    var c = L.TABLES.filter(function (t) { return t.zone === order[i] && isFree(t.id) && t.cap >= n && t.id !== MGR.skip; }).sort(function (a, b) { return a.cap - b.cap || (club ? a.min - b.min : 0); });
+    var c = L.TABLES.filter(function (t) { return t.zone === order[i] && isFree(t.id) && resOk(t.id) && t.cap >= n && t.id !== MGR.skip; }).sort(function (a, b) { return a.cap - b.cap || (club ? a.min - b.min : 0); });
     if (c.length) return c[0];
   }
   return null;
@@ -4534,6 +5247,9 @@ var Cosmos = (function () {
 function bind() {
   $('#vtog').addEventListener('click', function (e) { var b = e.target.closest('[data-v]'); if (!b) return; setViewUI(b.getAttribute('data-v')); hideBubble(); $('#hint').classList.add('off'); });
   $('#pick').addEventListener('click', function (e) { var b = e.target.closest('[data-pk]'); if (b) togglePk(b.getAttribute('data-pk')); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {    // scroll away from the room and it's back in 3D when you return
+    es.forEach(function (en) { if (en.intersectionRatio < 0.45 && L.scene.view() === 'plan' && !document.body.classList.contains('ivp-on') && $('#stage').contains($('#venue'))) setViewUI('3d'); });
+  }, { threshold: [0, 0.25, 0.45] }).observe($('#stage'));
   $('#pkp').addEventListener('click', function (e) {
     var dn = e.target.closest('[data-night]'); if (dn) { S.night = +dn.getAttribute('data-night'); releaseHold(true); computeBooked(); renderZones(); renderInterested(); renderDates(); setTimeout(function () { togglePk('time'); }, 220); return; }   // night, then the hour, then the party
     var tm = e.target.closest('[data-time]'); if (tm) { var was = S.time; setTime(tm.getAttribute('data-time')); renderTimes(); setTimeout(function () { togglePk('guests'); }, 220); if (S.time === '23:00' && was !== '23:00') setTimeout(function () { carlyneSay('Booking at 11? ' + CARL_1100, 8000); }, 450); return; }
@@ -4582,6 +5298,10 @@ function bind() {
     var mt = e.target.closest('[data-mtab]'); if (mt) { openMenu(mt.getAttribute('data-mtab')); return; }
   });
   $('#sbg').onclick = closeSheet; $('#sx').onclick = closeSheet;
+  $('#bub').onclick = function () { bubToggle(); };
+  $('#bubX').onclick = function () { bubToggle(false); };
+  $('#bubL').addEventListener('click', function (e) { var r0 = e.target.closest('[data-fm]'); if (!r0) return; var k = r0.getAttribute('data-fm').split(':'); goForming(k[0], k[1]); });
+  document.addEventListener('click', function (e) { var pv = e.target.closest('[data-fmprev]'); if (!pv) return; var k = pv.getAttribute('data-fmprev').split(':'), ft = fmFind(S.night, k[0], k[1]); if (!ft) return; var rq = S.bublReq[ft.key]; closeSheet(); openBublInvite(bublParams(ft, rq ? rq.fn : ''), true); });
   L.scene.onTap(function (id) {
     if (document.body.classList.contains('ivp-on')) return;
     if (id === '__mgr') return carlyneOpen();
@@ -4591,6 +5311,7 @@ function bind() {
     if (id === '__dj') return openDJ();
     openTable(id);
   });
+  window.addEventListener('hashchange', function () { var q = bublFromHash(); if (q) { var bi = nightIdx(q.d); S.night = Math.max(0, Math.min(13, bi)); renderDates(); setTime(q.a); computeBooked(); openBublInvite(q, false); return; } var g2 = guestFromHash(); if (g2) openGuestEnvelope(g2); });
   L.onInteract = function () { $('#hint').classList.add('off'); };
   var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { drawWall(); Cosmos.size(); }, 200); });
   document.addEventListener('visibilitychange', function () { L.scene.pause(document.hidden); if (document.hidden) Cosmos.stop(); else if (S.mode === 'club') Cosmos.start(); });
@@ -4600,18 +5321,22 @@ function boot() {
   document.body.setAttribute('data-mode', 'bar');
   drawWall(); Cosmos.setup();
   $$('.wtile').forEach(function (w) { var k = w.getAttribute('data-tile'), m = { inside: ['bar_wide_s', 'club_crowd_s'], menu: ['bar_pizza_s', 'club_cocktail_s'] }[k], ims = $$('img', w); if (m) { ims[0].src = MEDIA[m[0]] || ''; ims[1].src = MEDIA[m[1]] || ''; } });
-  renderDates(); renderTimes(); renderGuests(); bind(); bindCarlyne();
+  $$('[data-bm]').forEach(function (e) { e.outerHTML = bublMark(e.getAttribute('data-bm')); });
+  msLoad(); renderDates(); renderTimes(); renderGuests(); bind(); bindCarlyne();
+  document.addEventListener('click', function (e) { var m = e.target.closest('[data-ms]'); if (m) { e.preventDefault(); msAction(m.getAttribute('data-ms')); } });
   try { L.scene.init($('#venue')); } catch (e) { $('#loading').textContent = 'This device could not start 3D'; console.error(e); }
   setTimeout(function () { $('#loading').classList.add('off'); }, 400);
   var startT = '22:00';                                      // the app always opens on the bar, whatever the hour; the club is a tap away
   S.time = startT; renderTimes(); applyMode(modeOf(startT));
   var gp = guestFromHash();
+  var bp = bublFromHash();
+  if (bp && !gp) { var bi = nightIdx(bp.d); S.night = Math.max(0, Math.min(13, bi)); renderDates(); setTime(bp.a); computeBooked(); setTimeout(function () { openBublInvite(bp, false); }, 700); }
   if (gp) { var dd = Math.round((new Date(gp.d + 'T12:00:00') - nightDate(0)) / 864e5); S.night = Math.max(0, Math.min(13, dd)); renderDates(); setTime(gp.a); computeBooked(); L.scene.setMine(gp.t); window.__guestTable = gp.t; setTimeout(function () { openGuestEnvelope(gp); }, 700); }
   setTimeout(function () { $('#hint').classList.add('off'); }, 9000);
-  if (!gp) setTimeout(greet, 2800);                           // Carlyne says hello once, bubble only
+  if (!gp && !bp) setTimeout(greet, 2800);                           // Carlyne says hello once, bubble only
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-LITT.app = { S: S, tearLetter: function () { autoTear(); }, setTime: setTime, openTable: openTable, startHold: startHold, openDetails: openDetails, confirmBooking: function () { confirmBooking(); }, openPreview: openPreview, sendLink: sendLink, depAction: depAction, openSplit: openSplit, openChange: openChange, openQR: openQR, openSongs: openSongs, openPre: openPre, makeAnother: makeAnother, inviteLink: inviteLink, openGuestlist: openGuestlist, openMenu: openMenu, openEvents: openEvents, openInside: openInside, openChat: carlyneOpen, carlyneOpen: carlyneOpen, carlyneClose: carlyneClose, carlyneAsk: carlyneAsk, carlyneSay: carlyneSay, closeSheet: closeSheet };
+LITT.app = { S: S, tearLetter: function () { autoTear(); }, setTime: setTime, openTable: openTable, startHold: startHold, openDetails: openDetails, confirmBooking: function () { confirmBooking(); }, openPreview: openPreview, sendLink: sendLink, depAction: depAction, openSplit: openSplit, openChange: openChange, openQR: openQR, openSongs: openSongs, openPre: openPre, makeAnother: makeAnother, inviteLink: inviteLink, openGuestlist: openGuestlist, openMenu: openMenu, openEvents: openEvents, openInside: openInside, openChat: carlyneOpen, carlyneOpen: carlyneOpen, carlyneClose: carlyneClose, carlyneAsk: carlyneAsk, carlyneSay: carlyneSay, closeSheet: closeSheet, bublFor: bublFor, bublLink: bublLink, bublParams: bublParams, openBublInvite: openBublInvite, openForming: openForming, goForming: goForming, bubToggle: bubToggle, nightIdx: nightIdx };
 })();
 
 </script>
