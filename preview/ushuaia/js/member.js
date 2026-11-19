@@ -42,6 +42,7 @@ if(k<1)requestAnimationFrame(f);else{g.remove();band.remove();}
 })(t0);
 }
 function openSheet(){
+if(LIVE){openSheetLive();return;}   /* live: a real sign-in and the guest's real history (below) */
 if(document.querySelector('.vp-sheet'))return;
 const sc=document.createElement('div');sc.className='vp-scrim';
 const sh=document.createElement('div');sh.className='vp-sheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-label','Access your experience');
@@ -89,6 +90,49 @@ if(!S.vip)return;const p=document.getElementById('vPriv');if(!p||!p.hidden)retur
 p.innerHTML=`<h3 class="vp-h">Your privileges</h3><p class="vprv-sub">Applied to this booking, ${esc((S.guestName||ME.name).split(' ')[0])}.</p><ul class="vp-perks">${ME.perks.map(x=>`<li>${tick}<span>${esc(x)}</span></li>`).join('')}</ul>`;
 p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));
 };
+/* ---- live: "Access your experience", for real ----
+   The mobile number is the sign-in: a code is sent and typed into the six boxes. A guest BUBL knows gets "Welcome
+   back" with what BUBL has really recorded of them here (nights they were at, guests they hosted, since when), and
+   their table or ticket is back on the page. What the build's panel shows that nothing real feeds yet is not drawn:
+   the standing card and "Top 2%", "Remembered for you", "Your circle", and the Backstage List's "Held for you". */
+function openSheetLive(){
+if(document.querySelector('.vp-sheet'))return;
+const sc=document.createElement('div');sc.className='vp-scrim';
+const sh=document.createElement('div');sh.className='vp-sheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-label','Access your experience');
+const known=S.guestName||'',tel=S.guestPhone?BUBL.phone.pretty(S.guestPhone):'';
+sh.innerHTML=`<div class="vp-grip"></div><h3>Access your experience</h3><p class="vp-sub">Welcome back to Ushuaïa.</p>
+<label class="vp-f"><small>Name${known?'<em>Saved on this device</em>':''}</small><input class="vp-in" id="vpName" autocomplete="name" value="${esc(known)}"></label>
+<label class="vp-f"><small>Mobile number${tel?'<em>Saved on this device</em>':''}</small><input class="vp-in" id="vpTel" type="tel" autocomplete="tel" value="${esc(tel)}"></label>
+<div class="ip-step" id="vpCode" style="display:none;margin-top:14px"></div>
+<button class="vp-go" id="vpGo" type="button">Continue</button>
+${known?`<button class="vp-not" id="vpNot" type="button">Not ${esc(known)}?</button>`:''}`;
+scr().appendChild(sc);scr().appendChild(sh);
+requestAnimationFrame(()=>{sc.classList.add('on');sh.classList.add('on');});
+let step=null;
+const shut=()=>{if(step)step.stop();sc.classList.remove('on');sh.classList.remove('on');setTimeout(()=>{sc.remove();sh.remove();},500);};
+sc.addEventListener('click',shut);
+const b=sh.querySelector('#vpGo'),box=sh.querySelector('#vpCode'),fields=on=>sh.querySelectorAll('.vp-f').forEach(f=>{f.style.display=on?'':'none';});
+const not=sh.querySelector('#vpNot');if(not)not.addEventListener('click',async()=>{await BUBL.auth.signOut();S.guestName='';S.guestPhone='';S.guestEmail='';sh.querySelector('#vpName').value='';sh.querySelector('#vpTel').value='';not.remove();sh.querySelector('#vpTel').focus();});
+const done=async()=>{b.disabled=true;b.textContent='Opening your experience';const me=await BUBL.me();
+  if(!me.ok||!me.guest){shut();toast('No table or ticket under this number yet. Once you have one, it will be here.');return;}
+  S.guestName=me.guest.full_name;S.guestPhone=me.guest.phone_e164;S.guestEmail=me.guest.email;shut();
+  setTimeout(()=>shineChange(()=>welcome(me)),380);if(typeof restoreMine==='function')restoreMine();};
+b.addEventListener('click',async()=>{if(b.dataset.mode==='verify'||b.disabled)return;
+  const ph=BUBL.phone.parse(sh.querySelector('#vpTel').value,'+971');if(!ph.ok){toast(ph.reason);sh.querySelector('#vpTel').focus();return;}
+  if(await BUBL.auth.phone()===ph.e164)return done();
+  b.disabled=true;const sent=await BUBL.auth.sendCode(ph.e164);b.disabled=false;if(!sent.ok){toast(sent.reason);return;}
+  fields(false);box.style.display='';b.dataset.mode='verify';
+  step=codeStep(box,{phone:ph.e164,verifyBtn:b,onVerified:()=>{step=null;done();},onChangeNumber:()=>{step=null;delete b.dataset.mode;box.style.display='none';box.innerHTML='';fields(true);b.disabled=false;}});});
+}
+function welcome(me){
+const sg=document.querySelector('.signin');if(sg)sg.hidden=true;
+const blk=document.getElementById('vipBlock');if(!blk||!me||!me.guest)return;
+const h=me.history||{},since=h.since?new Date(h.since+'-01T12:00:00Z').toLocaleDateString('en-GB',{month:'long',year:'numeric',timeZone:'UTC'}):'';
+blk.innerHTML=`<p class="vp-hello">Welcome back,</p><h2 class="vp-name">${esc(me.guest.full_name)}</h2>
+<div class="vp-stats"><div><b>${h.visits||0}</b><span>visits</span></div><div><b>${h.guests_hosted||0}</b><span>guests hosted</span></div><div><b>${esc(since)}</b><span>member since</span></div></div>`;
+blk.hidden=false;blk.classList.add('on','now');
+}
+window.lcWelcome=welcome;
 function paintSignin(){
 const p=document.querySelector('.signin');if(!p)return;
 p.innerHTML=`Returning guest? <span class="lk" id="signinLk">Access your experience</span>`;

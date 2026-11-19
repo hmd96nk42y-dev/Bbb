@@ -4,7 +4,7 @@
    A guest switches their table to public as they hold it, or any time after from under the booking summary (setBooking → myTable). */
 (function(){
   if(!window.BUBLSocial)return;
-  if(!offered('publicTables'))return;   /* test and live: not wired yet, so nothing simulated runs */
+  const API=window.BUBL;   /* live: BUBL's back end (inside this block the name BUBL is the bubl colour) */
   const PUB='#FF7A1A',BUBL=BUBLSocial.BUBL_PURPLE,GR='120,196,140',ACCT_KEY='bubl.account.v1';
   const TIERC={vip:'#FF4FC8',plat:'#9A6BFF',gold:'#FFF0D2',silver:'#6FD2FF'};
 
@@ -37,7 +37,9 @@
   const myT=()=>(eng&&eng.data.myTable)||null;
   function glowMap(){const m={};if(!eng)return m;eng.tables().forEach(x=>{m[x.table]=x.type==='bubl'?BUBL:PUB;});const M=myT();if(M&&M.isPublic)m[M.table]=PUB;return m;}
   function postGlow(){try{if(typeof dollPost==='function')dollPost({cmd:'social',map:glowMap()});}catch(_){}paintOwn();paintBar();}
-  function onEng(){postGlow();if(openSheetEl===$('#sxSheet')&&sheetFor==='host')keepScroll(drawHost);}
+  function onEng(){postGlow();if(openSheetEl===$('#sxSheet')&&sheetFor==='host')keepScroll(drawHost);
+    if(LIVE&&pubDraw&&openSheetEl===$('#sxSheet')&&sheetFor===pubDraw.id&&eng.S.pubReq[pubDraw.id])keepScroll(pubDraw.draw);}   /* live: my request's state follows the back end */
+  let pubDraw=null;
   function groupOf(n,me){const a=me?me.g:'M',b=a==='M'?'F':'M';return Array.from({length:n},(_,i)=>i%2?b:a);}
   /* the venue's booking is handed to the engine, so "make it public" starts from it */
   function syncBooking(){if(!eng)return;const t=S.boothId&&T(S.boothId),M=myT();
@@ -45,7 +47,9 @@
     if(M&&M.table===t.id){eng.booking=null;return;}
     if(eng.booking&&eng.booking.table===t.id)return;
     const n=Math.max(1,S.party||2);eng.setBooking({table:t.id,min:S.bookMin||t.min,paid:[],group:groupOf(n,eng.me()),cap:Math.max(t.cap,n)});}
-  function rebuild(){if(!S.ev)return;const data=dataFor(S.ev),keep=!!(mine&&mine.ev===S.ev.id);data.bubls=[];   /* Ushuaïa runs public tables only */if(keep)data.myTable=mine.tbl;
+  function rebuild(){if(!S.ev)return;
+    if(LIVE){if(!eng){eng=window.__social=LP.start(onEng);eng.toast=m=>toast(m);}BAR.k=null;BAR.sel=null;beamsOff();syncBooking();postGlow();LP.refresh().then(liveArrive);return;}   /* live: nothing is generated; the back end is asked (live-public.js) */
+    const data=dataFor(S.ev),keep=!!(mine&&mine.ev===S.ev.id);data.bubls=[];   /* Ushuaïa runs public tables only */if(keep)data.myTable=mine.tbl;
     const cfg={plan:planFor(data,S.boothId?[S.boothId]:[]),data,features:['public'],pricing:{type:'minimum',depositPct:.5},currency:'AED',
       venue:{name:'Ushuaïa Dubai Harbour',code:'UDH'},publicGlow:PUB,bublGlow:BUBL,bublMark:'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
       brand:{vars:{accent:'--red'}},closeOptions:[120,150,180,210].map(a=>at(S.ev,a))};
@@ -57,16 +61,18 @@
   /* ---------- small pieces, in the booking sheet's style ---------- */
   const band=a=>{if(a<25)return[21,24];const lo=25+Math.floor((a-25)/4)*4;return[lo,lo+3];},bl=b=>b[0]+'–'+b[1];
   const gs=g=>`<i class="sx-gs ${g==='M'?'m':'f'}" aria-label="${g==='M'?'man':'woman'}">${g==='M'?'♂':'♀'}</i>`;
-  const leftTime=min=>{const h=Math.floor(min/60),m=min%60;return (h?h+'h ':'')+m+'m';};
+  const leftTime=min=>{if(LIVE&&min>=2880)return Math.floor(min/1440)+'d '+Math.floor(min%1440/60)+'h';   /* live: a closing time days away is said in days */
+    const h=Math.floor(min/60),m=min%60;return (h?h+'h ':'')+m+'m';};
   const MUT=`<svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor"/><circle cx="16" cy="6" r="4.5" fill="none" stroke="currentColor"/></svg>`;
   const SEG=['rgba(var(--acc-rgb),1)','rgba(var(--acc-rgb),.72)','rgba(var(--acc-rgb),.5)','rgba(255,255,255,.55)','rgba(255,255,255,.35)'];
-  function gbar(arr){const M=arr.filter(g=>g==='M').length,F=arr.length-M,t=Math.max(1,M+F);return `<div class="sx-g"><span>${gs('M')} ${M}</span><div class="sx-gt"><b class="m" style="width:${100*M/t}%"></b><b class="f" style="width:${100*F/t}%"></b></div><span>${F} ${gs('F')}</span></div>`;}
+  function gbar(arr){if(arr.some(g=>!g))return '';   /* live: a host who has not said who is in their group has no bar to draw */
+    const M=arr.filter(g=>g==='M').length,F=arr.length-M,t=Math.max(1,M+F);return `<div class="sx-g"><span>${gs('M')} ${M}</span><div class="sx-gt"><b class="m" style="width:${100*M/t}%"></b><b class="f" style="width:${100*F/t}%"></b></div><span>${F} ${gs('F')}</span></div>`;}
   function seatbar(n,inN,you,need){let s='';for(let i=0;i<n;i++)s+=`<i class="${i<inN?'in':i<inN+you?'you':i<need?'need':''}"></i>`;return `<div class="sx-seats">${s}</div>`;}
   function minbar(p,extra,extraCol){let s='';p.paid.forEach((v,i)=>s+=`<b style="width:${100*v/p.min}%;background:${SEG[i%SEG.length]}"></b>`);if(extra)s+=`<b style="width:${100*extra/p.min}%;background:${extraCol||`rgb(${GR})`}"></b>`;return `<div class="sx-min">${s}</div>`;}
   function chip(c){if(c.neutral)return `<span class="sx-chip n">${esc(c.l)} <em>×${c.c}</em></span>`;
     if(c.target)return `<span class="sx-chip t${c.hit?' hit':''}">${esc(c.l)}</span>`;
     return `<span class="sx-chip" style="background:rgba(${GR},${(.14+.6*(c.c/c.n)).toFixed(2)})">${esc(c.l)} <em>×${c.c}</em></span>`;}
-  const hostLine=h=>`${gs(h.g)} ${bl(band(h.age))} · ${esc(h.ind)} · ${esc(h.nat)}`;
+  const hostLine=h=>`${h.g?gs(h.g):''} ${h.band?esc(h.band):bl(band(h.age))} · ${esc(h.ind)} · ${esc(h.nat)}`;   /* live: the back end sends the age range itself, never the age */
   const kv=(k,v)=>`<div class="sx-kv"><span>${k}</span><b>${v}</b></div>`;
   const head=(col,label,title)=>{$('#sxHead').innerHTML=`<span class="tier" style="color:${col}"><i></i>${label}</span><h3>${esc(title)}</h3>`;};
   function body(html,bind){const b=$('#sxBody');b.innerHTML=html;if(bind)bind(b);}
@@ -110,41 +116,42 @@
 
   /* ---------- someone else's public table ---------- */
   function openPublic(p){
-    const t=T(p.table),spots=Math.max(1,p.cap-p.group.length),o={offer:Math.min(p.min-covered(p),Math.round((p.min-covered(p))/spots/250)*250),party:0,ig:''};p.closes=cutoff();
-    const draw=()=>{const r=eng.S.pubReq[p.id],me=eng.me(),left=Math.max(0,p.min-covered(p));if(o.offer>left)o.offer=left;
+    const t=T(p.table),spots=Math.max(1,p.cap-p.group.length),o={offer:Math.min(p.min-covered(p),Math.round((p.min-covered(p))/spots/(250*UNIT))*250*UNIT),party:0,ig:''};if(!LIVE)p.closes=cutoff();
+    const draw=()=>{if(LIVE){const np=eng.data.publics.find(x=>x.id===p.id);if(np)p=np;}   /* live: the table as the back end has it now */
+      const r=eng.S.pubReq[p.id],me=eng.me(),left=Math.max(0,p.min-covered(p));if(o.offer>left)o.offer=left;
       const preview=[...p.group,...(me&&!r?[me.g]:[])],rs=r?r.state:'',seated=rs==='in'||rs==='charged';
       head(PUB,'Public table · '+t.label,t.name);
       let acts;
       if(!r)acts=`<div class="ts-acts"><button class="btn ghost" id="sxShare" type="button">Share</button><button class="btn red" id="sxGo" type="button">Ask to join${o.offer?' · offer '+AED(o.offer):''}</button></div>${me?'':'<p class="sx-fine">You’ll make your bubl account next.</p>'}`;
       else if(rs==='pending')acts=`<div class="sx-wait"><b class="sx-pulse">Waiting for the host</b><p class="sx-fine">${r.offer?'Your offer: '+AED(r.offer)+'. ':''}Nothing is taken yet. The host sees your ranges, your match${r.offer?', your offer':''}${eng.S.acct&&eng.S.acct.social?' and your social link':''}. It lapses in ${lt(r.exp-Date.now())} if they don’t answer.</p></div><button class="sx-link" id="sxOut" type="button">Take my request back</button>`;
-      else if(rs==='acc')acts=`<div class="sx-wait"><b class="sx-ok2">The host accepted</b><p class="sx-fine">Hold your card within ${lt(r.cardDue-Date.now())} to take the seat. Held, not charged, until the minimum is covered by ${esc(p.closes)}.</p></div><button class="btn red full" id="sxHold" type="button">Hold ${AED(r.offer)} + ${AED(Math.round(r.offer*PUB_FEE))} bubl fee</button><button class="sx-link" id="sxOut" type="button">Take my request back</button>`;
-      else acts=`<div class="sx-wait"><b class="sx-ok2">${rs==='charged'?'Your seat is confirmed':'On the table'}</b><p class="sx-fine">${rs==='charged'?'The minimum is covered and every hold was charged. '+(r.offer?AED(r.offer)+' went to Ushuaïa, never to the host.':''):r.offer?AED(r.offer)+' held on your card. Charged once the minimum is covered.':'You joined with no offer.'}</p></div>${rs==='charged'?'':'<button class="sx-link" id="sxOut" type="button">Take my request back</button>'}<button class="btn ghost full" id="sxFb" type="button">After the night: bubl needs your feedback</button>`;
+      else if(rs==='acc')acts=`<div class="sx-wait"><b class="sx-ok2">The host accepted</b><p class="sx-fine">Hold your card within ${lt(r.cardDue-Date.now())} to take the seat. Held, not charged, until the minimum is covered by ${esc(p.closes)}.</p></div><button class="btn red full" id="sxHold" type="button">Hold ${AED(r.offer)} + ${AED(pubFee(p,r.offer))} bubl fee</button><button class="sx-link" id="sxOut" type="button">Take my request back</button>`;
+      else acts=`<div class="sx-wait"><b class="sx-ok2">${rs==='charged'?'Your seat is confirmed':'On the table'}</b><p class="sx-fine">${rs==='charged'?'The minimum is covered and every hold was charged. '+(r.offer?AED(r.offer)+' went to Ushuaïa, never to the host.':''):r.offer?AED(r.offer)+' held on your card. Charged once the minimum is covered.':'You joined with no offer.'}</p></div>${rs==='charged'?'':'<button class="sx-link" id="sxOut" type="button">Take my request back</button>'}${fbBtn()}`;
       body(`<div class="ts-facts"><div><b>${AED(left)}</b><span>left of ${AED(p.min)}</span></div><div><b>${p.group.length} of ${p.cap}</b><span>in the group</span></div><div><b>${esc(p.closes)}</b><span>closes · ${leftTime(p.left)} left</span></div></div>
         <div class="sx-host"><span class="sx-k">Host</span><span>${rs==='charged'&&p.host.name?esc(p.host.name)+' · ':''}${hostLine(p.host)}</span><span class="sx-ok">Number verified</span></div>${me?matchRow(p.host,'You and the host'):''}
-        <div class="sx-m"><div class="sx-mh"><span>Minimum ${AED(p.min)}</span><span><b>${AED(left)}</b> left</span></div>${minbar(p,r?0:o.offer)}<div class="sx-mh" style="margin:6px 0 0"><span>${p.paid.length} contribution${p.paid.length===1?'':'s'} so far${!r&&o.offer?' · <b style="color:rgb('+GR+')">green is yours</b>':''}</span></div></div>
+        <div class="sx-m"><div class="sx-mh"><span>Minimum ${AED(p.min)}</span><span><b>${AED(left)}</b> left</span></div>${minbar(p,r?0:o.offer)}<div class="sx-mh" style="margin:6px 0 0"><span>${LIVE?(!r&&o.offer?'<b style="color:rgb('+GR+')">Green is yours</b>':''):`${p.paid.length} contribution${p.paid.length===1?'':'s'} so far${!r&&o.offer?' · <b style="color:rgb('+GR+')">green is yours</b>':''}`}</span></div></div>
         <div class="sx-m"><div class="sx-mh"><span>The group${!r&&me?' with you':''}</span><span>${preview.length} of ${p.cap}</span></div>${gbar(preview)}</div>
         <p class="ts-state">If the minimum isn’t covered by ${esc(p.closes)}, the table cancels and every hold is released.</p>
         ${r?'':`<h4>Your offer · only the host sees it</h4>
-        <div class="sx-amt"><small>AED</small><b id="sxAmt">${o.offer.toLocaleString('en-US')}</b></div>
-        <input class="sx-range" id="sxRange" type="range" min="0" max="${left}" step="50" value="${o.offer}" aria-label="Your contribution">
-        <div class="sx-pills">${[[0,'Nothing'],[Math.round(left/4/50)*50,'¼ of it'],[Math.round(left/2/50)*50,'½ of it'],[left,'All of it']].map(([v,l])=>`<button class="tpill${v===o.offer?' sel':''}" data-q="${v}" type="button">${l}</button>`).join('')}</div>
+        <div class="sx-amt"><small>AED</small><b id="sxAmt">${(o.offer/UNIT).toLocaleString('en-US')}</b></div>
+        <input class="sx-range" id="sxRange" type="range" min="0" max="${left}" step="${50*UNIT}" value="${o.offer}" aria-label="Your contribution">
+        <div class="sx-pills">${[[0,'Nothing'],[Math.round(left/4/(50*UNIT))*50*UNIT,'¼ of it'],[Math.round(left/2/(50*UNIT))*50*UNIT,'½ of it'],[left,'All of it']].map(([v,l])=>`<button class="tpill${v===o.offer?' sel':''}" data-q="${v}" type="button">${l}</button>`).join('')}</div>
         ${!o.offer&&me&&!hasIg()?`<label class="ginfo-label">Your Instagram · needed to ask with no offer</label><input class="ginfo-input" id="sxIg" autocapitalize="off" placeholder="@yourhandle" value="${esc(o.ig)}">`:''}
         <p class="sx-fine">Nothing is taken when you ask. If the host accepts, you hold your card within 12 hours (3 hours in the last 3 days)${o.offer?', with bubl’s 10% on top':''}. It’s charged only once the minimum is covered by ${esc(p.closes)}; if it isn’t, the hold drops off at once. Paid to Ushuaïa, never to the host.</p>
         <p class="sx-fine">Bringing friends? Each asks with their own bubl account.</p>`}
         <div class="sx-acts">${acts}</div>`,bd=>{
-          const R=bd.querySelector('#sxRange');if(R){R.oninput=()=>{o.offer=+R.value;bd.querySelector('#sxAmt').textContent=o.offer.toLocaleString('en-US');};R.onchange=()=>keepScroll(draw);}
+          const R=bd.querySelector('#sxRange');if(R){R.oninput=()=>{o.offer=+R.value;bd.querySelector('#sxAmt').textContent=(o.offer/UNIT).toLocaleString('en-US');};R.onchange=()=>keepScroll(draw);}
           bd.querySelectorAll('[data-q]').forEach(x=>x.onclick=()=>{o.offer=+x.dataset.q;keepScroll(draw);});
           const ig=bd.querySelector('#sxIg');if(ig)ig.oninput=()=>{o.ig=ig.value.trim();};
-          const out=bd.querySelector('#sxOut');if(out)out.onclick=()=>{const rr=eng.S.pubReq[p.id];if(rr&&rr.offer&&rr.state==='in'){const k=p.paid.indexOf(rr.offer);if(k>-1)p.paid.splice(k,1);}if(rr&&rr.state==='in'){const k2=p.group.lastIndexOf(eng.me().g);if(k2>0)p.group.splice(k2,1);}delete eng.S.pubReq[p.id];eng.changed();keepScroll(draw);toast('Request taken back. Any hold is released.');};
-          const hb=bd.querySelector('#sxHold');if(hb)hb.onclick=()=>{const rr=eng.S.pubReq[p.id];openPay({amount:rr.offer,fee:Math.round(rr.offer*PUB_FEE),held:true,title:'Your offer, '+t.name,sub:S.ev.short,onDone:()=>{rr.state='in';p.paid.push(rr.offer);p.group.push(eng.me().g);if(covered(p)>=p.min)rr.state='charged';eng.changed();if(openSheetEl===$('#sxSheet')&&sheetFor===p.id)keepScroll(draw);toast(rr.state==='charged'?'The minimum is covered. Every hold is charged and your seat is confirmed.':'Card held. Charged once the minimum is covered.');}});};
-          const fb=bd.querySelector('#sxFb');if(fb)fb.onclick=()=>openFeedback(p.id,(rs==='charged'?[p.host.name||'The host']:[]),()=>openPublic(p));
+          const out=bd.querySelector('#sxOut');if(out)out.onclick=()=>{if(LIVE)return liveOut(p);const rr=eng.S.pubReq[p.id];if(rr&&rr.offer&&rr.state==='in'){const k=p.paid.indexOf(rr.offer);if(k>-1)p.paid.splice(k,1);}if(rr&&rr.state==='in'){const k2=p.group.lastIndexOf(eng.me().g);if(k2>0)p.group.splice(k2,1);}delete eng.S.pubReq[p.id];eng.changed();keepScroll(draw);toast('Request taken back. Any hold is released.');};
+          const hb=bd.querySelector('#sxHold');if(hb)hb.onclick=()=>{if(LIVE)return livePayOffer(p,t);const rr=eng.S.pubReq[p.id];openPay({amount:rr.offer,fee:Math.round(rr.offer*PUB_FEE),held:true,title:'Your offer, '+t.name,sub:S.ev.short,onDone:()=>{rr.state='in';p.paid.push(rr.offer);p.group.push(eng.me().g);if(covered(p)>=p.min)rr.state='charged';eng.changed();if(openSheetEl===$('#sxSheet')&&sheetFor===p.id)keepScroll(draw);toast(rr.state==='charged'?'The minimum is covered. Every hold is charged and your seat is confirmed.':'Card held. Charged once the minimum is covered.');}});};
+          const fb=bd.querySelector('#sxFb');if(fb)fb.onclick=()=>openFeedback(p.id,LIVE?fbNames(p.members):(rs==='charged'?[p.host.name||'The host']:[]),()=>openPublic(p));
           const sh=bd.querySelector('#sxShare');if(sh)sh.onclick=()=>share(p,()=>openPublic(p));
-          const go=bd.querySelector('#sxGo');if(go)go.onclick=()=>{
+          const go=bd.querySelector('#sxGo');if(go)go.onclick=()=>{if(LIVE)return liveAsk(p,o,()=>openPublic(p));
             const done=()=>{if(!o.offer&&!hasIg()){const h=(o.ig||'').replace(/^@/,'');if(!/^[A-Za-z0-9._]{2,30}$/.test(h)){toast('Add your Instagram to ask with no offer');open();keepScroll(draw);return;}const ac=eng.S.acct;if(ac){ac.social='Instagram @'+h;saveAcct(ac);}}
               eng.S.pubReq[p.id]={state:'pending',offer:o.offer,party:[eng.me().g],exp:Date.now()+120*60000};eng.changed();open();keepScroll(draw);toast('Asked. The host sees your ranges and your match.');
               setTimeout(()=>{const rr=eng.S.pubReq[p.id];if(!rr||rr.state!=='pending')return;rr.state=rr.offer?'acc':'in';rr.cardDue=Date.now()+12*3600000;if(!rr.offer)p.group.push(eng.me().g);eng.changed();if(openSheetEl===$('#sxSheet')&&sheetFor===p.id)keepScroll(draw);toast(rr.offer?'The host accepted. Hold your card to take the seat.':`The host accepted. You’re on ${t.name}.`);},3500);};
             if(eng.me())done();else signup({amount:null,label:'Your request',done,back:()=>openPublic(p)});};});};
-    sheetFor=p.id;draw();open();$('#sxBody').scrollTop=0;}
+    sheetFor=p.id;pubDraw={id:p.id,draw};draw();open();$('#sxBody').scrollTop=0;}
 
 
   /* ---------- public tables, as BUBL's server runs them (step 5b) ----------
@@ -152,12 +159,13 @@
      within 12 hours (3 in the last 3 days) with bubl's 10% on top; every hold is charged once the minimum is covered by the cut-off.
      Asking with no offer needs an Instagram handle. No names before a seat is confirmed: ranges, the match and the offer only. */
   const PUB_FEE=.10,CUTOFF_MIN=120;
-  const matchFor=x=>{const me=eng&&eng.me();return me&&x&&window.bublMatchOf?window.bublMatchOf(me,x):null;};
-  const shared=x=>{const me=eng&&eng.me();if(!me||!x)return [];const c=[];if(band(me.age)[0]===band(x.age)[0])c.push(bl(band(x.age)));if(me.ind===x.ind)c.push(x.ind);if(me.nat===x.nat)c.push(x.nat);(x.hob||[]).forEach(h=>{if((me.hob||[]).includes(h))c.push(h);});return c;};
+  const matchFor=x=>{if(LIVE)return x&&x.match&&x.match.pct!=null?x.match.pct:null;   /* live: the back end's own figure, worked out with this guest's own weights */
+    const me=eng&&eng.me();return me&&x&&window.bublMatchOf?window.bublMatchOf(me,x):null;};
+  const shared=x=>{const me=eng&&eng.me();if(!me||!x)return [];const c=[];{const xb=x.band||bl(band(x.age));if(bl(band(me.age))===xb)c.push(xb);}if(me.ind===x.ind)c.push(x.ind);if(me.nat===x.nat)c.push(x.nat);(x.hob||[]).forEach(h=>{if((me.hob||[]).includes(h))c.push(h);});return c;};
   const matchRow=(x,lbl)=>{const p=matchFor(x);if(p==null)return '';const c=shared(x);return `<div class="sx-mt"><b>${p}<small>%</small></b><span><em>${lbl||'Your match'}</em>${c.length?c.map(esc).join(' · '):'Different crowds'}</span></div>`;};
   const hasIg=()=>{const a=eng&&eng.S.acct;return !!(a&&/^Instagram\s*@?\S+/i.test(a.social||''));};
   const lt=ms=>{const m=Math.max(0,Math.round(ms/60000));return (m>=60?Math.floor(m/60)+'h ':'')+(m%60)+'m';};
-  const cutoff=()=>at(S.ev,-CUTOFF_MIN);
+  const cutoff=()=>at(S.ev,-(LIVE&&PAGE.rules.public_tables&&PAGE.rules.public_tables.cutoff_minutes_before_doors||CUTOFF_MIN));   /* live: the venue's own cut-off */
   if(!document.getElementById('bmDefsU')){const d=document.createElement('div');d.id='bmDefsU';d.innerHTML='<svg class="bm-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>\n<radialGradient id="lbGlass" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".015"/><stop offset=".7" stop-color="#fff" stop-opacity=".03"/><stop offset=".88" stop-color="#E6D6FF" stop-opacity=".16"/><stop offset=".965" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity=".62"/></radialGradient>\n<radialGradient id="lbRimM" cx="50%" cy="50%" r="50%"><stop offset=".58" stop-color="#000"/><stop offset=".84" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></radialGradient>\n<mask id="lbRim"><circle cx="32" cy="32" r="28" fill="url(#lbRimM)"/></mask>\n<radialGradient id="lbF1" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#D9B774"/><stop offset="1" stop-color="#D9B774" stop-opacity="0"/></radialGradient>\n<radialGradient id="lbF2" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#9A63F0" stop-opacity=".95"/><stop offset="1" stop-color="#9A63F0" stop-opacity="0"/></radialGradient>\n<radialGradient id="lbF3" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E8A2BE" stop-opacity=".95"/><stop offset="1" stop-color="#E8A2BE" stop-opacity="0"/></radialGradient>\n<radialGradient id="lbF4" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#F3E2B8" stop-opacity=".95"/><stop offset="1" stop-color="#F3E2B8" stop-opacity="0"/></radialGradient>\n<radialGradient id="lbSpec" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".45" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>\n<radialGradient id="lbCaus" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFF1D8" stop-opacity=".6"/><stop offset="1" stop-color="#FFF1D8" stop-opacity="0"/></radialGradient>\n<linearGradient id="lbGlint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>\n<clipPath id="lbClip"><circle cx="32" cy="32" r="28"/></clipPath>\n</defs></svg>';d.style.cssText='position:absolute;width:0;height:0;overflow:hidden';document.body.appendChild(d);}
   /* the real bubl mark, from Sk's builds */
   function bublMarkU(cls){return '<svg class="bm'+(cls?' '+cls:'')+'" viewBox="0 0 64 64" aria-hidden="true"><g clip-path="url(#lbClip)"><g class="bm-f" mask="url(#lbRim)"><g class="bf-a"><ellipse cx="46" cy="18" rx="20" ry="14" fill="url(#lbF1)"/><ellipse cx="14" cy="44" rx="18" ry="16" fill="url(#lbF3)"/></g><g class="bf-b"><ellipse cx="48" cy="46" rx="17" ry="15" fill="url(#lbF2)"/><ellipse cx="18" cy="16" rx="12" ry="10" fill="url(#lbF4)"/></g></g><circle cx="32" cy="32" r="28" fill="url(#lbGlass)"/><ellipse cx="41" cy="45" rx="7" ry="4.5" fill="url(#lbCaus)" transform="rotate(-35 41 45)"/></g><circle class="bm-rim" cx="32" cy="32" r="27.8" fill="none" stroke="#C8A46C" stroke-opacity=".75" stroke-width="1.1"/><g class="bf-glint"><path d="M32 4.2A27.8 27.8 0 0 1 52.6 13.2" fill="none" stroke="url(#lbGlint)" stroke-width="1.4" stroke-linecap="round"/></g><ellipse class="bf-spec" cx="21.5" cy="18.5" rx="8.5" ry="4.6" fill="url(#lbSpec)" transform="rotate(-38 21.5 18.5)"/><circle cx="16.8" cy="25.4" r="1.5" fill="#fff" opacity=".85"/></svg>';}
@@ -181,17 +189,17 @@
           bd.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{C.next[b.dataset.n]=!C.next[b.dataset.n];keepScroll(draw);});
           bd.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{C.q[b.dataset.q]=b.dataset.v;keepScroll(draw);});
           const nt=bd.querySelector('#fbNote');nt.oninput=()=>{C.note=nt.value;};
-          bd.querySelector('#fbSend').onclick=()=>{if(!ready())return;C.sent=true;
+          bd.querySelector('#fbSend').onclick=()=>{if(!ready())return;if(LIVE)return liveFeedback(key,C,ppl,()=>keepScroll(draw));C.sent=true;
             /* kept by BUBL's server with the request's record: the answers as given, plus the one yes or no the matchmaking brain reads */
             (window.__fbSent=window.__fbSent||[]).push({table:key,rating:C.rate,again:C.again,satisfied:C.again==='Yes',next:Object.keys(C.next).filter(k=>C.next[k]).map(k=>ppl[k]),q:C.q,note:C.note});keepScroll(draw);toast('Sent privately. Thank you.');};
           bd.querySelector('#sxBack').onclick=back;});};
     sheetFor='fb:'+key;draw();open();$('#sxBody').scrollTop=0;}
 
   /* ---------- share a public table ---------- */
-  function share(p,back){const t=T(p.table),left=Math.max(0,p.min-covered(p)),code='UDH-'+String(p.mine?'H7Q2':p.id.split('-').pop()).toUpperCase(),url='bubl.app/t/'+code,M=p.group.filter(g=>g==='M').length,F=p.group.length-M;
+  function share(p,back){const t=T(p.table),left=Math.max(0,p.min-covered(p)),code='UDH-'+String(p.mine?'H7Q2':p.id.split('-').pop()).toUpperCase(),url=LIVE?LP.shareUrl(p.mine?p.bookingId:p.id):'bubl.app/t/'+code,M=p.group.filter(g=>g==='M').length,F=p.group.length-M;
     head(PUB,'Share',p.mine?'Share your table':'Share this table');
     body(`<p class="ts-vote">This is what people see before they open it. Names stay hidden.</p>
-      <div class="sx-card"><div class="sx-card-t"><span>Ushuaïa · ${esc(S.ev.short)} · ${esc(t.label)}</span><b>${AED(left)} left to cover</b><span>${p.group.length} in · ${M} ${gs('M')} ${F} ${gs('F')} · closes ${esc(p.closes)}</span></div><div class="sx-card-u">${url}</div></div>
+      <div class="sx-card"><div class="sx-card-t"><span>Ushuaïa · ${esc(S.ev.short)} · ${esc(t.label)}</span><b>${AED(left)} left to cover</b><span>${p.group.length} in${p.noGender?'':` · ${M} ${gs('M')} ${F} ${gs('F')}`} · closes ${esc(p.closes)}</span></div><div class="sx-card-u">${url}</div></div>
       <div class="ts-acts"><button class="btn ghost" id="sxCopy" type="button">Copy link</button><a class="btn red" id="sxWa" href="https://wa.me/?text=${encodeURIComponent('Join our table at Ushuaïa for '+S.ev.short+' · '+AED(left)+' left to cover · https://'+url)}" target="_blank" rel="noopener">Send on WhatsApp</a></div>
       <p class="sx-fine">Anyone who opens it needs a bubl account to request.</p>
       <button class="sx-link" id="sxBack" type="button">Back</button>`,bd=>{
@@ -208,7 +216,7 @@
   function openGoPublic(){if(!eng)return;const M=myT(),src=M||eng.booking;if(!src){toast('Hold a table first, then make it public');return;}
     const t=T(src.table),edit=!!(M&&M.isPublic),ownN=M?(M.ownN||M.group.length):src.group.length,own=src.group.slice(0,ownN),
       joined=M?src.group.slice(ownN):[],offers=M?src.paid.slice(M.ownPaid?1:0):[],cap0=Math.max(t.cap,src.cap||0),opts=eng.cfg.closeOptions;
-    const o={share:M?(M.ownPaid||0):Math.round(src.min*.5/250)*250,M:own.filter(g=>g==='M').length,F:own.filter(g=>g==='F').length,closes:cutoff()};
+    const o={share:M?(M.ownPaid||0):LIVE?liveDeposit():Math.round(src.min*.5/250)*250,M:own.filter(g=>g==='M').length,F:own.filter(g=>g==='F').length,closes:cutoff()};
     o.spots=edit?Math.max(1,M.cap-M.group.length):Math.max(1,cap0-own.length-joined.length);
     const draw=()=>{const grpN=o.M+o.F+joined.length,maxSp=Math.max(1,cap0-grpN);o.spots=Math.min(Math.max(1,o.spots),maxSp);
       const paid=[...(o.share?[o.share]:[]),...offers],left=Math.max(0,src.min-paid.reduce((a,b)=>a+b,0)),me=eng.me();
@@ -216,9 +224,9 @@
       body(`<div class="ts-facts"><div><b>${AED(src.min)}</b><span>minimum spend</span></div><div><b>${o.spots}</b><span>spot${o.spots>1?'s':''} open</span></div><div><b>${AED(left)}</b><span>left to cover</span></div></div>
         <p class="ts-vote">Your table glows amber in the room for everyone with a bubl account. Guests ask for a seat and offer what they’d put towards the minimum, or nothing with their Instagram. You choose who joins.</p>
         <h4>You cover</h4>
-        <div class="sx-amt"><small>AED</small><b id="sxAmt">${o.share.toLocaleString('en-US')}</b></div>
-        <input class="sx-range" id="sxRange" type="range" min="0" max="${src.min}" step="250" value="${o.share}" aria-label="What you cover">
-        <div class="sx-pills">${[.25,.5,.75,1].map(f=>{const v=Math.round(src.min*f/250)*250;return `<button class="tpill${v===o.share?' sel':''}" data-q="${v}" type="button">${f===1?'All of it':f===.5?'Half':f*100+'%'}</button>`;}).join('')}</div>
+        <div class="sx-amt"><small>AED</small><b id="sxAmt">${(o.share/UNIT).toLocaleString('en-US')}</b></div>${LIVE&&!o.share?'<p class="sx-fine">Your deposit counts here once it is paid.</p>':''}
+        <input class="sx-range" id="sxRange" type="range"${LIVE?' style="display:none"':''} min="0" max="${src.min}" step="250" value="${o.share}" aria-label="What you cover">
+        <div class="sx-pills"${LIVE?' style="display:none"':''}>${[.25,.5,.75,1].map(f=>{const v=Math.round(src.min*f/250)*250;return `<button class="tpill${v===o.share?' sel':''}" data-q="${v}" type="button">${f===1?'All of it':f===.5?'Half':f*100+'%'}</button>`;}).join('')}</div>
         <div class="sx-m"><div class="sx-mh"><span>Minimum ${AED(src.min)}</span><span><b>${AED(left)}</b> left for others</span></div>${minbar({min:src.min,paid},0)}</div>
         <h4>Your group</h4>
         <div class="sx-opt"><span>Men</span>${stepper('M',gs('M')+' '+o.M)}</div>
@@ -240,10 +248,12 @@
             if(k==='S')o.spots+=d;else{o[k]=Math.max(0,o[k]+d);if(o.M+o.F<1)o[k]=1;if(o.M+o.F+joined.length>cap0)o[k]-=1;}keepScroll(draw);});
           bd.querySelector('#sxLater').onclick=()=>{closeSheet();if(!edit)toast('Kept private. You can make it public any time under your booking');};
           bd.querySelector('#sxGo').onclick=()=>{const go=()=>publish(src,o,joined,offers);if(edit){go();return;}
+            if(LIVE){if(eng.me())go();else signup({h:'Go public',cta:'Go public',done:go,back:()=>openGoPublic()});return;}   /* live: nothing is paid at this moment; the host's deposit is what they cover */
             if(eng.me())hold(o.share,'Your share of '+t.name,go,()=>openGoPublic(),'Go public');
             else signup({amount:o.share,label:'Your share of '+t.name,charge:'Only when the table confirms',h:'Go public',cta:'Go public',done:go,back:()=>openGoPublic()});};});};
     sheetFor='golive';draw();open();$('#sxBody').scrollTop=0;}
-  function publish(src,o,joined,offers){const me=eng.me(),t=T(src.table),M0=myT(),edit=!!(M0&&M0.isPublic);
+  function publish(src,o,joined,offers){if(LIVE)return livePublish(o,joined);
+    const me=eng.me(),t=T(src.table),M0=myT(),edit=!!(M0&&M0.isPublic);
     const own=[...Array(o.M).fill('M'),...Array(o.F).fill('F')];const k=me?own.indexOf(me.g):-1;if(k>0){own.splice(k,1);own.unshift(me.g);}
     const T_=M0||{table:src.table,min:src.min,requests:[]};
     Object.assign(T_,{isPublic:true,ownN:own.length,ownPaid:o.share,paid:[...(o.share?[o.share]:[]),...offers],group:[...own,...joined],closes:o.closes,left:minsTo(o.closes)});
@@ -269,15 +279,17 @@
           return `<div class="sx-req${r.state!=='new'?' done':''}"><div class="h"><span>${r.handle?esc(r.handle):'<span class="sx-dim">No social link</span>'}${m!=null?` <i class="sx-rm">${m}% match</i>`:''}</span><span>${r.offer?AED(r.offer):'<span class="sx-dim">No offer</span>'}</span></div>
           <div class="s">${hostLine(r)}${r.hob&&r.hob.length?' · '+r.hob.map(esc).join(', '):''}</div>
           ${r.state==='new'?`<div class="a"><button class="btn ghost" data-dec="${r.id}" type="button">Decline</button><button class="btn red" data-acc="${r.id}" type="button">Accept</button></div>`:`<div class="s" style="color:${r.state==='dec'?'var(--mute)':'rgb('+GR+')'}">${line}</div>`}</div>`;}).join(''):`<p class="sx-fine">${T_.isPublic?'Requests appear here. You’ll get a message for each one.':'Make the table public to receive requests.'}</p>`}
-        ${T_.requests.some(r=>r.state==='held')&&covered(T_)>=T_.min?'<button class="btn ghost full" id="sxFbH" type="button">After the night: bubl needs your feedback</button>':''}
+        ${LIVE&&T_.isPublic&&left>0&&!T_.confirmed?`<button class="btn ghost full" id="sxCover" type="button">Cover what’s left · ${AED(left)}</button>`:''}
+        ${T_.requests.some(r=>r.state==='held')&&covered(T_)>=T_.min&&fbOpen()?'<button class="btn ghost full" id="sxFbH" type="button">After the night: bubl needs your feedback</button>':''}
         <div class="sx-acts">${T_.isPublic?'<button class="btn red full" id="sxShare" type="button">Share link</button>':'<button class="btn red full" id="sxPub" type="button">Make it public</button>'}</div>`,bd=>{
           bd.querySelector('#sxTog').onclick=()=>T_.isPublic?confirmPrivate():openGoPublic();
           const ed=bd.querySelector('#sxEdit');if(ed)ed.onclick=()=>openGoPublic();
           const pb=bd.querySelector('#sxPub');if(pb)pb.onclick=()=>openGoPublic();
           const sh=bd.querySelector('#sxShare');if(sh)sh.onclick=()=>share(Object.assign({mine:true},T_),()=>openHost());
-          bd.querySelectorAll('[data-acc]').forEach(x=>x.onclick=()=>{const r=T_.requests.find(y=>y.id===x.dataset.acc);r.state='acc';T_.group.push(r.party[0]);eng.changed();toast(r.offer?'Accepted. They have 12 hours to hold their card.':'Accepted. They join with no offer.');
+          bd.querySelectorAll('[data-acc]').forEach(x=>x.onclick=()=>{if(LIVE)return liveAnswer(x.dataset.acc,true);const r=T_.requests.find(y=>y.id===x.dataset.acc);r.state='acc';T_.group.push(r.party[0]);eng.changed();toast(r.offer?'Accepted. They have 12 hours to hold their card.':'Accepted. They join with no offer.');
             if(r.offer)setTimeout(()=>{if(r.state!=='acc')return;r.state='held';T_.paid.push(r.offer);eng.changed();toast(`${r.handle||'Guest'} held their card · ${AED(r.offer)} towards the minimum`);},4500);else r.state='held';});
-          bd.querySelectorAll('[data-dec]').forEach(x=>x.onclick=()=>{const r=T_.requests.find(y=>y.id===x.dataset.dec);r.state='dec';eng.changed();toast('Declined. Nothing was taken from their card.');});
+          bd.querySelectorAll('[data-dec]').forEach(x=>x.onclick=()=>{if(LIVE)return liveAnswer(x.dataset.dec,false);const r=T_.requests.find(y=>y.id===x.dataset.dec);r.state='dec';eng.changed();toast('Declined. Nothing was taken from their card.');});
+          const cv=bd.querySelector('#sxCover');if(cv)cv.onclick=()=>liveCover();
           const fh=bd.querySelector('#sxFbH');if(fh)fh.onclick=()=>openFeedback('mine',T_.requests.filter(r=>r.state==='held').map(r=>r.name||'Guest'),()=>openHost());});};
     sheetFor='host';drawHost();open();$('#sxBody').scrollTop=0;}
   function confirmPrivate(){const T_=myT();if(!T_)return;const t=T(T_.table),pend=T_.requests.filter(r=>r.state==='new').length;
@@ -285,7 +297,7 @@
     body(`<p class="ts-vote">Make your table private? It stops glowing in the room and leaves the public tables.${pend?` ${pend} pending request${pend>1?'s are':' is'} declined and ${pend>1?'their holds are':'the hold is'} released.`:''} Guests you already accepted stay on the table.</p>
       <div class="sx-acts"><div class="ts-acts"><button class="btn ghost" id="sxKeep" type="button">Keep it public</button><button class="btn red" id="sxPriv" type="button">Make private</button></div></div>`,bd=>{
         bd.querySelector('#sxKeep').onclick=()=>openHost();
-        bd.querySelector('#sxPriv').onclick=()=>{T_.isPublic=false;T_.requests.forEach(r=>{if(r.state==='new')r.state='dec';});clearTimeout(eng._simT1);clearTimeout(eng._simT2);closeSheet();eng.changed();toast(`${t.name} is private. It stops glowing in the room.`);};});
+        bd.querySelector('#sxPriv').onclick=()=>{if(LIVE)return livePrivate(t);T_.isPublic=false;T_.requests.forEach(r=>{if(r.state==='new')r.state='dec';});clearTimeout(eng._simT1);clearTimeout(eng._simT2);closeSheet();eng.changed();toast(`${t.name} is private. It stops glowing in the room.`);};});
     open();$('#sxBody').scrollTop=0;}
 
   /* ---------- holds, log in and the bubl account, in the booking's own style ---------- */
@@ -295,20 +307,22 @@
         bd.querySelector('#sxPay').onclick=()=>{done();};bd.querySelector('#sxBack').onclick=back;});open();}
   function saveAcct(a){try{localStorage.setItem(ACCT_KEY,JSON.stringify(a));}catch(_){}eng.S.acct=a;}
   const phoneBlock=a=>`<label class="ginfo-label">Mobile number</label><div class="sx-row"><input class="ginfo-input" style="flex:0 0 78px" id="sxCc" value="${esc(a.cc||'+971')}"><input class="ginfo-input" id="sxPh" inputmode="tel" value="${esc(a.phone||'')}" placeholder="50 123 4567"></div>
-    ${a.otp?'<p class="sx-ok3">Number verified</p><div class="sx-otp"><i>4</i><i>8</i><i>2</i><i>1</i></div>':'<button class="btn ghost full" id="sxOtp" type="button" style="margin-top:10px">Send code</button><div class="sx-otp" id="sxOtpBox" style="opacity:.4"><i></i><i></i><i></i><i></i></div>'}`;
-  function bindPhone(bd,a,after){const b=bd.querySelector('#sxOtp');if(!b)return;b.onclick=()=>{a.phone=(bd.querySelector('#sxPh')||{}).value||'';b.textContent='Code sent';const box=bd.querySelector('#sxOtpBox');box.style.opacity=1;
+    ${LIVE?(a.otp?'<p class="sx-ok3">Number verified</p>':'<button class="btn ghost full" id="sxOtp" type="button" style="margin-top:10px">Send code</button><div class="ip-step" id="sxOtpBox" style="display:none;margin-top:14px"></div>')   /* live: a real code, typed into Sk's six boxes */
+      :a.otp?'<p class="sx-ok3">Number verified</p><div class="sx-otp"><i>4</i><i>8</i><i>2</i><i>1</i></div>':'<button class="btn ghost full" id="sxOtp" type="button" style="margin-top:10px">Send code</button><div class="sx-otp" id="sxOtpBox" style="opacity:.4"><i></i><i></i><i></i><i></i></div>'}`;
+  function bindPhone(bd,a,after){const b=bd.querySelector('#sxOtp');if(!b)return;if(LIVE)return livePhone(bd,a,after,b);b.onclick=()=>{a.phone=(bd.querySelector('#sxPh')||{}).value||'';b.textContent='Code sent';const box=bd.querySelector('#sxOtpBox');box.style.opacity=1;
     '4821'.split('').forEach((x,k)=>setTimeout(()=>{box.children[k].textContent=x;if(k===3){a.otp=true;toast('Number verified');after&&after();}},350+k*260));};}
-  function login(then){const a={otp:false};
+  function login(then){const a={otp:false};if(LIVE&&LP.signedIn())a.otp=true;
     const paint=()=>{head('var(--acc)','bubl account','Log in to bubl');
       body(`<p class="ts-vote">One bubl account works at every venue.</p>${phoneBlock(a)}
         <div class="sx-acts"><button class="btn red full" id="sxIn" type="button" ${a.otp?'':'disabled'}>Log in</button><button class="sx-link" id="sxNew" type="button">New here? Make a bubl account</button></div>`,bd=>{
           bindPhone(bd,a,paint);
-          bd.querySelector('#sxIn').onclick=()=>{let acct=null;try{acct=JSON.parse(localStorage.getItem(ACCT_KEY));}catch(_){}
+          bd.querySelector('#sxIn').onclick=()=>{if(LIVE)return liveLoggedIn(then);let acct=null;try{acct=JSON.parse(localStorage.getItem(ACCT_KEY));}catch(_){}
             if(!acct||!acct.verified)acct={first:'Sam',last:'K',verified:true,social:'@samk',email:'sam@example.com',phone:a.phone,profile:{g:'M',age:30,nat:'Lebanese',ind:'Founder',hob:['Padel','F1','Travel']}};
             saveAcct(acct);eng.changed();toast('Welcome back, '+acct.first);then&&then();};
           bd.querySelector('#sxNew').onclick=()=>signup({done:then,back:()=>login(then)});});};
     paint();open();}
   function signup(ctx){const d={g:'',nat:'',ind:'',hob:[]},a={first:'',last:'',dob:'',email:'',social:'',otp:false,id:null,stage:'',idDone:false,c1:false,c2:false};let i=0;
+    if(LIVE){a.email=S.guestEmail||'';const nm=(S.guestName||'').trim().split(/\s+/);a.first=nm[0]||'';a.last=nm.slice(1).join(' ');if(LP.signedIn()){a.otp=true;if(ctx.skipPhone&&a.email)i=1;}}   /* live: what the guest has already given is not asked again */
     const val=(bd,s)=>{const e=bd.querySelector(s);return e?e.value.trim():'';};
     const picks=(f,list,multi)=>`<div class="sx-pills sx-wrap" data-f="${f}"${multi?` data-multi="${multi}"`:''}>${list.map(x=>`<button class="tpill${(multi?d.hob.includes(x[0]):d[f]===x[0])?' sel':''}" data-v="${x[0]}" type="button">${x[1]}</button>`).join('')}</div>`;
     const L=a=>a.map(x=>[x,x]);
@@ -345,7 +359,7 @@
          ${ctx.amount!=null?kv(esc(ctx.label),ctx.amount?AED(ctx.amount):'None')+kv('Charged',esc(ctx.charge||'Only when it confirms'))+kv('If it cancels','Released straight away'):''}
          <div class="sx-acts"><button class="btn ${ctx.amount?'pri':'red'} full" id="sxPay" type="button" ${a.c1&&a.c2?'':'disabled'}>${ctx.amount?' Pay':ctx.cta||(ctx.amount!=null?'Send request':'Make my account')}</button></div>`,
        bind:bd=>{bd.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{a[b.dataset.c]=!a[b.dataset.c];paint();});
-         bd.querySelector('#sxPay').onclick=()=>{saveAcct({first:a.first,last:a.last,email:a.email,phone:a.phone,social:a.social?(/^(instagram|linkedin|tiktok|x)\b/i.test(a.social)?a.social:'Instagram @'+a.social.replace(/^@/,'')):'',verified:false,profile:d});eng.changed();toast(ctx.cta||ctx.amount==null?'bubl account made':'bubl account made. Request sent');ctx.done&&ctx.done();};}}];
+         bd.querySelector('#sxPay').onclick=()=>{if(LIVE)return liveCreate(a,d,ctx,bd.querySelector('#sxPay'));saveAcct({first:a.first,last:a.last,email:a.email,phone:a.phone,social:a.social?(/^(instagram|linkedin|tiktok|x)\b/i.test(a.social)?a.social:'Instagram @'+a.social.replace(/^@/,'')):'',verified:false,profile:d});eng.changed();toast(ctx.cta||ctx.amount==null?'bubl account made':'bubl account made. Request sent');ctx.done&&ctx.done();};}}];
     for(let k=steps.length-1;k>=0;k--)if(steps[k].off)steps.splice(k,1);   /* the ID scan comes back once that integration is real */
     const paint=()=>{const s=steps[i];head('var(--acc)',`bubl account · ${i+1} of ${steps.length}`,s.h);
       body(`<div class="sx-prog">${steps.map((_,k)=>`<i class="${k<=i?'on':''}"></i>`).join('')}</div>${s.b()}
@@ -356,6 +370,89 @@
           bd.querySelector('#sxBk').onclick=()=>{if(i){i--;paint();}else if(ctx.back)ctx.back();else closeSheet();};});
       $('#sxBody').scrollTop=0;};
     paint();open();}
+
+
+  /* ================= live: every button, sent to BUBL's back end =================
+     Nothing below runs in demo mode. Each function asks the back end, then asks it for the facts again (LP.refresh),
+     so the sheets only ever show what the back end holds. */
+  const again=()=>LP.refresh();
+  const pubFee=(p,x)=>LIVE?Math.floor(x*(p.feePct==null?PUB_FEE:p.feePct)+.5):Math.round(x*PUB_FEE);   /* shown before paying; the card form's figure is the back end's own */
+  const fbOpen=()=>!LIVE||!!(S.ev&&S.ev.doorsAt&&Date.now()>=S.ev.doorsAt);   /* live: feedback is asked once the night has begun */
+  const fbBtn=()=>fbOpen()?'<button class="btn ghost full" id="sxFb" type="button">After the night: bubl needs your feedback</button>':'';
+  const fbNames=members=>(members||[]).map(m=>(m.full_name||'').split(' ')[0]).filter(n=>n&&n!==(S.guestName||'').split(' ')[0]);
+  const liveDeposit=()=>typeof HN!=='undefined'&&HN.confirmed&&typeof MINE!=='undefined'?(MINE.depositMinor||0):0;   /* what the host covers: their deposit, once it is secured */
+  const socialOf=text=>{const s=String(text||'').trim();if(!s)return undefined;
+    const m=/^(instagram|linkedin|tiktok|x)\b[\s:@/]*(.+)$/i.exec(s),u=/(instagram|linkedin|tiktok|x|twitter)\.com\/(?:in\/)?@?([^/?#\s]+)/i.exec(s);
+    if(u)return {network:u[1].toLowerCase()==='twitter'?'x':u[1].toLowerCase(),handle:u[2]};
+    return m?{network:m[1].toLowerCase(),handle:m[2].replace(/^@/,'').trim()}:{network:'instagram',handle:s.replace(/^@/,'')};};
+  /* the mobile number, proven with a real code in Sk's six boxes */
+  function livePhone(bd,a,after,b){b.onclick=async()=>{if(b.dataset.mode==='verify')return;
+    const ph=API.phone.parse((bd.querySelector('#sxPh')||{}).value||'',(bd.querySelector('#sxCc')||{}).value||'+971');if(!ph.ok){toast(ph.reason);return;}
+    a.phone=bd.querySelector('#sxPh').value;a.cc=bd.querySelector('#sxCc').value;const em=bd.querySelector('#sxEm');if(em)a.email=em.value.trim();
+    if(await API.auth.phone()===ph.e164){a.otp=true;after&&after();return;}
+    b.disabled=true;const sent=await API.auth.sendCode(ph.e164);b.disabled=false;if(!sent.ok){toast(sent.reason);return;}
+    const box=bd.querySelector('#sxOtpBox');if(!box)return;box.style.display='';b.textContent='Verify';b.dataset.mode='verify';
+    codeStep(box,{phone:ph.e164,verifyBtn:b,onVerified:()=>{a.otp=true;toast('Number verified');after&&after();},onChangeNumber:()=>{a.otp=false;after&&after();}});};}
+  /* "Log in": the number is proven; a guest with a bubl account goes on, one without is asked the questions */
+  async function liveLoggedIn(then){await again();
+    if(eng.me()){toast('Welcome back'+(eng.S.acct&&eng.S.acct.first?', '+eng.S.acct.first:''));then&&then();}
+    else signup({done:then,skipPhone:true,back:()=>login(then)});}
+  /* the last step of the account: BUBL's server checks the name, then keeps the answers */
+  async function liveCreate(a,d,ctx,btn){if(btn.disabled)return;btn.disabled=true;
+    const g=await API.signUp({full_name:(a.first+' '+a.last).trim(),email:a.email});
+    if(!g.ok){btn.disabled=false;toast(g.reason);return;}
+    S.guestName=g.guest.full_name;S.guestEmail=g.guest.email;S.guestPhone=g.guest.phone_e164;
+    const r=await API.social('profile',{answers:{age:d.age,gender:d.g,nationality:d.nat,industry:d.ind,hobbies:d.hob,social:socialOf(a.social)},agreed:true});
+    if(!r.ok){btn.disabled=false;toast(r.reason);return;}
+    await again();toast('bubl account made');ctx.done&&ctx.done();}
+  /* "Ask to join": one seat, with my offer; nothing is taken from the card */
+  async function liveAsk(p,o,back){
+    if(!eng.me()){signup({amount:null,label:'Your request',skipPhone:true,done:()=>{openPublic(p);liveAsk(p,o,back);},back});return;}
+    if(!o.offer&&!hasIg()){const h=(o.ig||'').replace(/^@/,'');if(!/^[A-Za-z0-9._]{2,30}$/.test(h)){toast('Add your Instagram to ask with no offer');return;}
+      const s=await API.social('profile',{answers:Object.assign({},eng.S.acct.answers,{social:{network:'instagram',handle:h}}),agreed:true});if(!s.ok){toast(s.reason);return;}}
+    const r=await API.social('request',{booking_id:p.id,offer_minor:o.offer});
+    if(!r.ok){toast(r.reason);await again();return;}
+    LP.remember(p.id);toast('Asked. The host sees your ranges and your match.');await again();if(openSheetEl===$('#sxSheet')&&pubDraw&&sheetFor===p.id)keepScroll(pubDraw.draw);}
+  async function liveOut(p){const rr=eng.S.pubReq[p.id];if(!rr)return;const r=await API.social('withdraw',{request_id:rr.id});
+    if(!r.ok)toast(r.reason);else{LP.forget(p.id);delete eng.S.pubReq[p.id];toast('Request taken back. Any hold is released.');}
+    await again();if(openSheetEl===$('#sxSheet')&&pubDraw&&sheetFor===p.id)keepScroll(pubDraw.draw);}
+  /* the accepted guest's card: held, not charged, for their offer plus bubl's fee */
+  async function livePayOffer(p,t){const rr=eng.S.pubReq[p.id];if(!rr)return;const r=await API.payPublic({request_id:rr.id});if(!r.ok){toast(r.reason);await again();return;}
+    openPayLive(r,{title:'Your offer, '+t.name,sub:S.ev.short,held:true,heldNote:'Charged only once the minimum is covered.',onCancel:again,
+      onDone:async()=>{await again();const x=eng.S.pubReq[p.id];toast(x&&x.state==='charged'?'The minimum is covered. Every hold is charged and your seat is confirmed.':'Card held. Charged once the minimum is covered.');}});}
+  async function liveAnswer(id,accept){const r=await API.social('answer',{request_id:id,accept});
+    if(!r.ok)toast(r.reason);else toast(!accept?'Declined. Nothing was taken from their card.':r.card_due_at?`Accepted. They have ${lt(Date.parse(r.card_due_at)-Date.now())} to hold their card.`:'Accepted. They join with no offer.');
+    await again();}
+  /* "Go public" and "Save": the host's own count of men and women, and the spots they open */
+  async function livePublish(o,joined){const M=myT(),edit=!!(M&&M.isPublic),t=T(S.boothId);if(!t||typeof MINE==='undefined'||!MINE.id)return;
+    const r=await API.social(edit?'group':'make-public',{booking_id:MINE.id,men:o.M,women:o.F,spots:o.spots+joined.length});
+    if(!r.ok){if(r.code==='profile_needed'){signup({h:'Go public',cta:'Go public',skipPhone:true,done:()=>livePublish(o,joined),back:()=>openGoPublic()});return;}toast(r.reason);return;}
+    await again();
+    if(edit){closeSheet();toast('Saved');return;}
+    const T_=myT();if(T_){share(Object.assign({mine:true},T_),()=>openHost());setTimeout(()=>toast(`${t.name} is public. It glows amber in the room.`),400);}else closeSheet();}
+  async function livePrivate(t){const r=await API.social('make-private',{booking_id:MINE.id});if(!r.ok){toast(r.reason);openHost();return;}
+    closeSheet();await again();toast(`${t.name} is private. It stops glowing in the room.`);}
+  /* the host covers what the room has not: held on their card until the minimum is covered */
+  async function liveCover(){const r=await API.social('cover',{booking_id:MINE.id});if(!r.ok){toast(r.reason);return;}
+    const pay=await API.payPublic({request_id:r.request_id});if(!pay.ok){toast(pay.reason);await again();return;}
+    openPayLive(pay,{title:'Cover what’s left',sub:`${T(S.boothId).name}, ${S.ev.short}`,held:true,heldNote:'Charged only once the minimum is covered.',onDone:again,onCancel:again});}
+  /* "For bubl only": every answer as given, and the one yes or no the matchmaking reads (again === 'Yes') */
+  async function liveFeedback(key,C,ppl,redraw){const id=key==='mine'?MINE.id:key;
+    const r=await API.social('feedback',{booking_id:id,satisfied:C.again==='Yes',answers:{rating:C.rate,again:C.again,next:Object.keys(C.next).filter(k=>C.next[k]).map(k=>ppl[k]),q:C.q,note:C.note}});
+    if(!r.ok&&r.code!=='already_given'){toast(r.reason);return;}
+    C.sent=true;redraw();toast('Sent privately. Thank you.');}
+  /* a shared link (…?t=<table>): the page opens at that night, and at that table once the guest is signed in */
+  let arrived=false;
+  async function liveArrive(){if(arrived)return;arrived=true;const id=LP.sharedId();if(!id)return;
+    const r=await API.call('guest','shared-table',{booking_id:id});
+    if(!r.ok){toast('That table is no longer open to the room.');return;}
+    const ev=EVENTS.find(e=>e.id===r.table.service);if(!ev||!T(r.table.table.key))return;
+    LP.remember(id);
+    const go=async()=>{if(S.ev!==ev){applyEvent(ev);if(typeof buildEvents==='function')buildEvents();setLbl('#pkDate',ev.short);}await again();
+      const p=eng.data.publics.find(x=>x.id===id);if(p)openPublic(p);else{closeSheet();toast('That table is no longer open to the room.');}};
+    if(LP.signedIn())go();else login(go);}
+
+  if(LIVE)window.bublLogin=login;   /* live: other parts of the page that need a signed-in guest (the Interested wall) use the same log-in */
 
   /* ---------- the room: tapping a glowing table ---------- */
   function openTable(id){if(!eng)return false;const M=myT();if(M&&M.table===id){openHost();return true;}
@@ -380,6 +477,7 @@
   /* the venue just held a table: hand it to the engine; if they switched public on, set it up */
   window.sxAfterBook=function(t){if(!eng)return;const go=S.sxPubNext===t.id;S.sxPubNext=null;lastBooth=S.boothId||null;
     const M=myT();if(M&&M.table!==t.id){mine=null;eng.data.myTable=null;}eng.booking=null;syncBooking();postGlow();
+    if(LIVE)LP.refresh();
     if(go)setTimeout(openGoPublic,1500);};
 
   /* ---------- above the room: Public tables, expandable; tap a table to see it in the room ---------- */
@@ -393,13 +491,13 @@
       v=`${inN}<small> of ${b.seats}</small>`;
       s=req==='in'?'<em class="ok">You’re in</em>':req==='pending'?'<em>Requested</em>':m!=null?`<em class="ok">${m}% match</em>`:st==='confirmed'||st==='full'?'Confirmed':`${need} more to confirm`;}
     else{const p=it.p,left=Math.max(0,p.min-covered(p)),r=it.mine?null:eng.S.pubReq[p.id];
-      v=`<small>AED </small>${left.toLocaleString('en-US')}`;
+      v=`<small>AED </small>${(left/UNIT).toLocaleString('en-US')}`;
       s=it.mine?`<em style="color:${PUB}">Your table</em>`:r?(r.state==='pending'?'<em>Requested</em>':'<em class="ok">You’re in</em>'):`left · closes ${esc(p.closes)}`;}
     return `<button class="sxc${on?' on':''}" data-id="${it.id}" type="button" aria-pressed="${on}"><span class="sxc-t"><i style="background:${TIERC[t.tier]||'#FF2D2D'}"></i>${esc(t.name)}</span><b class="sxc-v">${v}</b><span class="sxc-s">${s}</span><span class="sxc-go">${on?'Open ›':'Show in the room'}</span></button>`;}
   function addCard(){const o=ownState();if(o&&o.M&&o.M.isPublic)return '';
     return `<button class="sxc add" data-add type="button"><span class="sxc-t">Your table</span><b class="sxc-v">+</b><span class="sxc-s">${o?'Make it public':'Open your own'}</span><span class="sxc-go">${o?'Set it up ›':'How it works'}</span></button>`;}
   function paintBar(){const bar=$('#sxBar');if(!bar||!eng)return;
-    ['public'].forEach(k=>{const b=bar.querySelector(`[data-k="${k}"]`);if(!b)return;const n=barItems(k).length;b.querySelector('em').textContent=n;b.classList.toggle('none',!n);b.setAttribute('aria-expanded',BAR.k===k?'true':'false');});
+    ['public'].forEach(k=>{const b=bar.querySelector(`[data-k="${k}"]`);if(!b)return;const n=barItems(k).length;b.querySelector('em').textContent=LIVE&&!LP.signedIn()?'':n;b.classList.toggle('none',!n&&!(LIVE&&!LP.signedIn()));b.setAttribute('aria-expanded',BAR.k===k?'true':'false');});
     const tray=$('#sxTray');tray.classList.toggle('on',!!BAR.k);if(!BAR.k)return;
     const items=barItems(BAR.k);if(BAR.sel&&!items.some(i=>i.id===BAR.sel))BAR.sel=null;
     tray.style.setProperty('--c',colOf(BAR.k));
@@ -407,7 +505,9 @@
     const list=$('#sxList'),x=list.scrollLeft;list.innerHTML=items.map(it=>barCard(it,BAR.k)).join('')+(BAR.k==='public'?addCard():'');list.scrollLeft=x;}
   function revealRoom(){const a=$('#app'),bar=$('#sxBar');if(!a||!bar)return;const top=bar.getBoundingClientRect().top;
     if(top<56||top>140)a.scrollTo({top:a.scrollTop+top-72,behavior:'smooth'});}
-  function barToggle(k){if(!eng)return;if(BAR.k===k){BAR.k=null;BAR.sel=null;beamsOff();paintBar();return;}
+  function barToggle(k){if(!eng)return;
+    if(LIVE&&!LP.signedIn()&&BAR.k!==k){login(()=>{closeSheet();LP.refresh().then(()=>barToggle(k));});return;}   /* live: the list is for guests who have signed in */
+    if(BAR.k===k){BAR.k=null;BAR.sel=null;beamsOff();paintBar();return;}
     const items=barItems(k);if(!items.length){toast(k==='bubl'?'No bubls tonight yet':'No public tables tonight yet');return;}
     BAR.k=k;BAR.sel=null;beamsOff();dollPost({cmd:'beacon',key:'grp',ids:items.map(i=>i.id),color:colOf(k),dur:9});paintBar();$('#sxList').scrollLeft=0;revealRoom();}
   function barPick(id){if(BAR.sel===id){openTable(id);return;}BAR.sel=id;
@@ -418,6 +518,6 @@
 
   /* ---------- night changes, booking changes ---------- */
   window.socialEvent=function(ev){if(!ev||ev.id===lastEv)return;lastEv=ev.id;rebuild();};
-  window.__socialGlow=function(){if(!eng)return;const b=S.boothId||null;if(b!==lastBooth){lastBooth=b;const M=myT();if(M&&M.table!==b){mine=null;eng.data.myTable=null;}eng.booking=null;syncBooking();}postGlow();};
+  window.__socialGlow=function(){if(!eng)return;const b=S.boothId||null;if(b!==lastBooth){if(LIVE)LP.refresh();lastBooth=b;const M=myT();if(M&&M.table!==b){mine=null;eng.data.myTable=null;}eng.booking=null;syncBooking();}postGlow();};
   lastBooth=S.boothId||null;lastEv=S.ev&&S.ev.id;rebuild();
 })();

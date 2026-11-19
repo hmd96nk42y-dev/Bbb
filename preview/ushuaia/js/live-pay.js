@@ -23,7 +23,7 @@ function openPayLive(r,o){
   let busy=false,done=false,confirm=null;const err=sh.querySelector('.pay-err'),go=sh.querySelector('.pay-go');
   const say=m=>{err.textContent=m;err.hidden=!m;};
   const shut=paid=>{sc.classList.remove('on');sh.classList.remove('on');setTimeout(()=>{sc.remove();sh.remove();if(!paid&&o.onCancel)o.onCancel();},420);};
-  const success=()=>{done=true;sh.innerHTML=`<div class="pay-ok"><div class="pay-tick"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none"/><path d="M15 27l7 7 15-16" fill="none"/></svg></div><b>${o.held?'Held':'Paid'} ${M(total)}</b><span>${o.held?'Charged only once the table is secured.':'Thank you.'}</span></div>`;
+  const success=()=>{done=true;sh.innerHTML=`<div class="pay-ok"><div class="pay-tick"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none"/><path d="M15 27l7 7 15-16" fill="none"/></svg></div><b>${o.held?'Held':'Paid'} ${M(total)}</b><span>${o.held?(o.heldNote||'Charged only once the table is secured.'):'Thank you.'}</span></div>`;
     setTimeout(()=>{shut(true);o.onDone&&o.onDone();},1300);};
   sc.addEventListener('click',e=>{e.stopPropagation();if(!busy)shut();});
   ['click','pointerdown','pointerup','touchstart','touchend'].forEach(ev=>{sh.addEventListener(ev,e=>e.stopPropagation());sc.addEventListener(ev,e=>e.stopPropagation());});

@@ -58,6 +58,9 @@ function bookLive(t,b,fresh){
   if(fresh)toast(b.state==='requested'?`${t.name} requested. The team will confirm it with you.`:HN.confirmed?`${t.name} is confirmed.`:MINE.payNow?`Pay the deposit now to confirm ${t.name} and unlock your entry QR.`:`${t.name} is held for you. Pay the deposit to confirm it and unlock your entry QR.`);
   if(fresh)setTimeout(()=>hostTransition(becomeHost),260);else becomeHost();
   hostWatch();
+  if(PAGE.modules.includes('table_votes')){$('#minSpend').hidden=false;if(window.vtRender)vtRender();}   /* the table's song vote (votes.js); the spend figures of that section stay hidden */
+  if(!fresh)BUBL.call('guest','change-request',{booking_id:b.booking_id,look:true}).then(c=>{HN.chgReq=!!(c.ok&&c.request&&c.request.state==='pending');});   /* a table change already asked for is still with the team */
+  if(typeof sxAfterBook==='function')sxAfterBook(t);   /* public tables: the table is handed to those screens; "Hold and go public" opens its sheet */
 }
 /* After the cut-off there is no hold and no split: the table is booked by paying the deposit in one go.
    The back end keeps the table for the venue's own few minutes while the host pays (never shown as a hold) and opens

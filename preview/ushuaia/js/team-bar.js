@@ -1,6 +1,11 @@
 /* ================= Roland · the host, working the harbour ================= */
 (function(){
-  const PRICE_LINE=`Backstage A is ${AED(30000)} for 12. VIP ${AED(18000)} for 12, Platinum ${AED(15000)} for 12, Gold ${AED(10000)} for 10, Silver ${AED(6000)} for 8. Extra guests are ${AED(750)} to ${AED(2500)} each, depending on the section.`;
+  /* live: every figure the team gives is the venue's own (its tiers, its tickets) or counted from real bookings;
+     what BUBL cannot do yet (the menu, pre-orders, calling the team) is not offered. */
+  const livePrices=()=>{const ts=Object.keys(TIERS).map(k=>TIERS[k]).filter(t=>!t.req&&t.min!=null),ex=ts.map(t=>t.extra).filter(Boolean);
+    return ts.map(t=>`${t.label} is ${AED(t.min)} for ${t.cap}`).join(', ')+'.'+(ex.length?` Extra guests are ${AED(Math.min(...ex))}${Math.min(...ex)===Math.max(...ex)?'':` to ${AED(Math.max(...ex))}`} each, depending on the section.`:'');};
+  const liveTickets=ev=>{const g=ev.ga||[];return g.length?g.map(t=>`${t.label} is ${t.on_sale&&t.price_minor!=null?AED(t.price_minor):t.why==='sold_out'?'sold out':'not on sale yet'}${t.valid_until?`, before ${t.valid_until}`:''}`).join('; ')+'. One ticket per person. Tap Buy tickets above the room.':`Tickets for ${ev.short} are not sold here.`;};
+  const PRICE_LINE=LIVE?livePrices():`Backstage A is ${AED(30000)} for 12. VIP ${AED(18000)} for 12, Platinum ${AED(15000)} for 12, Gold ${AED(10000)} for 10, Silver ${AED(6000)} for 8. Extra guests are ${AED(750)} to ${AED(2500)} each, depending on the section.`;
   function busy(){const o=openCount(),tot=TABLES.filter(t=>!t.req).length,taken=tot-TABLES.filter(t=>!t.req&&tableOpen(t)).length;return {o,taken,tot,d:taken/tot>.6?'filling fast':'still plenty open'};}
   function recommend(){
     const p=S.party||6,cand=TABLES.filter(t=>!t.req&&fits(t,p)&&seeded(t.id));
@@ -14,11 +19,11 @@
   const AG={last:null,list:[],idx:0,crit:null};
   const PLACES={dj:{x:0,z:780,l:'the DJ'},stage:{x:0,z:690,l:'the stage'},floor:{x:0,z:420,l:'the dance floor'},door:{x:0,z:-40,l:'the entrance'}};
   const RANK={bsA:5,bsB:5,bsC:5,vip:4,plat:3,gold:2,silver:1};
-  function money(v,unit){v=parseFloat(String(v).replace(/,/g,''));if(isNaN(v))return 0;if(unit==='k'||v<1000)v*=1000;return Math.round(v);}
+  function money(v,unit){v=parseFloat(String(v).replace(/,/g,''));if(isNaN(v))return 0;if(unit==='k'||v<1000)v*=1000;return Math.round(v)*UNIT;}   /* live: in the back end's minor units, like every price */
   function parseCrit(q){const c={};let m,qb=q;
     if((m=q.match(/(?:for|party of|group of|table of|we are|we re|there are|there s)\s+(\d{1,2})\b/))||(m=q.match(/\b(\d{1,2})\s*(?:people|guests|pax|persons|of us|friends|girls|guys)\b/))){c.party=Math.max(2,Math.min(16,+m[1]));qb=q.replace(m[0],' ');}
     if((m=qb.match(/between\s+(?:aed\s*)?(\d[\d,.]*)\s*(k)?\s*(?:and|to|-)\s*(?:aed\s*)?(\d[\d,.]*)\s*(k)?/))){c.min=money(m[1],m[2]||m[4]);c.max=money(m[3],m[4]);}
-    else if((m=qb.match(/(?:aed\s*)?(\d[\d,.]*)\s*(k|thousand)?\b/))&&(m[2]||+String(m[1]).replace(/,/g,'')>=1000||/aed|budget|under|below|max|up to|around|about| at |spend|minimum|less than/.test(qb))){const v=money(m[1],m[2]?'k':null);if(v>=3000)c.max=v;}
+    else if((m=qb.match(/(?:aed\s*)?(\d[\d,.]*)\s*(k|thousand)?\b/))&&(m[2]||+String(m[1]).replace(/,/g,'')>=1000||/aed|budget|under|below|max|up to|around|about| at |spend|minimum|less than/.test(qb))){const v=money(m[1],m[2]?'k':null);if(v>=3000*UNIT)c.max=v;}
     if(/backstage|stage deck|ring a|behind the dj/.test(q))c.tier='bs';else if(/\bvip\b/.test(q))c.tier='vip';else if(/platinum|\bplat\b/.test(q))c.tier='plat';else if(/\bgold\b/.test(q))c.tier='gold';else if(/silver/.test(q))c.tier='silver';
     if(/\bleft\b/.test(q))c.side='left';else if(/\bright\b/.test(q))c.side='right';
     if(/\b(dj|booth|decks)\b/.test(q))c.near='dj';else if(/\bstage\b/.test(q)&&c.tier!=='bs')c.near='stage';else if(/dance ?floor|the crowd|the floor|middle|center|centre/.test(q))c.near='floor';else if(/entrance|door|exit|gate/.test(q))c.near='door';
@@ -59,14 +64,15 @@
     if(AG.last&&/\b(cheaper|less expensive|lower minimum|cheaper one)\b/.test(q)){const p=AG.crit.party||S.party||0,cc=Object.assign({},AG.crit,{max:minFor(AG.last,p)-1});const L=search(cc);if(!L.length)return `${AG.last.name} is already the best price that fits.`;AG.list=L;AG.idx=0;AG.crit=cc;return showTable(L[0],cc,'Cheaper');}
     if(AG.last&&/\b(closer|nearer)\b/.test(q)){const P=PLACES[AG.crit.near||'dj'],cur=dist(AG.last,P),cc=Object.assign({},AG.crit,{near:AG.crit.near||'dj',order:'near'});const L=search(cc).filter(t=>dist(t,P)<cur-1);if(!L.length)return `${AG.last.name} is the closest that fits${AG.crit.max?` within ${AED(AG.crit.max)}`:''}. Raise the budget and we can get you nearer.`;AG.list=L;AG.idx=0;AG.crit=cc;return showTable(L[0],cc,'Closer');}
     /* the rest of the night */
-    if(/\b(buy|get|need|want|book)\b.*\btickets?\b|\btickets? for\b/.test(q)){try{openTix();}catch(_){}return tix.done?`You already have your ticket, ${tix.done}. It's one per person, so share your link and friends buy their own.`:`Tickets are open. It's one per person: pick your ticket, add your details, then pay with Apple Pay or card. Friends buy their own with your link.`;}
-    if(/\b(show|open|see)\b.*\bmenu\b|^ menu $/.test(q)){try{$('#menuBtn').click();}catch(_){}return `Here's the menu. Pre-order and you pay 10% less, still counted in full toward your minimum.`;}
+    if(/\b(buy|get|need|want|book)\b.*\btickets?\b|\btickets? for\b/.test(q)){if(LIVE){const g=S.ev.ga||[];if(g.length){try{openTix();}catch(_){}}return tix.done?`You already have your ticket, ${tix.done}. It's one per person.`:g.length?`Tickets are open. It's one per person: pick your ticket, add your details, then pay by card.`:`Tickets for ${S.ev.short} are not sold here.`;}
+      try{openTix();}catch(_){}return tix.done?`You already have your ticket, ${tix.done}. It's one per person, so share your link and friends buy their own.`:`Tickets are open. It's one per person: pick your ticket, add your details, then pay with Apple Pay or card. Friends buy their own with your link.`;}
+    if(!LIVE&&/\b(show|open|see)\b.*\bmenu\b|^ menu $/.test(q)){try{$('#menuBtn').click();}catch(_){}return `Here's the menu. Pre-order and you pay 10% less, still counted in full toward your minimum.`;}
     if(/firework|light show|pyro/.test(q)){try{dollPost({cmd:'fireworks'});const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-110),behavior:'smooth'});}catch(_){}return `Watch the dome.`;}
     if(/\b(3d|three d)\b/.test(q)&&/\b(show|switch|go|view|see)\b/.test(q)){try{S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});}catch(_){}return `Here's the room in 3D.`;}
     if(/\bplan\b/.test(q)&&/\b(show|switch|go|view|see)\b/.test(q)){try{S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});}catch(_){}return `Here's the plan. Tap a section to zoom in.`;}
     if(booked&&/invite|send (the )?link|share (the )?link|my guests/.test(q)){try{const a=$('#app'),el=$('#invite');if(a&&el)a.scrollTo({top:el.getBoundingClientRect().top+a.scrollTop-a.getBoundingClientRect().top-80,behavior:'smooth'});}catch(_){}return `Here's your guest link. Each guest claims their own spot.`;}
     if(booked&&/deposit/.test(q)){try{HN.depOpen=true;hnTabs();const a=$('#app'),el=$('#tabDep');if(a&&el)a.scrollTo({top:el.getBoundingClientRect().top+a.scrollTop-a.getBoundingClientRect().top-80,behavior:'smooth'});}catch(_){}return `Here's your deposit. Split it evenly in one tap, or open Custom split to set each seat's part. It goes out on your invite link, nothing extra to send.`;}
-    if(booked&&/split/.test(q)){try{HN.decOpen=true;hnTabs();SPLIT.open=true;spRender();const a=$('#app'),el=$('#hnSplit');if(a&&el)a.scrollTo({top:el.getBoundingClientRect().top+a.scrollTop-a.getBoundingClientRect().top-80,behavior:'smooth'});}catch(_){}return `Here's the split. Set each person's share by % or AED.`;}
+    if(!LIVE&&booked&&/split/.test(q)){try{HN.decOpen=true;hnTabs();SPLIT.open=true;spRender();const a=$('#app'),el=$('#hnSplit');if(a&&el)a.scrollTo({top:el.getBoundingClientRect().top+a.scrollTop-a.getBoundingClientRect().top-80,behavior:'smooth'});}catch(_){}return `Here's the split. Set each person's share by % or AED.`;}
     /* finding a table */
     if(wantsTable(q,c)){const L=search(c);AG.crit=c;AG.list=L;AG.idx=0;
       if(!L.length){AG.last=null;try{dollPost({cmd:'suggest',id:null});}catch(_){}return `Nothing open matches that${c.max?` within ${AED(c.max)}`:''}${c.party?` for ${c.party}`:''} for ${S.ev.short}. Try a higher budget, a smaller group or another section.`;}
@@ -76,7 +82,7 @@
   window.__ushReply=function(qRaw){
     const q=' '+String(qRaw).toLowerCase().replace(/[^a-z0-9'\s]/g,' ')+' ',has=(...w)=>w.some(t=>q.indexOf(t)>-1),ev=S.ev,b=busy();
     {const r=agent(q.replace(/'/g,' '));if(r)return r;}
-    if(has('hello',' hi ',' hey','evening','greeting'))return `Good evening from the Ushua\u00efa team. We look after the tables here. Ask us about ${ev.short}, the sections or what to order.`;
+    if(has('hello',' hi ',' hey','evening','greeting'))return `Good evening from the Ushua\u00efa team. We look after the tables here. Ask us about ${ev.short}, the sections or ${LIVE?'when to arrive':'what to order'}.`;
     if(has('thank','cheers'))return `Our pleasure. Tap a section when you're ready, then your table, and we'll have it set before you arrive.`;
     if(has('other night','other event','season','what else','next event','upcoming','calendar'))return `Season 3 so far: ${EVENTS.map(e=>`${e.short} on ${fmtD(dOf(e.k))}`).join(', ')}. Pick a night under the event card to switch.`;
     if(has('dress','wear','attire',' code','outfit'))return `Casual, but no flip-flops. 21 and over, and bring your original Emirates ID or passport, copies aren't accepted.`;
@@ -86,10 +92,14 @@
       const t=recommend();if(!t)return `For ${S.party||'your group'} everything that fits is gone for ${ev.short}. Try a smaller party size or another night.`;
       try{dollPost({cmd:'select',id:t.id});}catch(_){}
       return `For ${S.party?S.party:'your group'}${BUD.on?` on ${AED(BUD.val)}`:''}, we'd put you at ${t.name}: ${t.where.toLowerCase()}. ${AED(minFor(t,S.party))} minimum. We've lit it in the room, tap it to hold it.`;}
+    if(LIVE&&has('backstage','behind the dj','stage deck','ring')){const a=TIERS.bsA;return `Backstage wraps the DJ booth on the stage deck in three rings.${a&&a.min!=null?` Ring A is ${AED(a.min)} for ${a.cap}${a.extra?`, extra guests ${AED(a.extra)} each`:''}.`:''} Rings B and C are on request: the team confirms the minimum with you.`;}
     if(has('backstage','behind the dj','stage deck','ring'))return `Backstage wraps the DJ booth on the stage deck in three rings. Ring A is ${AED(30000)} for 12, extra guests ${AED(2500)} each. Rings B and C are held for the Backstage List and priced on request.`;
+    if(LIVE&&has('ticket','general admission','door price',' ga '))return liveTickets(ev);   /* live: a question about tickets is answered with tickets, before the table prices */
     if(has('minimum','min spend','spend','price','cost','how much','budget','extra','silver','gold','platinum',' vip'))return `${PRICE_LINE} Slide the budget bar under the room and every table that fits lights up.`;
-    if(has('bottle','drink','order','champagne','tequila','vodka','menu','cocktail','shot'))return `Most tables open with Don Julio 1942 or Grey Goose and add champagne later. Pre-order before you arrive and you pay 10% less, while it still counts in full toward your minimum.`;
+    if(!LIVE&&has('bottle','drink','order','champagne','tequila','vodka','menu','cocktail','shot'))return `Most tables open with Don Julio 1942 or Grey Goose and add champagne later. Pre-order before you arrive and you pay 10% less, while it still counts in full toward your minimum.`;
+    if(LIVE&&has('arrive','arrival','when','time','early','late','doors')){const e=(ev.ga||[]).find(t=>t.valid_until);return `Doors ${ev.doors}.${e?` The ${e.label.toLowerCase()} ticket works before ${e.valid_until}.`:''} Sunset over the harbour is the best time to walk in.`;}
     if(has('arrive','arrival','when','time','early','late','doors'))return `Doors ${ev.doors}${ev.ends?`, music until ${ev.ends}`:''}. The early-entry ticket works before 22:00. Sunset over the harbour is the best time to walk in.`;
+    if(LIVE&&has('ticket','entry','general admission','door price',' ga '))return liveTickets(ev);
     if(has('ticket','entry','general admission','door price',' ga '))return `Early entry is ${AED(250)} before 22:00, second wave ${AED(300)}, VIP standing ${AED(1500)}. One ticket per person. Tap Buy tickets above the room.`;
     if(has('where','address','location','find you','directions','metro','taxi','parking','park'))return `Dubai Harbour, off Sheikh Mohammed bin Rashid Boulevard. Parking is limited, so a taxi is easiest. By metro, the Red Line to Nakheel Harbour and Tower, about 5 km away. The map is at the bottom of this page.`;
     if(has('re entry','reentry','leave and','come back','photo','video','camera','smok'))return `No re-entry once you're in. No photography or videography. Smoking is allowed in the venue.`;
@@ -137,6 +147,7 @@
       document.body.appendChild(_conn); }
     _conn.classList.add('on'); clearTimeout(_connT); _connT=setTimeout(function(){ _conn.classList.remove('on'); },2400);
   }
+  if(LIVE&&callEl)callEl.style.display='none';   /* live: no number to call until the venue gives one */
   if(callEl) callEl.addEventListener('click',showConnecting);
 
   /* ride above the soft keyboard like WhatsApp */

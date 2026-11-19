@@ -122,6 +122,7 @@ async function restoreMine(){
   const r=await BUBL.me();if(!r.ok||!r.guest)return;
   S.guestName=r.guest.full_name;S.guestPhone=r.guest.phone_e164;S.guestEmail=r.guest.email;
   LT.mine=r.tickets||[];tixNight();   /* my tickets (live-tickets.js) */
+  if(window.lcWelcome)lcWelcome(r);   /* a guest BUBL knows is welcomed back, with their real history (member.js) */
   const b=(r.bookings||[]).find(x=>x.role==='host'&&EVENTS.some(e=>e.id===x.service)&&T(x.table.key));if(!b)return;
   const ev=EVENTS.find(e=>e.id===b.service);if(S.ev!==ev){applyEvent(ev);buildEvents();setLbl('#pkDate',ev.short);}
   S.party=b.party_size;if(window.paintGuests)paintGuests();

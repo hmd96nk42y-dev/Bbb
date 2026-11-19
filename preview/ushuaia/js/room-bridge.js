@@ -70,7 +70,6 @@ function renderRoom(){
     dollFrame=document.createElement('iframe');dollFrame.className='doll-frame';dollFrame.title='Ushua\u00efa, pick your table in 3D';dollFrame.setAttribute('scrolling','no');
     dollFrame.src=VENUE_SRC;
     host.appendChild(dollFrame);addVtog(host);
-    if(LIVE)dollFrame.addEventListener('load',()=>{try{const st=dollFrame.contentDocument.createElement('style');st.textContent='#roland,#rolBub{display:none!important}';dollFrame.contentDocument.head.appendChild(st);}catch(_){}});   /* the team bar: not offered in test and live yet */
   }
   syncDoll();
 }
