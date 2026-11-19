@@ -1,0 +1,20 @@
+/* Find your table, compact: two rows that read Any and open when tapped */
+.bud{padding:12px!important}
+.bud .bud-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
+.bud .bud-t{font-size:20px!important;letter-spacing:.06em}
+.bud .bud-hd .bud-go{flex:0 0 auto;height:34px;padding:0 14px;font-size:13px}
+.bud-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bud-dd{display:flex;align-items:center;gap:8px;min-width:0;height:42px;padding:0 11px 0 12px;border-radius:10px;background:rgba(255,45,45,.06);box-shadow:0 0 0 1px rgba(255,45,45,.35) inset;color:#fff;text-align:left}
+.bud-dd span{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,200,192,.72)}
+.bud-dd b{flex:1;min-width:0;text-align:right;font:400 18px/1 var(--disp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ffd9d2;text-shadow:0 0 8px rgba(255,45,45,.85)}
+.bud-dd b.off{color:rgba(255,200,192,.5);text-shadow:none}
+.bud-dd s{flex:0 0 7px;height:7px;border-right:1.5px solid rgba(255,200,192,.6);border-bottom:1.5px solid rgba(255,200,192,.6);transform:translateY(-2px) rotate(45deg);transition:transform .25s var(--snap)}
+.bud-dd[aria-expanded="true"]{box-shadow:0 0 0 1.5px #FF2D2D inset,0 0 14px -4px #FF2D2D}
+.bud-dd[aria-expanded="true"] s{transform:translateY(2px) rotate(-135deg)}
+.bud-pn{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s var(--snap)}
+.bud-pn.on{grid-template-rows:1fr}
+.bud-pi{overflow:hidden;min-height:0}
+.bud .bud-pi{margin:0 -8px;padding:0 8px}
+.bud .bud-pn .bud-guests,.bud .bud-pn .bud-pre{margin:6px 0 0;padding:4px 0 8px}
+.bud .bud-pn .bud-pre{grid-template-columns:repeat(6,1fr)}
+.bud #budClr{display:none!important}

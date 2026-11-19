@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>Ushuaïa</title>
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BUBL">
+<link rel="apple-touch-icon" href="media/icon-180.png">
+<link rel="icon" type="image/png" href="media/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/shell.css">
+</head>
+<body>
+  <iframe id="screen" title="BUBL app"></iframe>
+  <div class="topscrim"></div>
+  <div class="loader" id="loader"><div class="ring"></div></div>
+<script src="config.js"></script>
+<script>window.BUBL_SHELL={app:'app.html',accent:'--c-guest',background:'#000000',mode:(window.BUBL_CONFIG||{}).mode};</script>
+<script src="../engine/shell.js"></script>
+</body></html>

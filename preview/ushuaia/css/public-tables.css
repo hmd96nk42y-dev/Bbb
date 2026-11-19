@@ -1,0 +1,16 @@
+/* public tables: the match, and the after-the-night feedback in bubls (the real mark, recoloured, never redrawn) */
+.sx-mt{display:flex;align-items:center;gap:12px;margin:10px 0;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset}
+.sx-mt b{font:400 26px/1 var(--disp);color:#F2C14E}.sx-mt b small{font-size:13px;margin-left:1px}
+.sx-mt span{display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--ink2)}.sx-mt em{font-style:normal;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.sx-rm{font-style:normal;margin-left:6px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:rgba(242,193,78,.14);color:#F2C14E}
+.fb-q{margin:0 0 16px}.fb-q>b{display:block;font-size:15px;font-weight:600;margin-bottom:8px}.fb-q>small{display:block;font-size:12px;color:var(--mute);margin:-4px 0 8px}
+.fb-rate{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.fb-rb{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;background:none;border:0}
+.fb-rb .bm{width:42px;height:42px;filter:grayscale(1) brightness(.7);opacity:.5;transition:filter .35s,opacity .35s,transform .35s cubic-bezier(.2,.8,.2,1)}
+.fb-rb::before{content:'';position:absolute;top:6px;left:50%;width:42px;height:42px;margin-left:-21px;border-radius:50%;background:var(--rc);mix-blend-mode:color;opacity:0;transition:opacity .35s,background .35s;pointer-events:none}
+.fb-rb.on .bm{filter:saturate(1.25) brightness(1.08);opacity:1;transform:scale(1.06);border-radius:50%;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--rc) 70%,transparent) 0 58%,transparent 62%)}
+.fb-rb.on::before{opacity:1}
+.fb-rb.on::after{content:'';position:absolute;top:6px;left:50%;width:42px;height:42px;margin-left:-21px;border-radius:50%;box-shadow:0 0 20px -2px var(--rc);pointer-events:none}
+.fb-rb small{font-size:11px;font-weight:700;color:var(--mute)}
+.fb-rw{font-size:13px;font-weight:700;margin:4px 0 0;transition:color .35s}
+.fb-note{height:auto;padding:12px 14px;resize:none}

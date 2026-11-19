@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<title>bubl · Ushuaïa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/venue.css">
+<link rel="stylesheet" href="css/hits.css">
+<link rel="stylesheet" href="css/evrail.css">
+<link rel="stylesheet" href="css/social.css">
+<link rel="stylesheet" href="css/bud-compact.css">
+<link rel="stylesheet" href="css/price-points.css">
+<link rel="stylesheet" href="css/public-tables.css">
+</head>
+<body>
+<div class="screen" id="screen">
+  <div class="app" id="app">
+    <header class="hdr">
+      <span class="blw" aria-label="bubl" role="img"><svg class="bl" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <radialGradient id="bgGlass" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".015"/><stop offset=".7" stop-color="#fff" stop-opacity=".03"/><stop offset=".88" stop-color="#ffd9d4" stop-opacity=".1"/><stop offset=".965" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity=".62"/></radialGradient>
+          <radialGradient id="bgRimM" cx="50%" cy="50%" r="50%"><stop offset=".58" stop-color="#000"/><stop offset=".84" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></radialGradient>
+          <mask id="bgRim"><circle cx="32" cy="32" r="28" fill="url(#bgRimM)"/></mask>
+          <radialGradient id="bgF1" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff2418" stop-opacity=".95"/><stop offset="1" stop-color="#ff2418" stop-opacity="0"/></radialGradient>
+          <radialGradient id="bgF2" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="bgF3" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#e2422c" stop-opacity=".95"/><stop offset="1" stop-color="#e2422c" stop-opacity="0"/></radialGradient>
+          <radialGradient id="bgF4" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff" stop-opacity=".7"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="bgSpec" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".45" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="bgCaus" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+          <linearGradient id="bgGlint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <clipPath id="bgClip"><circle cx="32" cy="32" r="28"/></clipPath>
+        </defs>
+        <g clip-path="url(#bgClip)">
+          <g mask="url(#bgRim)" style="mix-blend-mode:screen">
+            <g class="bf-a"><ellipse cx="46" cy="18" rx="20" ry="14" fill="url(#bgF1)"/><ellipse cx="14" cy="44" rx="18" ry="16" fill="url(#bgF3)"/></g>
+            <g class="bf-b"><ellipse cx="48" cy="46" rx="17" ry="15" fill="url(#bgF2)"/><ellipse cx="18" cy="16" rx="12" ry="10" fill="url(#bgF4)"/></g>
+          </g>
+          <circle cx="32" cy="32" r="28" fill="url(#bgGlass)"/>
+          <ellipse cx="41" cy="45" rx="7" ry="4.5" fill="url(#bgCaus)" transform="rotate(-35 41 45)"/>
+        </g>
+        <circle cx="32" cy="32" r="27.8" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".5"/>
+        <g class="bf-glint"><path d="M32 4.2A27.8 27.8 0 0 1 52.6 13.2" fill="none" stroke="url(#bgGlint)" stroke-width="1.4" stroke-linecap="round"/></g>
+        <ellipse class="bf-spec" cx="21.5" cy="18.5" rx="8.5" ry="4.6" fill="url(#bgSpec)" transform="rotate(-38 21.5 18.5)"/>
+        <circle cx="16.8" cy="25.4" r="1.5" fill="#fff" opacity=".85"/>
+      </svg></span>
+      <span class="night" id="hdrNight">Season 3</span>
+    </header>
+
+    <main class="page">
+      <section class="mast">
+        <h1 class="mlogo-wrap" id="wm"><span class="sr">Ushuaïa Dubai Harbour Experience</span></h1>
+        <p class="mast-line">Season 3, open air on the harbour</p>
+        <p class="mast-meta"><span>Dubai Harbour</span></p>
+        <div class="evhero" id="evHero"></div>
+        <div class="ev-head"><b>Pick your night</b><span id="evRailN"></span></div>
+        <div class="evrail" id="evRail" role="tablist" aria-label="Season 3 nights"></div>
+        <div class="venue-actions">
+          <button class="vact media" id="mediaBtn" type="button">
+            <div class="vbg" style="background-position:center 40%"></div><div class="vsh"></div>
+            
+            <span class="vlab"><span class="vname">Inside Ushuaïa</span><span class="vsub">The room at showtime</span></span>
+          </button>
+          <button class="vact menu" id="menuBtn" type="button">
+            <div class="vbg" style="background-position:center 30%"></div><div class="vsh"></div>
+            <span class="vlab"><span class="vname">Menu</span><span class="vsub">Bottles, cocktails and bites</span></span>
+          </button>
+        </div>
+      </section>
+
+      <section id="pickSec">
+        <div class="pickers">
+          <button class="pkr" data-key="date" id="pkDate" type="button"><small>Event</small><span class="lbl empty">Choose</span></button>
+          <button class="pkr" data-key="time" id="pkTime" type="button"><small>Arrival</small><span class="lbl empty">Choose</span></button>
+          <button class="pkr" data-key="party" id="pkParty" type="button"><small>Guests</small><span class="lbl empty">Choose</span></button>
+        </div>
+        <div class="pkpanel" id="pnDate"><p class="pkhint">Season 3 at Dubai Harbour. Pick your night.</p><div class="drow" id="dateRow"></div></div>
+        <div class="pkpanel" id="pnTime"><p class="pkhint">Doors from 19:00</p><div class="tmrow" id="timeRow"></div></div>
+        <div class="pkpanel" id="pnParty"><div class="prow" id="partyRow"></div></div>
+      </section>
+
+      <p class="signin">Returning guest? <span class="lk" id="signinLk">Access your experience</span></p>
+      <section class="vipb" id="vipBlock" hidden aria-live="polite"></section>
+      <section class="vipb tixb" id="tixBlock" hidden aria-live="polite"></section>
+      <section class="vipb hostb" id="hostBlock" hidden aria-live="polite"></section>
+
+      <section class="room">
+        <div class="tix-row"><button class="tixbtn" id="buyTix" type="button"><span>Buy tickets</span></button><span class="tix-sub" id="tixSub">From AED 250.</span></div>
+        <div class="room-stats" id="roomStats" hidden>
+          <div class="rs"><span class="rsn" id="rsTaken">–</span><span class="rsl">Tables booked</span></div>
+          <div class="rs"><span class="rsn" id="rsFloor">–</span><span class="rsl">On the floor</span></div>
+          <div class="rs locked" id="rsLocked" role="button" tabindex="0"><span class="rsn">12</span><span class="rsl">Your crowd</span></div>
+        </div>
+        <div class="bk-ctx is-prompt" id="bkCtx">
+          <span class="bk-tx"><span class="bk-main" id="bkMain">Set arrival and guests</span><span class="bk-sub" id="bkSub">Then tap a section, then your table</span></span>
+          <span class="bk-open" id="bkOpen"><i></i><b id="bkOpenN">–</b>&nbsp;open</span>
+        </div>
+        <div class="sxbar" id="sxBar" aria-label="Social tables"><div class="sxb-row"><button class="sxb" data-k="public" type="button" aria-expanded="false" aria-controls="sxTray" style="--c:#FF7A1A"><i></i><b>Public tables</b><em>0</em><s></s></button></div><div class="sxb-tray" id="sxTray"><div class="sxb-in"><p class="sxb-hint" id="sxHint"></p><div class="sxb-list" id="sxList"></div></div></div></div>
+        <div class="rcanvas is3d" id="roomCanvas"><div class="rwait">Lighting the room</div></div>
+        <div class="rleg"><span><i style="background:#FF2D2D;box-shadow:0 0 8px #FF2D2D"></i>Backstage</span><span><i style="background:#FF4FC8;box-shadow:0 0 8px #FF4FC8"></i>VIP</span><span><i style="background:#9A6BFF;box-shadow:0 0 8px #9A6BFF"></i>Platinum</span><span><i style="background:#FFF0D2;box-shadow:0 0 8px #FFF0D2"></i>Gold</span><span><i style="background:#6FD2FF;box-shadow:0 0 8px #6FD2FF"></i>Silver</span><span><i class="pk"></i>Your pick</span></div>
+        <section class="bud" id="budget" aria-label="Find your table">
+          <div class="bud-hd"><h2 class="bud-t">Find your table</h2><button class="bud-go" id="budGo" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Search</button></div>
+          <div class="bud-sel">
+            <button class="bud-dd" data-dd="g" type="button" aria-expanded="false" aria-controls="budPnG"><span>Guests</span><b class="off" id="budGv">Any</b><s></s></button>
+            <button class="bud-dd" data-dd="b" type="button" aria-expanded="false" aria-controls="budPnB"><span>Budget</span><b class="off" id="budVal">Any</b><s></s></button>
+          </div>
+          <div class="bud-pn" data-pn="g" id="budPnG"><div class="bud-pi"><div class="bud-guests" id="budGuests"></div></div></div>
+          <div class="bud-pn" data-pn="b" id="budPnB"><div class="bud-pi"><div class="bud-pre" id="budPre"></div><button class="bud-x" id="budClr" type="button" hidden>Clear</button></div></div>
+        </section>
+        <p class="rnote">Pinch in or tap a section to open the plan, then tap your table. Pinch out or tap empty space to step back. Double-tap the room for fireworks.</p>
+      </section>
+
+      <section class="ssum" id="selSum">
+        <div class="sl"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span><span><span class="sn" id="selName">Table</span> <span class="sm" id="selMeta"></span></span></div>
+        <button class="schg" id="selChg" type="button">Request change</button>
+      </section>
+      <div class="sx-own" id="sxOwn" hidden></div>
+      <section class="vprv" id="vPriv" hidden></section>
+
+      <section class="minsp" id="minSpend" hidden>
+        <div class="sec-hd"><h2 class="sech">Your minimum</h2><span id="msTable"></span></div>
+        <div class="ms-nums"><b id="msSpent">AED 0</b><span>spent of <b id="msMin">AED 0</b></span></div>
+        <div class="ms-bar" id="msBar"><i id="msFill"></i><em id="msMark"></em></div>
+        <p class="ms-over" id="msOver"></p>
+        <p class="ms-note" id="msNote">Pre-order before you arrive and packages come in under table prices. Every dirham counts toward your minimum.</p>
+        <button class="btn red full" id="msPre" type="button" style="margin-top:12px">Pre-order from the menu</button>
+        <div class="vote" id="tVote" data-who="host"></div>
+      </section>
+
+      <section class="inv" id="invite">
+        <h2 class="sech">Your guests</h2>
+        <p class="ilde">Send one link. Each guest claims their own spot at the table.</p>
+        <button class="ipv-btn" id="ipvBtn" type="button"><svg viewBox="0 0 22 16" aria-hidden="true"><rect x=".75" y=".75" width="20.5" height="14.5" rx="1" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M1.2 1.4 11 9.2l9.8-7.8" fill="none" stroke="#fff" stroke-width="1.2"/><circle cx="11" cy="9.4" r="2.6" fill="#FF1414"/></svg>Preview invitation</button>
+        <div class="lbox"><span class="lk" id="linkKey">bubl.app/ushuaia-dxb/k7r2x9</span><button class="lcpy" id="copyBtn" type="button" aria-label="Copy link"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="13" rx="1"/><path d="M5 16V5a2 2 0 012-2h9"/></svg></button></div>
+        <div class="srow"><button class="sbtn pri" id="sCopy" type="button">Copy link</button><button class="sbtn" id="sWA" type="button">WhatsApp</button><button class="sbtn" id="sSMS" type="button">SMS</button><button class="sbtn" id="sMore" type="button">Share</button></div>
+        <div class="smsf" id="smsForm"><input type="tel" class="num" placeholder="+971 50 000 0000"/><button class="snd" type="button">Send</button></div>
+        <p class="inote"><i></i><span>Each guest adds their own name, number and email through the link, beforehand or at the door. No details, no entry.</span></p>
+        <div class="idiv"></div>
+        <div class="ghd" id="glab">Guests joined <span id="gj">0</span> of <span id="gt">3</span></div>
+        <div class="ptrack"><div class="pfill" id="pfill"></div></div>
+        <div class="gfeed" id="gfeed"><p class="gempty">Waiting for your guests to claim their spots</p></div>
+      </section>
+
+      <section class="intr" id="interested" hidden>
+        <div class="sec-hd"><h2 class="sech">Interested</h2><span id="intCount"></span></div>
+        <p class="intr-sub" id="intSub">Going to this one? Add your Instagram and you're on the list everyone can see.</p>
+        <form class="intf" id="intForm" novalidate><label class="inw"><span class="at">@</span><input id="intIn" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="your.handle" aria-label="Instagram handle"/></label><button class="btn pri" type="submit" style="white-space:nowrap">Add me</button></form>
+        <p class="intr-err" id="intErr" role="alert"></p>
+        <div class="intr-wall" id="intWall"></div>
+        <p class="intr-foot">Interest doesn't hold a table. Only a booking can invite guests.</p>
+      </section>
+
+      <section class="socials">
+        <div class="sec-hd"><h2 class="sech">Socials</h2><span>Instagram</span></div>
+        <div id="socList"></div>
+      </section>
+      <div id="bkLoc"></div>
+      <a class="wa" id="waBox" href="#" role="button" aria-label="Chat with Ushuaïa on WhatsApp">
+        <span class="wa-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16A2.5 2.5 0 0 1 4 13.5z" fill="#fff"/><circle cx="8.5" cy="9.5" r="1.2" fill="#25D366"/><circle cx="12" cy="9.5" r="1.2" fill="#25D366"/><circle cx="15.5" cy="9.5" r="1.2" fill="#25D366"/></svg></span>
+        <span class="wa-t"><b>Chat with us on WhatsApp</b><span id="waNum"></span></span>
+        <span class="wa-go">Chat</span>
+      </a>
+      <p class="foot">Powered by bubl</p>
+    </main>
+    <div class="thost" id="toastHost"></div>
+  </div>
+
+  <div class="medo" id="mediaOvr" role="dialog" aria-label="The room">
+    <div class="medo-top"><div><b>Inside Ushuaïa</b><span>Photos and video from the harbour</span></div><button id="medClose" type="button" aria-label="Close">✕</button></div>
+    <div class="media-scroll" id="mediaScroll"></div>
+    <div class="media-dots" id="mediaDots"></div>
+  </div>
+
+  <div class="msh-scrim" id="mshScrim"></div>
+  <div class="msh" id="sxSheet" role="dialog" aria-label="Social table"><div class="msh-grip"></div><div class="msh-hd"><div class="t" id="sxHead"></div><button class="msh-x" data-close type="button" aria-label="Close">✕</button></div><div class="msh-body" id="sxBody"></div></div>
+  <div class="msh" id="tSheet" role="dialog" aria-label="Table"><div class="msh-grip"></div><div class="msh-hd"><div class="t" id="tsHead"></div><button class="msh-x" data-close type="button" aria-label="Close">✕</button></div><div class="msh-body" id="tsBody"></div></div>
+  <div class="msh" id="djSheet" role="dialog" aria-label="DJ"><div class="msh-grip"></div><div class="msh-hd"><div class="dj-av"><i>U</i></div><div class="t"><h3 style="margin-top:0;font-size:26px">Lineup</h3><div class="dj-sub"><span>Season 3</span></div></div><button class="msh-x" data-close type="button" aria-label="Close">✕</button></div><div class="msh-body" id="djBody"></div></div>
+  <div class="msh" id="depSheet" role="dialog" aria-label="Custom split"><div class="msh-grip"></div><div class="msh-hd"><div class="t"><h3 style="margin-top:0;font-size:26px">Custom split</h3><div class="ds-sub" id="dsSub"></div></div><button class="msh-x" data-close type="button" aria-label="Close">✕</button></div><div class="msh-body" id="dsBody"></div></div>
+  <div class="msh" id="tixSheet" role="dialog" aria-label="Tickets"><div class="msh-grip"></div><div class="msh-hd"><div class="t" id="tixHead"></div><button class="msh-x" data-close type="button" aria-label="Close">✕</button></div><div class="msh-body" id="tixBody"></div></div>
+  <div class="msh" id="menuSheet" role="dialog" aria-label="Menu"><div class="msh-grip"></div><div class="msh-hd"><div class="t"><h3 style="margin-top:0;font-size:28px">Menu</h3><div class="mnote" id="menuNote" style="margin:4px 0 0"></div></div><button class="msh-x" data-close type="button" aria-label="Close">✕</button></div>
+    <div class="mtabs" id="mTabs"></div><div class="mmin" id="menuMin"></div><div class="msh-body" id="menuList"></div>
+    <div class="basket-bar"><div class="bb-info"><div class="bb-label" id="bbLabel">Your basket</div><div class="bb-items" id="bbItems">Nothing added yet</div><div class="bb-prog" id="bbProg" hidden><i id="bbProgI"></i></div></div><div class="bb-total" id="bbTotal">AED 0</div></div>
+  </div>
+
+  <div class="ios-nb" id="smsBanner" role="status" aria-live="polite">
+    <div class="ios-nb-ic" aria-hidden="true"><svg viewBox="0 0 40 40"><defs><linearGradient id="msgG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67F07F"/><stop offset="1" stop-color="#1FC23B"/></linearGradient></defs><rect width="40" height="40" rx="9.5" fill="url(#msgG)"/><path d="M20 9.2c-6.9 0-12.4 4.5-12.4 10.1 0 3.2 1.8 6 4.6 7.9-.2 1.7-1 3.3-2.4 4.5 2.5.1 4.6-.8 6.1-2.3 1.3.3 2.6.5 4.1.5 6.9 0 12.4-4.5 12.4-10.1S26.9 9.2 20 9.2z" fill="#fff"/></svg></div>
+    <div class="ios-nb-body"><div class="ios-nb-top"><span class="ios-nb-title">BUBL</span><span class="ios-nb-time">now</span></div><p class="ios-nb-msg" id="smsLine"></p><p class="ios-nb-sub" id="confSumm"></p></div>
+  </div>
+
+  <div class="ginfo-backdrop" id="ginfoModal">
+    <div class="ginfo-card">
+      <p class="ginfo-hed" id="ginfoHed">Hold this table</p>
+      <p class="ginfo-sub">So the door knows who you are.</p>
+      <div class="ginfo-sum" id="ginfoSum"></div>
+      <p class="id-note"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="5.6" cy="7.4" r="1.6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M3.4 11c.5-1.1 1.3-1.6 2.2-1.6s1.7.5 2.2 1.6M9.6 6.6h3M9.6 9h2.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span>Your name must match your ID at the door, or entry isn&#39;t guaranteed.</span></p><label class="ginfo-label" for="ginfoName">Full name as on your ID</label>
+      <input class="ginfo-input" id="ginfoName" type="text" placeholder="First and last name" autocomplete="name"/>
+      <label class="ginfo-label" for="ginfoPhone">Mobile number</label>
+      <input class="ginfo-input" id="ginfoPhone" type="tel" placeholder="+971 50 000 0000" autocomplete="tel"/>
+      <label class="ginfo-label" for="ginfoEmail">Email</label>
+      <input class="ginfo-input" id="ginfoEmail" type="email" placeholder="you@email.com" autocomplete="email" autocapitalize="off"/>
+      <p class="ginfo-errtxt" id="ginfoErr">Add your name, number and email, and accept the terms.</p>
+      <div class="ginfo-tc2" id="ginfoTcRow" role="checkbox" aria-checked="false" tabindex="0"><span class="gtc-box" aria-hidden="true"></span><span class="gtc-txt">I agree to the <u>booking terms</u>, accept the table's minimum spend, and confirm I'm 21 or older.</span></div><input type="checkbox" id="ginfoTc" hidden/>
+      <button class="btn red full" id="ginfoCta" type="button">Hold my table</button>
+    </div>
+  </div>
+  <div class="flash" id="flash"></div>
+</div>
+
+<!-- the engine: shared by every venue; it does nothing in demo mode -->
+<script src="config.js"></script>
+<script src="../engine/vendor/supabase.js"></script>
+<script src="../engine/vendor/libphonenumber-mobile.js"></script>
+<script src="../engine/vendor/uqr.js"></script>
+<script src="../engine/money.js"></script>
+<script src="../engine/phone.js"></script>
+<script src="../engine/checks.js"></script>
+<script src="../engine/qr.js"></script>
+<script src="../engine/api.js"></script>
+<script src="../engine/boot.js"></script>
+<!-- the skin: Sk's page, cut along his own section headings, run in his order -->
+<script>
+BUBL.start({ skin: [
+  'js/state.js',
+  'js/utils.js',
+  'js/live-gates.js',
+  'js/venue-data.js',
+  'js/hero.js',
+  'js/room-bridge.js',
+  'js/pickers.js',
+  'js/sheets.js',
+  'js/table-sheet.js',
+  'js/code-step.js',
+  'js/hold.js',
+  'js/live-hold.js',
+  'js/minimum.js',
+  'js/menu.js',
+  'js/budget.js',
+  'js/lineup.js',
+  'js/gallery.js',
+  'js/invite.js',
+  'js/interested.js',
+  'js/socials.js',
+  'js/tickets.js',
+  'js/invitation.js',
+  'js/map.js',
+  'js/room-view.js',
+  'js/member.js',
+  'js/team-bar.js',
+  'js/logo.js',
+  'js/votes.js',
+  'js/host.js',
+  'js/split-bill.js',
+  'js/host-extras.js',
+  'js/deposit.js',
+  'js/price-points.js',
+  'js/deposit-hold.js',
+  'js/live-host.js',
+  'js/invitation-deposit.js',
+  'js/live-invite.js',
+  'js/host-tabs.js',
+  'js/ticket-holder.js',
+  'js/live-tickets.js',
+  'js/pay.js',
+  'js/live-pay.js',
+  'js/details.js',
+  'js/page-guards.js',
+  'js/init.js',
+  'js/blackout.js',
+  'js/terms-tick.js',
+  'js/hits.js',
+  'js/evrail.js',
+  'js/bud-compact.js',
+  '../engine/social/bubl-social.js',
+  'js/public-tables.js'
+] });
+</script>
+</body>
+</html>
