@@ -31,7 +31,8 @@ const OPS_LIVE=(function(){
   const sold=k=>(N.tickets||[]).find(x=>x.type===k)||{};
   const GA=N.ticket_types.slice(0,3).map(t=>({id:t.key,label:t.label,sub:t.sub||'',price:null,alloc:sold(t.key).capacity||null}));
   const GATES=(V.gates||[]).map(g=>({id:g.id,label:g.label,sub:g.sub||'',cap:g.scans_per_min||0,lanes:g.lanes||0}));
-  const SOURCES=[{id:'direct',label:V.name+' direct',grp:'direct',comm:0},{id:'host',label:'The team (host desk)',grp:'direct',comm:0}]
+  /* 'door' is the build's own source for a walk-up: tickets the team recorded as paid on the venue's terminal */
+  const SOURCES=[{id:'direct',label:V.name+' direct',grp:'direct',comm:0},{id:'host',label:'The team (host desk)',grp:'direct',comm:0},{id:'door',label:'Walk-up at the door',grp:'other',comm:0}]
     .concat((N.agreements||[]).filter(a=>a.state!=='ended').map(a=>({id:a.key,label:a.label,grp:a.kind==='promoter'?'promoter':'partner',
       comm:Number((a.terms&&a.terms.rates&&a.terms.rates.tab)||0),agreement:a.id})));
   const r=ME.role,who=k=>k===r?ME.name:'';

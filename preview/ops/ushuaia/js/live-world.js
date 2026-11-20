@@ -63,7 +63,7 @@ function buildWorld(ev){
   types.forEach((key,k)=>{
     const agg=(N.tickets||[]).find(x=>x.type===key);if(!agg)return;const made=[];
     if(sales){sales.filter(x=>x.type===key).forEach(x=>{const at=Date.parse(x.day+'T12:00:00Z'),pr=fromMinor(x.revenue_minor)/x.n;if(at<W.ON)W.ON=at;
-      for(let i=0;i<x.n;i++)made.push({ref:'',k,b:-1,g:-1,s:'direct',at:Math.min(at,D),pr,cl:0,st:0,stAt:0,sc:0,gt:'',late:0,opScan:0});});}
+      for(let i=0;i<x.n;i++)made.push({ref:'',k,b:-1,g:-1,s:x.door_terminal?'door':'direct',at:Math.min(at,D),pr,cl:0,st:0,stAt:0,sc:0,gt:'',late:0,opScan:0});});}
     else for(let i=0;i<Number(agg.sold||0);i++)made.push({ref:'',k,b:-1,g:-1,s:'direct',at:0,pr:0,cl:0,st:0,stAt:0,sc:0,gt:'',late:0,opScan:0});
     let i=0;(N.scans||[]).filter(x=>x.kind==='ticket'&&x.type===key).forEach(x=>{for(let n=0;n<x.n&&i<made.length;n++,i++){made[i].sc=ms(x.t);made[i].gt=x.gate||'';}});
     made.forEach(x=>W.tix.push(x));

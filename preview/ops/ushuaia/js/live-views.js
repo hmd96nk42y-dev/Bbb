@@ -9,15 +9,16 @@
    "if(LIVE)return live…".
    ============================================================ */
 
-/* Financial position: deposits and tickets really charged, minimums committed and not yet collected, and the
+/* Financial position: deposits and tickets really charged, door sales the team recorded as paid on the venue's own
+   terminal (the build's own "on site" colour, drawn only when there are some), minimums committed and not yet collected, and the
    manager's breakeven once somebody has entered it. No projected profit and no "sold at breakeven": those were models. */
 function livePositionHero(s,live){const f=s.fin,be=f.breakeven,set=f.beSet,past=set&&f.collected>=be;
   const headline=!set?'No breakeven entered for this night yet.':past?'Breakeven passed. '+AK(f.collected-be)+' clear so far.':P(f.collected,be)+' of breakeven collected. '+(f.gross>=be?'Committed balances take it past.':AK(be-f.gross)+' still to sell.');
   const max=Math.max(f.gross,be,1)*1.07,w=v=>(Math.max(0,v)/max*100).toFixed(2)+'%',bp=be/max*100;
-  const segs='<i class="dep" style="width:'+w(f.dep)+'"></i><i class="tix" style="width:'+w(f.tix)+'"></i><i class="com" style="width:'+w(f.committed)+'"></i>';
+  const segs='<i class="dep" style="width:'+w(f.dep)+'"></i><i class="tix" style="width:'+w(f.tix)+'"></i>'+(f.door>0?'<i class="on" style="width:'+w(f.door)+'"></i>':'')+'<i class="com" style="width:'+w(f.committed)+'"></i>';
   const bar='<div class="pos"><div class="pos-bar"><div class="pos-l">'+segs+'</div>'+(set?'<div class="pos-l au" style="clip-path:inset(0 0 0 '+bp.toFixed(2)+'%)">'+segs+'</div><div class="pos-be '+(bp>76?'r':bp<24?'l':'')+'" style="left:'+bp.toFixed(2)+'%"><b>Breakeven '+N(aedK(be))+'</b></div>':'')+'</div>'+
     '<div class="pos-ax"><span class="n">0</span><span class="n">'+aedK(max/2)+'</span><span class="n">'+aedK(max)+'</span></div></div>';
-  const leg='<div class="leg"><span><i class="sw-dep"></i>Deposits '+AK(f.dep)+'</span><span><i class="sw-tix"></i>Tickets '+AK(f.tix)+'</span><span><i class="sw-com"></i>Committed, not collected '+AK(f.committed)+'</span>'+(past?'<span><i class="sw-au"></i>Past breakeven '+AK(f.collected-be)+'</span>':'')+'</div>';
+  const leg='<div class="leg"><span><i class="sw-dep"></i>Deposits '+AK(f.dep)+'</span><span><i class="sw-tix"></i>Tickets '+AK(f.tix)+'</span>'+(f.door>0?'<span><i class="sw-on"></i>Door, on the venue’s terminal '+AK(f.door)+'</span>':'')+'<span><i class="sw-com"></i>Committed, not collected '+AK(f.committed)+'</span>'+(past?'<span><i class="sw-au"></i>Past breakeven '+AK(f.collected-be)+'</span>':'')+'</div>';
   return '<div class="hud hero"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="lbl">Financial position</span><button class="btn xs" data-act="mod" data-id="cost">Breakeven</button></div>'+
     '<div class="big n" style="margin-top:10px">'+aedK(f.collected).replace('AED ','<small style="margin:0 6px 0 0">AED</small>')+'<small>collected</small></div><p class="sub" style="margin-top:6px;color:var(--t2)">'+headline+'</p>'+bar+leg+
     '<div class="stat3"><div><b>'+aedK(f.held||0)+'</b><span>held on cards, not charged</span></div><div><b>'+aedK(f.committed)+'</b><span>minimums still to collect</span></div><div><button data-act="mod" data-id="cost" style="display:block"><b class="gold" style="font-family:var(--body);font-size:14px;font-weight:700;letter-spacing:0">Breakeven</b><span>'+(set?'set by '+esc(String(W.be.by).split(' ')[0]):'not entered yet')+'</span></button></div></div></div>';}

@@ -33,7 +33,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now(
 async function liveDo(door,body,okMsg){
   const r=await BUBL.ops(door,Object.assign({service:W.ev.sid},body||{}));
   if(!r.ok){haptic([30,40,30]);toast(esc(r.reason||'That could not be done.'));await liveRefresh();return null;}
-  if(okMsg)toast(okMsg);await liveRefresh();return r;}
+  if(okMsg)toast(typeof okMsg==='function'?okMsg(r):okMsg);await liveRefresh();return r;}
 
 /* the audit log is the back end's own: what the page used to note for itself is not kept here */
 log=function(){return {};};
@@ -53,9 +53,11 @@ snapshot=function(Wd,t,pure){
     const tk=s.tk,T=N.tickets||[];
     tk.named=sum(T,x=>Number(x.named||0));tk.unnamed=Math.max(0,sum(T,x=>Number(x.sold||0))-tk.named);tk.refunded=sum(T,x=>Number(x.refunded||0));tk.refAmt=sum(T,x=>fromMinor(x.refunded_minor)||0);
     const M_=N.money;
-    /* money really taken through BUBL: deposits charged and tickets charged. Nothing on site: that is the POS's */
+    /* money really taken through BUBL: deposits charged and tickets charged. On site, only what the team recorded as
+       paid on the venue's own terminal at the door (counted apart: BUBL did not take it). The bars and the table
+       checks are the POS's, and stay empty until it is connected. */
     s.fin.dep=M_?fromMinor(M_.deposits_charged_minor):0;s.fin.held=M_?fromMinor(M_.deposits_held_minor):0;s.fin.tix=M_?fromMinor(M_.tickets_charged_minor):0;
-    s.fin.door=0;s.fin.bar=0;s.fin.settled=0;s.fin.onsite=0;s.fin.collected=s.fin.dep+s.fin.tix;s.fin.gross=s.fin.collected+s.fin.committed;
+    s.fin.door=M_?fromMinor(M_.door_terminal_minor)||0:0;s.fin.bar=0;s.fin.settled=0;s.fin.onsite=s.fin.door;s.fin.collected=s.fin.dep+s.fin.tix+s.fin.door;s.fin.gross=s.fin.collected+s.fin.committed;
     s.fin.breakeven=Wd.be.unset?0:Wd.be.amt;s.fin.beSet=!Wd.be.unset;s.fin.profit=Wd.be.unset?0:s.fin.collected-Wd.be.amt;
     s.cost={fixed:s.fin.breakeven,vari:0,v:0,lines:[],breakeven:s.fin.breakeven,total:s.fin.breakeven,set:Wd.be};
     /* the team: who has opened OPS for this night. The venue's staff plan is not in BUBL, so there is no "of N" */
@@ -105,8 +107,11 @@ ON.reqMin=el=>{const b=bk(el.dataset.b);b.min=Math.max(0,b.min+(+el.dataset.d));
 ON.reqOk=el=>{const b=bk(el.dataset.b);if(!(b.min>0)){toast('Set the table’s minimum first.');return;}
   liveDo('request-answer',{booking:b.uid,confirm:true,minimum_minor:toMinor(b.min)},'Confirmed at '+aed(b.min)+' minimum for '+esc(gName(b.booker))+'.');};
 ON.reqNo=el=>{const b=bk(el.dataset.b);liveDo('request-answer',{booking:b.uid,confirm:false},'Declined. '+esc(gName(b.booker))+'’s request is closed.');};
-ON.relB=el=>{const b=bk(el.dataset.b),nm=W.T[tableAt(b,now())].name;withPin('Release '+nm,()=>{liveDo('booking-release',{booking:b.uid,reason:'Released by a manager',pin:pinNow()},esc(nm)+' released and back on sale.');});};
-Act.release=function(b,mgr,why){liveDo('booking-release',{booking:b.uid,reason:why||'Released by a manager',pin:pinNow()},esc(W.T[tableAt(b,now())].name)+' released and back on sale.');};
+/* Releasing a table. When the venue cancels one whose deposit was charged, every charge goes back to the card that paid
+   it, in full and at once (Sk, 20 Nov 2026); the message says how much, as BUBL's back end reports it. */
+const releasedMsg=nm=>r=>esc(nm)+(r.given_back_minor>0?' cancelled. '+aed(fromMinor(r.given_back_minor))+' is going back to the '+(r.cards>1?r.cards+' cards':'card')+' that paid.':' released and back on sale.');
+ON.relB=el=>{const b=bk(el.dataset.b),nm=W.T[tableAt(b,now())].name;withPin('Release '+nm,()=>{liveDo('booking-release',{booking:b.uid,reason:'Released by a manager',pin:pinNow()},releasedMsg(nm));});};
+Act.release=function(b,mgr,why){liveDo('booking-release',{booking:b.uid,reason:why||'Released by a manager',pin:pinNow()},releasedMsg(W.T[tableAt(b,now())].name));};
 Act.seatTable=function(b){liveDo('booking-step',{booking:b.uid,to:'seated'});return b.seats.filter(s=>s.ar&&!s.st).length||b.party;};
 Act.seatOne=function(s){liveDo('booking-step',{booking:s.b.uid,to:'seated'});};
 ON.seatAll=el=>{const b=bk(el.dataset.b);haptic(15);liveDo('booking-step',{booking:b.uid,to:'seated'},esc(W.T[tableAt(b,now())].name)+' is seated.');};
@@ -199,11 +204,27 @@ ON.scLookup=()=>{if(Scan.res)Scan.dismiss();let last=0;Sheet.open({title:'Manual
   ON.lkGo=async el=>{const res=$('#lres'),x=res&&res._r&&res._r[+el.dataset.i];if(!x)return;Sheet.close(true);
     const a=await BUBL.ops('admit',{service:W.ev.sid,gate:UI.gate,ticket:x.ticket_id,booking:x.booking_id,seat_no:x.seat_no});
     if(!a.ok){toast(esc(a.reason||'That could not be checked.'));return;}if(UI.tab!=='scan')setTab('scan');Scan.show(scanResult(a,null));};};
-/* a door sale: the guest buys on their own phone, at the price on sale right now, and their ticket is scanned like any other */
-ON.scDoor=()=>{const url=new URL('../../ushuaia/index.html',location.href).href;
-  Sheet.open({title:'Door sale',sub:GATE[UI.gate]?GATE[UI.gate].label:'',static:true,
-    body:()=>'<div class="qrbox">'+QR.svg(url,180)+'</div><p class="note" style="text-align:center">The guest scans this, buys a ticket on the booking page at the price on sale right now, and their ticket opens on their phone. Scan it like any other ticket.</p>',
-    foot:()=>'<button class="btn pri full" data-act="sheetClose">Done</button>'});};
+/* a door sale, as the build's sheet has it.
+   On the guest's phone: they buy on the booking page at the price on sale right now, and their ticket is scanned like
+   any other. On the venue's terminal (Sk, 20 Nov 2026: "yes BUBL should count"): the operator takes the money on the
+   terminal, then records it here; BUBL writes the tickets at the price on sale at this moment, admits them at this gate
+   and counts them apart from the cards it charged itself. The terminal choice is drawn only while BUBL's back end says a
+   door ticket is on sale (the doors are open and the wave has places). The build's line "matched with the terminal at
+   close-out" is left out: BUBL is not connected to the terminal, so it cannot match anything. */
+ON.scDoor=()=>{const url=new URL('../../ushuaia/index.html',location.href).href;let n=1,how='phone',busy=false;
+  const dt=()=>BUBL.night.door_ticket||{},term=()=>!!(dt().on_sale&&dt().price_minor!=null),price=()=>fromMinor(dt().price_minor);
+  const o=Sheet.open({title:'Door sale',sub:(GATE[UI.gate]?GATE[UI.gate].label:'')+(term()?' · '+aed(price())+' each':''),static:true,
+    body:()=>{if(!term())how='phone';
+      return (term()?'<div class="seg"><button class="'+(how==='phone'?'on':'')+'" data-act="dsH" data-h="phone">Guest pays on their phone</button><button class="'+(how==='term'?'on':'')+'" data-act="dsH" data-h="term">Venue terminal</button></div>':'')+
+      (how==='phone'?'<div class="qrbox">'+QR.svg(url,180)+'</div><p class="note" style="text-align:center">The guest scans this, buys a ticket on the booking page at the price on sale right now, and their ticket opens on their phone. Scan it like any other ticket.</p>'
+        :'<div style="display:flex;align-items:center;justify-content:space-between"><div class="step"><button data-act="dsN" data-d="-1" aria-label="Fewer">'+I('minus',18)+'</button><b>'+n+'</b><button data-act="dsN" data-d="1" aria-label="More">'+I('plus',18)+'</button></div><div class="big n" style="font-size:30px">'+aed(n*price())+'</div></div><p class="note">Take payment on the venue’s card terminal first, then record it here. Door tickets admit straight away.</p>');},
+    foot:()=>how==='phone'?'<button class="btn pri full" data-act="sheetClose">Done</button>':'<button class="btn pri full" data-act="dsGo">'+I('card',18)+'Paid on the terminal, admit '+n+'</button>'});
+  const rp=()=>{o._b=null;o._f=null;Sheet.paint(o);};
+  ON.dsN=e=>{n=clamp(n+(+e.dataset.d),1,Math.min(10,dt().left_at_this_price||10));rp();};ON.dsH=e=>{how=e.dataset.h;rp();};
+  ON.dsGo=async()=>{if(busy||how!=='term'||!term())return;busy=true;
+    const a=await BUBL.ops('door-sale',{service:W.ev.sid,gate:UI.gate,n,price_minor:dt().price_minor});busy=false;
+    if(!a.ok){haptic([30,40,30]);toast(esc(a.reason||'That could not be recorded.'));await liveRefresh();if(Sheet.top()===o)rp();return;}
+    Scan.mine+=a.n;Sheet.close();haptic([15,40,15]);toast(N(a.n)+' door ticket'+(a.n>1?'s':'')+' recorded and admitted.');await liveRefresh();};};
 
 /* ---- another night ---- */
 ON.pickEv=async el=>{const ev=EVK[el.dataset.id];if(!ev)return;const n=await BUBL.opsNight(ev.sid);
