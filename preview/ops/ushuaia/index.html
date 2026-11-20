@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>BUBL OPS · Ushuaïa Dubai Harbour</title>
+<meta name="theme-color" content="#0B0C10">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BUBL OPS">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="media/icon-180.png">
+<link rel="stylesheet" href="css/ops.css">
+<link rel="stylesheet" href="css/partner-access.css" id="paCss">
+</head>
+<body>
+<div id="app" data-phase="pre" data-device="hand"><div id="frameNote"><button data-act="device">Back to Atlas</button><span>Handheld view, 390 wide</span></div><div id="stage"></div></div>
+<script src="config.js"></script>
+<script src="../engine/boot.js"></script>
+<script>
+/* Sk's OPS build, cut along his own section headings (tests/design/unpack_ops.py), in his order.
+   { demo: … } is loaded only by a demo page, { live: … } only by a test or live page. */
+BUBL.startOps({ skin: [
+  'js/fonts.js',
+  '../engine/vendor/jsqr.js',
+  'js/00-core.js',
+  { demo: 'js/demo-data.js', live: 'js/live-data.js' },
+  'js/10-venue-config.js',
+  { demo: 'js/20-world.js', live: 'js/live-world.js' },
+  'js/30-store.js',
+  'js/40-charts.js',
+  'js/50-shell.js',
+  'js/60-home.js',
+  'js/62-home-live.js',
+  'js/64-home-post.js',
+  'js/70-floor.js',
+  'js/75-guest-payments.js',
+  'js/80-scan.js',
+  'js/85-report.js',
+  'js/88-agent.js',
+  'js/89-integrations.js',
+  'js/90-atlas.js',
+  { demo: 'js/92-chats.js', live: 'js/live-stubs.js' },
+  { demo: 'js/92b-guest-inbox.js' },
+  { demo: 'js/92c-chat-summaries.js' },
+  { demo: 'js/93-links.js' },
+  { demo: 'js/94-invitation-preview.js' },
+  'js/95-home-data-ui.js',
+  'js/99-boot.js',
+  'js/pa-1-promoter-access.js',
+  'js/pa-2-agreement.js',
+  'js/pa-3-module.js',
+  'js/pa-4-wizard.js',
+  'js/pa-5-hotels.js',
+  'js/pa-6-vip-links.js',
+  { live: 'js/live-views.js' },
+  { live: 'js/live-gates.js' },
+  { live: 'js/live-actions.js' },
+  { live: 'js/live-partners.js' },
+]});
+</script>
+</body>
+</html>

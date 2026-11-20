@@ -35,12 +35,16 @@ async function liveHoldCta(){
   if(who===null)return ginfoIdle(label);                                   /* "Use a different number" */
   if(!who.ok){ginfoIdle(label);return ginfoSay(who.reason,who.field);}
   S.guestName=who.guest.full_name;S.guestPhone=who.guest.phone_e164;S.guestEmail=who.guest.email;
-  const r=await BUBL.hold({table:t.id,service:S.ev.id,party_size:S.party,deposit_pct:RULES.depOpts[0]/100});
+  /* a table opened from a VIP link is taken on the link's own terms (live-offer.js) */
+  const offer=typeof OFFER!=='undefined'&&OFFER&&OFFER.table===t.id?OFFER:null;
+  const r=offer?await BUBL.call('guest','offer-accept',{token:offer.token}):await BUBL.hold({table:t.id,service:S.ev.id,party_size:S.party,deposit_pct:RULES.depOpts[0]/100});
+  if(offer&&!r.ok){ginfoIdle(label);return ginfoSay(OFFER_SAYS[r.code]||HOLD_SAYS[r.code]||r.reason);}
+  if(offer)OFFER=null;
   if(!r.ok){ginfoIdle(label);
     if(r.code==='pay_now_only'){S.ev.late=true;}   /* the cut-off passed while the form was open: the table is booked by paying straight away */
     else return ginfoSay(HOLD_SAYS[r.code]||r.reason);}
   _pending=null;ginfoShut();ginfoIdle(label);
-  if(r.ok)bookLive(t,{booking_id:r.booking_id,state:r.state,minimum_minor:r.minimum_minor,deposit_minor:r.deposit_minor,hold_expires_at:r.hold_expires_at,invitation_token:r.invitation_token,party_size:S.party,pay_now:false},true);
+  if(r.ok)bookLive(t,{booking_id:r.booking_id,state:r.state,minimum_minor:r.minimum_minor,deposit_minor:r.deposit_minor,hold_expires_at:r.hold_expires_at,invitation_token:r.invitation_token,party_size:S.party,pay_now:!!r.pay_now},true);
   else bookLate(t);
 }
 /* The table is the guest's in the database: the page becomes the host's, from what the back end holds. */
