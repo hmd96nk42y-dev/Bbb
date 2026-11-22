@@ -1,0 +1,131 @@
+/* The showcase studio.
+   The phone and everything inside it is Sk's own frame from his screens canvas
+   ("bubl concierge · pilot storyboard screens"), class for class and pixel for
+   pixel: device 360 x 760, screen 342 x 742, bubbles at most 84% wide, his
+   WhatsApp colours and type sizes. Those rules are the first block below and
+   are not to be restyled. The second block is the studio around the phone, in
+   the style of his scene 22. The third makes the chat fill a real phone's
+   screen with no bezel, so nothing is ever scaled or squeezed. */
+
+/* ---------- 1. Sk's frame, as in the canvas ---------- */
+.dev{width:360px;height:760px;border-radius:50px;background:#0c0c0e;padding:9px;box-sizing:border-box;box-shadow:0 0 0 1px #2a2a2e}
+.scr{width:342px;height:742px;border-radius:42px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.wa{background:#0B141A;font-family:Inter,system-ui,sans-serif;color:#E9EDEF}
+.wa-top{background:#1F2C34;padding:40px 12px 10px 10px;display:flex;align-items:center;gap:10px;flex:none}
+.wa-av{width:36px;height:36px;border-radius:50%;background:#0B141A;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.wa-av img{width:34px;height:34px}
+.wa-nm{font-size:15px;font-weight:600;line-height:1.2}
+.wa-sb{font-size:11.5px;color:#8696A0}
+.wa-body{flex:1;padding:10px 9px;display:flex;flex-direction:column;gap:5px;justify-content:flex-end;overflow:hidden;min-height:0}
+.day{align-self:center;background:#1F2C34;color:#8696A0;font-size:11px;padding:4px 9px;border-radius:7px;margin:2px 0 4px}
+.in{align-self:flex-start;background:#1F2C34;border-radius:9px;max-width:84%;padding:6px 8px 5px;font-size:13px;line-height:1.38;box-sizing:border-box}
+.out{align-self:flex-end;background:#144D37;border-radius:9px;max-width:84%;padding:6px 8px 5px;font-size:13px;line-height:1.38;box-sizing:border-box}
+.tm{display:block;text-align:right;font-size:10px;color:#8BA39A;margin-top:2px}
+.in .tm{color:#8696A0}
+.grp{display:flex;flex-direction:column;gap:2px;align-self:flex-start;max-width:84%}
+.grp .in{max-width:100%;border-bottom-left-radius:3px;border-bottom-right-radius:3px}
+.wbtn{display:flex;align-items:center;justify-content:center;gap:6px;background:#1F2C34;color:#53BDEB;font:500 13px Inter,sans-serif;border:0;border-radius:3px;padding:8px 6px;width:100%;margin:0}
+.wbtn:last-child{border-bottom-left-radius:9px;border-bottom-right-radius:9px}
+.wbtn svg{width:14px;height:14px}
+.img{width:100%;border-radius:6px;display:block;object-fit:cover}
+.mut{color:#8696A0}
+.comp{flex:none;display:flex;gap:6px;align-items:center;padding:6px 8px 14px;background:#0B141A}
+.cfield{flex:1;background:#1F2C34;border-radius:20px;padding:9px 14px;font-size:13px;color:#8696A0}
+.cmic{width:38px;height:38px;border-radius:50%;background:#21C063;display:flex;align-items:center;justify-content:center}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#1F2C34;border-radius:16px 16px 0 0;padding:10px 0 16px}
+.shade{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.grab{width:36px;height:4px;border-radius:2px;background:#3B4A54;margin:0 auto 10px}
+.srow{display:flex;align-items:center;gap:12px;padding:10px 18px;font-size:13.5px}
+.srow small{display:block;color:#8696A0;font-size:12px;margin-top:1px}
+.radio{width:18px;height:18px;border-radius:50%;border:2px solid #8696A0;box-sizing:border-box;flex:none}
+.radio.on{border-color:#21C063;box-shadow:inset 0 0 0 3px #1F2C34;background:#21C063}
+.dlab{margin-top:14px;font:600 13px Inter,sans-serif;color:#141413;display:flex;gap:8px;align-items:baseline}
+.dlab span{font-weight:400;color:#5E5D59}
+
+/* What a working chat needs that a still picture does not. Nothing here changes a size or a colour above. */
+.wa-body{justify-content:flex-start;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}   /* a chat scrolls; a still picture does not */
+.wa-body::-webkit-scrollbar{display:none}
+.wa-body>:first-child{margin-top:auto}             /* a short chat sits at the bottom, as in WhatsApp */
+.in,.out{overflow-wrap:anywhere;white-space:pre-wrap}
+.grp.pic{width:84%}                                 /* a message with a picture is as wide as a bubble may be */
+.grp .img{aspect-ratio:1200/628;margin-bottom:6px}  /* WhatsApp's own shape for the picture on top of a message */
+.ft{display:block;color:#8696A0;font-size:11.5px;margin-top:4px}
+.wbtn{cursor:pointer;text-decoration:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.wbtn:active{background:#26343D}
+.wbtn[aria-disabled="true"]{color:#8696A0;cursor:default}
+input.cfield{border:0;outline:0;min-width:0;font-family:inherit;color:#E9EDEF;-webkit-appearance:none;appearance:none}
+input.cfield::placeholder{color:#8696A0;opacity:1}
+button.cmic{border:0;padding:0;cursor:pointer;flex:none;-webkit-tap-highlight-color:transparent}
+.sheet{max-height:86%;overflow-y:auto}
+.srow{cursor:pointer}
+.sheet-title{text-align:center;font-weight:600;font-size:15px;margin-bottom:6px}
+.sheet-send{margin:10px 18px 0;display:block;width:calc(100% - 36px);border:0;background:#21C063;color:#0B141A;text-align:center;border-radius:22px;padding:10px;font:600 14px Inter,sans-serif;cursor:pointer}
+.sheet-send:disabled{opacity:.45;cursor:default}
+.tm svg{vertical-align:-1px;margin-left:3px}
+
+/* ---------- 2. the studio around the phone (the style of scene 22) ---------- */
+html,body{margin:0;height:100%}
+body{background:#FBFAF7;font-family:Inter,system-ui,sans-serif;color:#141413;display:flex;flex-direction:column;-webkit-text-size-adjust:100%}
+.bar{height:52px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid #E3DFD6;background:#fff;box-sizing:border-box;overflow:hidden}
+.bar img{width:26px;height:26px;flex:none}
+.bar-title{font:600 15px 'Space Grotesk',sans-serif;white-space:nowrap}
+.pill{font:500 11.5px Inter,sans-serif;padding:3px 9px;border-radius:10px;background:#E7F1EA;color:#1F5C38;white-space:nowrap}
+.pill.demo{background:#F0E9DF;color:#7a3b12}
+.pill.off{background:#EFEDE8;color:#5E5D59}
+.grow{flex:1;min-width:0}
+.sbtn{font:500 12px Inter,sans-serif;padding:6px 11px;border-radius:8px;border:1px solid #DDD8CE;background:#fff;color:#141413;cursor:pointer;white-space:nowrap;flex:none}
+.sbtn:active{background:#F4F2EE}
+/* The phone is shown at its true size (360 x 760). Only when the window is too short to hold it is the whole
+   phone made smaller, in proportion (never squeezed): --k is set by studio.js and is 1 whenever it fits. */
+.stage{flex:1;min-height:0;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:36px;padding:20px 16px;box-sizing:border-box;overflow:auto}
+.phone{display:flex;flex-direction:column;flex:none;zoom:var(--k,1)}
+.side{width:250px;flex:none;padding-top:36px;display:flex;flex-direction:column;gap:14px}
+.side .dlab{margin:0;font-size:15px;flex-direction:column;gap:2px}
+.side .dlab span{font-size:12.5px}
+.strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:#5E5D59}
+.chip{font:500 12px Inter,sans-serif;padding:6px 11px;border-radius:999px;border:1px solid #DDD8CE;background:#fff;color:#141413;cursor:pointer;white-space:nowrap;flex:none}
+.note{margin:0;font-size:12.5px;line-height:1.5;color:#5E5D59}
+.note.bad{color:#9B2C20}
+.gate{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box}
+.gate[hidden],.stage[hidden],.strip[hidden]{display:none}
+.card{width:100%;max-width:340px;background:#fff;border:1px solid #E3DFD6;border-radius:14px;padding:22px 20px;box-sizing:border-box}
+.card h1{margin:0 0 6px;font:600 20px 'Space Grotesk',sans-serif}
+.card p{margin:0 0 14px;font-size:13.5px;line-height:1.5;color:#3D3D3A}
+.card label{display:block;font-size:12px;color:#5E5D59;margin:0 0 5px}
+.card input{width:100%;box-sizing:border-box;border:1px solid #DDD8CE;border-radius:9px;padding:11px 12px;font:400 16px Inter,sans-serif;color:#141413;background:#fff;margin:0 0 12px;outline:0}
+.card input:focus{border-color:#141413}
+.go{width:100%;border:0;border-radius:9px;padding:12px;font:600 14px Inter,sans-serif;background:#141413;color:#fff;cursor:pointer}
+.go:disabled{opacity:.5;cursor:default}
+.card .link{display:block;margin:12px auto 0;border:0;background:none;font:500 12.5px Inter,sans-serif;color:#5E5D59;text-decoration:underline;cursor:pointer}
+.card .err{color:#9B2C20;font-size:12.5px;margin:10px 0 0;min-height:1.2em}
+
+/* a narrow window: the notes sit above the phone */
+@media (max-width:700px){
+  .stage{flex-direction:column;align-items:center;gap:12px}
+  .side{width:auto;max-width:360px;padding-top:0;gap:8px;align-items:center;text-align:center}
+  .side .dlab{align-items:center}
+  .strip{justify-content:center}
+}
+
+/* ---------- 3. on a real phone: the chat is the screen ---------- */
+@media (max-width:600px){
+  body{height:var(--vvh,100dvh);overflow:hidden}
+  .bar{height:44px;padding:0 10px;gap:8px}
+  .bar img{width:22px;height:22px}
+  .bar-title{font-size:14px}
+  .pill .more,.pill.meta{display:none}
+  .stage{padding:0;gap:0;overflow:hidden;align-items:stretch}
+  .side{max-width:none;display:block;text-align:left}
+  .side .dlab{display:none}
+  .strip{padding:7px 10px;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;background:#fff;border-bottom:1px solid #E3DFD6;scrollbar-width:none}
+  .strip::-webkit-scrollbar{display:none}
+  .phone{flex:1;min-height:0;zoom:1}
+  .dev{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none;background:#0B141A}
+  .scr{width:100%;height:100%;border-radius:0}
+  .wa-top{padding-top:10px}
+  .comp{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  input.cfield{font-size:16px}                      /* below 16px Safari zooms the page when the field is tapped */
+  .note{position:fixed;left:10px;right:10px;bottom:72px;background:#141413;color:#fff;border-radius:10px;padding:9px 12px;z-index:5}
+  .note:empty{display:none}
+  .note.bad{color:#fff;background:#9B2C20}
+}
