@@ -15,7 +15,7 @@ function ginfoCodeMode(on){   /* swap the form's boxes for the code boxes, insid
 }
 function ginfoSay(msg,field){const e=$('#ginfoErr');e.textContent=msg;e.classList.add('show');if(field){const el=$({full_name:'#ginfoName',phone:'#ginfoPhone',email:'#ginfoEmail'}[field]);if(el)el.classList.add('err');}}
 function ginfoIdle(label){GI.busy=false;const c=$('#ginfoCta');c.disabled=false;c.textContent=label;}
-function ginfoShut(){if(GI.ui&&GI.ui.cancel)GI.ui.cancel();ginfoCodeMode(false);GI.busy=false;$('#ginfoModal').classList.remove('show');}
+function ginfoShut(){if(GI.ui&&GI.ui.cancel)GI.ui.cancel();ginfoCodeMode(false);GI.busy=false;$('#ginfoModal').classList.remove('show');if(typeof offerNotYoursShut==='function')offerNotYoursShut();}
 /* what the back end said, in the guest's words: most refusals already are a sentence fit to show */
 const HOLD_SAYS={taken:'That table was just taken. Pick another one.',sign_up_needed:'Add your name and email first.',pending_hold_limit:'You already have a table waiting for its deposit. Settle that one first.',
   table_limit:'This number already has a table on this night.',not_on_sale:'This night is not on sale.',booking_closed:'Online booking has closed for this night.',ended:'This night is over.'};
@@ -38,7 +38,10 @@ async function liveHoldCta(){
   /* a table opened from a VIP link is taken on the link's own terms (live-offer.js) */
   const offer=typeof OFFER!=='undefined'&&OFFER&&OFFER.table===t.id?OFFER:null;
   const r=offer?await BUBL.call('guest','offer-accept',{token:offer.token}):await BUBL.hold({table:t.id,service:S.ev.id,party_size:S.party,deposit_pct:RULES.depOpts[0]/100});
-  if(offer&&!r.ok){ginfoIdle(label);return ginfoSay(OFFER_SAYS[r.code]||HOLD_SAYS[r.code]||r.reason);}
+  if(offer&&!r.ok){ginfoIdle(label);
+    /* the number they confirmed is not the one the link was sent to: Sk's own screen (live-offer.js) */
+    if(r.code==='offer_not_yours'){const again=await BUBL.call('guest','offer',{token:offer.token});return offerNotYours(offer.token,again.ok&&again.status==='not_yours'?again:{venue:offer.view.venue,service:offer.view.service});}
+    return ginfoSay(OFFER_SAYS[r.code]||HOLD_SAYS[r.code]||r.reason);}
   if(offer)OFFER=null;
   if(!r.ok){ginfoIdle(label);
     if(r.code==='pay_now_only'){S.ev.late=true;}   /* the cut-off passed while the form was open: the table is booked by paying straight away */
