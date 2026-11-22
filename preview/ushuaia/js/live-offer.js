@@ -5,7 +5,9 @@
    terms. The guest gives their own details and proves their number as on any table; "Hold" then takes the link
    instead of making an ordinary hold. From there the page is the host's, as for any table. */
 let OFFER=null;
-const OFFER_SAYS={link_invalid:'This link is not valid.',link_inactive:'This link is no longer active.',offer_taken:'This link has already been used.',taken:'This table has just been taken. Please contact the venue.'};
+/* offer_not_yours: the link was sent to another number (Sk, 22 Nov 2026). What that person is told is Sk's to word
+   (DECISIONS question 77); until he has, it is the line already used for a link that cannot be used. */
+const OFFER_SAYS={link_invalid:'This link is not valid.',offer_not_yours:'This link is not valid.',link_inactive:'This link is no longer active.',offer_taken:'This link has already been used.',taken:'This table has just been taken. Please contact the venue.'};
 async function openOfferLink(){
   let token=null;try{token=new URLSearchParams(location.search).get('v');}catch(_){}
   if(!token)return false;

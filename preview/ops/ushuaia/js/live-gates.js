@@ -37,9 +37,9 @@ const NOT_YET={
   notes:'[data-act="addNote"],[data-act="addNoteT"],#gnote',
   /* drawing on the plan: adding, moving, merging and removing tables, templates and the lock. "Out of service" is real */
   layout:'[data-act="flEdit"],[data-act="flAdd"],[data-act="flTpl"],[data-act="flLock"],[data-act="tRemove"],[data-act="tMerge"],[data-act="flMoveX"]',
-  /* the door: the paid Early entry upgrade (a ticket's kind and price cannot be changed once sold), test tickets and the
-     practice set. A sale on the venue's own terminal is real (question 73, answered 20 Nov 2026). */
-  door:'[data-act="scUpgrade"],[data-act="testTickets"],[data-act="scPr"],[data-act="goPractice"],[data-act="alertAck"]',
+  /* the door: test tickets and the practice set. A sale on the venue's own terminal and the paid Early entry upgrade
+     are real (questions 73 and 82, answered 20 and 22 Nov 2026). */
+  door:'[data-act="testTickets"],[data-act="scPr"],[data-act="goPractice"],[data-act="alertAck"]',
   /* the simulation's own controls: the clock, switching feeds off, previewing made-up data, the offline test */
   simulation:'[data-act="speed"],[data-act="phaseOv"],[data-act="phaseAuto"],[data-act="tbNow"],[data-act="integSw"],[data-act="integDemo"],[data-act="integAllOn"],[data-act="offline"]',
   /* ticket transfers, refunds and disputes sent back through the card processor; presale windows edited from OPS */

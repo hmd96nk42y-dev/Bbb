@@ -109,8 +109,12 @@ ON.reqOk=el=>{const b=bk(el.dataset.b);if(!(b.min>0)){toast('Set the table’s m
 ON.reqNo=el=>{const b=bk(el.dataset.b);liveDo('request-answer',{booking:b.uid,confirm:false},'Declined. '+esc(gName(b.booker))+'’s request is closed.');};
 /* Releasing a table. When the venue cancels one whose deposit was charged, every charge goes back to the card that paid
    it, in full and at once (Sk, 20 Nov 2026); the message says how much, as BUBL's back end reports it. */
-const releasedMsg=nm=>r=>esc(nm)+(r.given_back_minor>0?' cancelled. '+aed(fromMinor(r.given_back_minor))+' is going back to the '+(r.cards>1?r.cards+' cards':'card')+' that paid.':' released and back on sale.');
-ON.relB=el=>{const b=bk(el.dataset.b),nm=W.T[tableAt(b,now())].name;withPin('Release '+nm,()=>{liveDo('booking-release',{booking:b.uid,reason:'Released by a manager',pin:pinNow()},releasedMsg(nm));});};
+/* an amount to the fils when it has any, and as the build writes a whole amount when it has none */
+const aedExact=v=>Number.isInteger(v)?aed(v):'AED '+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const releasedMsg=nm=>r=>esc(nm)+(r.given_back_minor>0?' cancelled. '+aedExact(fromMinor(r.given_back_minor))+' is going back to the '+(r.cards>1?r.cards+' cards':'card')+' that paid.':' released and back on sale.');
+/* Sk, 22 Nov 2026: the pad says the amount before the PIN, "Release PL01 · AED 7,500 back to the card" */
+const releaseTitle=(b,nm)=>{const g=b.live&&b.live.refund_on_release;return 'Release '+nm+(g&&g.minor>0?' · '+aedExact(fromMinor(g.minor))+' back to the '+(g.cards>1?'cards':'card'):'');};
+ON.relB=el=>{const b=bk(el.dataset.b),nm=W.T[tableAt(b,now())].name;withPin(releaseTitle(b,nm),()=>{liveDo('booking-release',{booking:b.uid,reason:'Released by a manager',pin:pinNow()},releasedMsg(nm));});};
 Act.release=function(b,mgr,why){liveDo('booking-release',{booking:b.uid,reason:why||'Released by a manager',pin:pinNow()},releasedMsg(W.T[tableAt(b,now())].name));};
 Act.seatTable=function(b){liveDo('booking-step',{booking:b.uid,to:'seated'});return b.seats.filter(s=>s.ar&&!s.st).length||b.party;};
 Act.seatOne=function(s){liveDo('booking-step',{booking:s.b.uid,to:'seated'});};
@@ -146,11 +150,15 @@ const SCAN_SAYS={
   not_found:()=>({tone:'bad',code:'NOT_FOUND',title:'Not a valid ticket',sub:'No ticket or table seat with this code for '+W.ev.short+'.'}),
   not_confirmed:()=>({tone:'bad',code:'VOID',title:'Booking not active',sub:'This table is not confirmed.'}),
   dup:r=>({tone:'warn',code:'DUP',title:'Already scanned',sub:'Scanned at '+fT(Date.parse(r.first_at))+(r.first_gate&&GATE[r.first_gate]?', '+GATE[r.first_gate].label:'')+'.'}),
-  late:r=>({tone:'warn',code:'DUP',title:'Entry time has passed',sub:'This ticket was valid until '+fT(Date.parse(r.valid_until))+'.'}),
+  /* a ticket shown after its time. Where the venue has a paid upgrade at the door (Sk, 22 Nov 2026) this is the build's
+     own "Early entry ended" result, with its upgrade button; otherwise it is refused, or admitted with the Manager PIN */
+  late:r=>r.upgrade_minor>0?{tone:'warn',code:'EARLY',title:'Early entry ended',sub:'Valid until '+fT(Date.parse(r.valid_until))+'. Upgrade'+(BUBL.night.door_ticket&&BUBL.night.door_ticket.label?' to '+BUBL.night.door_ticket.label:'')+' for '+aedExact(fromMinor(r.upgrade_minor))+'.'}
+    :{tone:'warn',code:'DUP',title:'Entry time has passed',sub:'This ticket was valid until '+fT(Date.parse(r.valid_until))+'.'},
   ok:()=>({tone:'ok',code:'OK',title:'Admit',sub:''}),vip:()=>({tone:'ok',code:'VIP',title:'Admit',sub:''}),override:()=>({tone:'ok',code:'OK',title:'Admit',sub:'Admitted on a manager’s approval'})};
 function scanResult(a,code){const r=(SCAN_SAYS[a.result]||SCAN_SAYS.not_found)(a);
   Object.assign(r,{raw:code,server:a,mode:'live',name:a.name||(a.kind?'Unnamed':''),ref:a.ref||'',gateWant:UI.gate,vip:a.result==='vip',gst:a.name?{crm:1}:null});
   if(a.kind==='ticket'&&a.label){r.rec={k:0};r.tier=a.label;}
+  if(a.upgrade_minor>0)VENUE.earlyUpgrade=fromMinor(a.upgrade_minor);   /* the venue's own amount, on the build's button */
   if(a.kind==='seat'&&a.table){const T=W.T[a.table.key]||{};r.rec={b:{}};r.seat=true;r.tier=(TIERS[a.table.tier]||{}).label||'';r.table=a.table.name;r.tableId=a.table.key;r.seatN=a.seat_no;r.host=(SECTIONS[T.sec]||{}).host||'';r.b=a.booking;
     const owed=a.booking&&a.booking.booking&&a.booking.booking.owed_note;if(owed&&r.tone!=='bad')r.sub=[r.sub,owed].filter(Boolean).join(' ');}
   if(a.check_id&&r.tone!=='bad')r.sub=[r.sub,'Check ID: the name must match.'].filter(Boolean).join(' ');
@@ -191,6 +199,11 @@ ON.scOverride=()=>{const r=Scan.res;if(!r||!r.raw)return;withPin(r.title==='Alre
   const a=await BUBL.ops('scan-override',{service:W.ev.sid,gate:UI.gate,code:r.raw,reason:r.title,pin:pinNow()});
   if(!a.ok){toast(esc(a.reason||'That could not be approved.'));Scan.dismiss();return;}
   Scan.show(scanResult(a,r.raw));});};
+/* the upgrade is paid on the venue's terminal, then recorded: a small door sale, and the guest is admitted */
+ON.scUpgrade=async()=>{const r=Scan.res;if(!r||!r.raw||!r.server||!(r.server.upgrade_minor>0)||Scan.asking)return;Scan.asking=true;
+  const a=await BUBL.ops('door-upgrade',{service:W.ev.sid,gate:UI.gate,code:r.raw,price_minor:r.server.upgrade_minor});Scan.asking=false;
+  if(!a.ok){haptic([30,40,30]);toast(esc(a.reason||'The upgrade could not be recorded.'));Scan.dismiss();return;}
+  Scan.show(scanResult(a,r.raw));};
 ON.scNext=()=>{};
 /* with no camera there is no "next in line" to tap here: a guest is found with Look up */
 (function(){const upd=Scan.update;Scan.update=function(){upd.call(this);const nx=$('#scNext'),h=$('#scHint');if(nx)nx.style.display='none';

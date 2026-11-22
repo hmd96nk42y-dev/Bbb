@@ -18,7 +18,12 @@ function liveGuestLink(kind,token){return new URL('../../ushuaia/index.html?'+ki
 function liveVlAll(){const ev=W.ev.id;return ((W.live&&W.live.vip_links)||[]).map(x=>{const min=fromMinor(x.minimum_minor)||0,dep=fromMinor(x.deposit_minor)||0,pp=(x.price_points||[]).map(r=>({amt:fromMinor(r.amount_minor),n:r.guests}));
   return {id:x.id,token:x.token||'',g:(x.guest&&x.guest.name)||'VIP guest',ph:(x.guest&&x.guest.phone)||'',email:(x.guest&&x.guest.email)||'',ev,table:x.table,min,
     settle:dep===0?'night':dep===min?'dep100':dep*2===min?'dep50':'amt',amt:dep,split:pp.length>0,pp,exp:'cut',expAt:ms(x.expires_at),note:x.note||'',created:ms(x.made_at),by:x.made_by||'',
-    openAt:0,bookedAt:x.booking?ms(x.booking.at):0,cancelled:ms(x.cancelled_at)};});}
+    openAt:0,bookedAt:x.booking?ms(x.booking.at):0,cancelled:ms(x.cancelled_at),wrong:x.wrong_number||null};});}
+/* Sk, 22 Nov 2026: a link the team typed a number on can only be taken by that number, "and the sender is told". Until
+   the sender's own chat exists (step 11) this is where they are told: one more row in the link's Progress, in the
+   build's own row, only when it has happened. The other person's number is never kept or shown. */
+function liveVlWrong(v){const w=v.wrong;if(!w||!w.n)return '';
+  return row('alert','warn','Opened by a different number',fDT(ms(w.last_at))+' · they could not take the table'+(w.n>1?' · '+N(w.n)+' tries':''),'','');}
 function liveVlWizard(){
   ON.vlEv=()=>{};   /* a link is for the night that is open: pick another night first to make one for it */
   ON.vlSave=()=>{const d=VL.d,g=String(d.g).trim().replace(/\s+/g,' ');if(g.split(' ').length<2||/\d/.test(g)){toast('Add their full name, as on their ID.');return;}
