@@ -1,16 +1,20 @@
-// The showcase studio's page: one simulated phone, drawn in Sk's own frame.
+// The showcase studio's page: simulated phones, drawn in Sk's own frame.
 //
-// In plain words: the phone on this page shows exactly the messages bubl's
+// In plain words: each phone on this page shows exactly the messages bubl's
 // engine wrote, in the format Meta delivers them. What you type or tap here is
 // sent to the same engine through the same door a real WhatsApp message uses.
+// You can play several people: the host, and the friends the host forwards
+// bubl's message to. A forwarded message arrives in the friend's chat with the
+// host, as it does in WhatsApp; its In and Out links open the friend's own chat
+// with bubl with the answer already written.
 //
-//   test mode   a signed-in studio operator speaks for a simulated person on
-//               the staging back end. Nothing here can reach a real phone.
+//   test mode   a signed-in studio operator speaks for simulated people on the
+//               staging back end. Nothing here can reach a real phone.
 //   demo mode   no back end at all. The page plays demo/opening.json: the
 //               engine's own answers, recorded by the tests, and says DEMO.
 //
 // The page draws messages; it decides nothing. Every word, date and amount on
-// the phone comes from the engine (or its recording), never from this file.
+// a phone comes from the engine (or its recording), never from this file.
 const cfg = window.BUBL_CONFIG || {};
 const LIVE = cfg.mode === 'test' && !!cfg.supabaseUrl && !!cfg.publishableKey;
 const $ = (id) => document.getElementById(id);
@@ -48,21 +52,43 @@ const ICON = {
   reply: () => icon('M6 4L2 8l4 4M2 8h8a4 4 0 014 4'),
   list: () => icon('M2 4h12M2 8h12M2 12h12'),
   open: () => icon('M6 3H3v10h10v-3M9 2h5v5M14 2L7 9'),
+  forwarded: () => icon('M9 3l5 5-5 5M14 8H6a4 4 0 00-4 4', { w: 11, stroke: '#8696A0' }),
   ticks: (read) => icon('M1 6l3 3 6-7M6 9l1 1 6-8', { box: '0 0 16 11', w: 15, h: 11, sw: '1.5', stroke: read ? '#53BDEB' : '#8BA39A' }),
   mic: () => icon([{ rect: { x: 6, y: 2, width: 4, height: 8, rx: 2, fill: '#0B141A' } }, { d: 'M4 8a4 4 0 008 0M8 12v2', stroke: '#0B141A' }], { w: 16, sw: '1.5' }),
   send: () => icon('M3 8h9M8 4l4 4-4 4', { w: 16, sw: '1.8', stroke: '#0B141A' }),
+  back: () => icon('M10 3L5 8l5 5', { w: 18, sw: '1.8', stroke: '#E9EDEF' }),
 };
 
-// ---------- WhatsApp's own text marks: *bold* _italic_ ~struck~ ----------
-function rich(text) {
+/** Only a public https address is ever opened or shown as a picture. */
+const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//.test(u) && !u.startsWith('https://demo.invalid') ? u : typeof u === 'string' && /^(media|\.\.?)\//.test(u) ? u : null);
+/** A "text bubl" link: https://wa.me/<number>?text=…  A "share" link has no number: WhatsApp then asks who to send it to. */
+function waLink(u) {
+  let url;
+  try { url = new URL(u); } catch { return null; }
+  if (url.origin !== 'https://wa.me') return null;
+  const text = url.searchParams.get('text');
+  return text === null ? null : { share: url.pathname === '/' || url.pathname === '', text };
+}
+
+// ---------- WhatsApp's own text marks (*bold* _italic_ ~struck~) and links ----------
+function rich(text, onLink) {
   const frag = document.createDocumentFragment();
-  const re = /\*(\S(?:[^*\n]*\S)?)\*|_(\S(?:[^_\n]*\S)?)_|~(\S(?:[^~\n]*\S)?)~/g;
+  const re = /(https:\/\/[^\s]+)|\*(\S(?:[^*\n]*\S)?)\*|_(\S(?:[^_\n]*\S)?)_|~(\S(?:[^~\n]*\S)?)~/g;
   let at = 0;
   for (let m; (m = re.exec(text)); ) {
     if (m.index > at) frag.append(text.slice(at, m.index));
-    const n = el(m[1] !== undefined ? 'b' : m[2] !== undefined ? 'i' : 's', '', m[1] ?? m[2] ?? m[3]);
-    if (m[1] !== undefined) n.style.fontWeight = '600';
-    frag.append(n);
+    if (m[1] !== undefined) {
+      const a = el('a', 'lnk', m[1]);
+      const wa = waLink(m[1]);
+      const url = safeUrl(m[1]);
+      if (wa && onLink) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onLink(wa); }); }
+      else if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+      frag.append(a);
+    } else {
+      const n = el(m[2] !== undefined ? 'b' : m[3] !== undefined ? 'i' : 's', '', m[2] ?? m[3] ?? m[4]);
+      if (m[2] !== undefined) n.style.fontWeight = '600';
+      frag.append(n);
+    }
     at = m.index + m[0].length;
   }
   if (at < text.length) frag.append(text.slice(at));
@@ -74,135 +100,12 @@ function stamp(at, ticks) {
   if (ticks) t.append(ICON.ticks(ticks === 'read'));
   return t;
 }
-/** Only a public https address is ever opened or shown as a picture. */
-const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//.test(u) && !u.startsWith('https://demo.invalid') ? u : typeof u === 'string' && /^(media|\.\.?)\//.test(u) ? u : null);
-
-// ---------- the thread ----------
-const thread = $('thread');
-let newestButtons = null;
-function toBottom() { thread.scrollTop = thread.scrollHeight; }
-function clearThread() {
-  thread.replaceChildren(el('div', 'day', 'Today'));
-  newestButtons = null;
-  closeSheet();
-}
-
-/** The person's own message: what they typed, or the title of what they tapped. */
-function drawMine(text, at, state) {
-  const b = el('div', 'out');
-  b.append(rich(text), stamp(at, state === 'pending' ? 'sent' : 'read'));
-  thread.append(b);
-  toBottom();
-  return b;
-}
-
-/** One of bubl's messages, from Meta's own format. */
-function drawBubl(row, onTap) {
-  const m = row.message ?? {};
-  if (m.type === 'text') {
-    const b = el('div', 'in');
-    b.dataset.what = row.what;
-    b.append(rich(String(m.text?.body ?? '')), stamp(row.at));
-    thread.append(b);
-    return;
-  }
-  const i = m.interactive ?? {};
-  const g = el('div', 'grp');
-  g.dataset.what = row.what;
-  const b = el('div', 'in');
-  const picture = safeUrl(i.header?.image?.link);
-  if (picture) {
-    g.classList.add('pic');
-    const img = el('img', 'img');
-    img.alt = '';
-    img.src = picture;
-    img.addEventListener('load', toBottom);
-    b.append(img);
-  }
-  b.append(rich(String(i.body?.text ?? '')));
-  if (i.footer?.text) b.append(el('span', 'ft', i.footer.text));
-  b.append(stamp(row.at));
-  g.append(b);
-  if (i.type === 'button') {
-    for (const x of i.action?.buttons ?? []) {
-      const btn = el('button', 'wbtn');
-      btn.type = 'button';
-      btn.append(ICON.reply(), x.reply.title);
-      btn.addEventListener('click', () => onTap({ id: x.reply.id, title: x.reply.title, kind: 'button' }, g));
-      g.append(btn);
-    }
-    newestButtons = g;
-  } else if (i.type === 'list') {
-    const btn = el('button', 'wbtn');
-    btn.type = 'button';
-    btn.append(ICON.list(), i.action?.button ?? '');
-    const rows = (i.action?.sections ?? []).flatMap((s) => s.rows ?? []);
-    btn.addEventListener('click', () => openSheet(i.action?.button ?? '', rows, (r) => onTap({ id: r.id, title: r.title, kind: 'list' }, g)));
-    g.append(btn);
-    newestButtons = g;
-  } else if (i.type === 'cta_url') {
-    const p = i.action?.parameters ?? {};
-    const url = safeUrl(p.url);
-    const a = el('a', 'wbtn');
-    a.append(ICON.open(), p.display_text ?? '');
-    if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-    else { a.setAttribute('aria-disabled', 'true'); a.addEventListener('click', () => say('That page is not published beside this studio yet.')); }
-    g.append(a);
-  }
-  thread.append(g);
-}
-
-function draw(rows, onTap) {
-  for (const row of rows) {
-    if (row.direction === 'in') {
-      const m = row.message ?? {};
-      drawMine(String(m.text?.body ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? ''), row.at, row.state);
-    } else if (row.state === 'failed') {
-      say(`One of bubl's answers could not be delivered${row.problem ? `: ${row.problem}` : '.'}`, true);
-    } else drawBubl(row, onTap);
-  }
-  toBottom();
-}
-
-// ---------- WhatsApp's pick-list, over the chat ----------
-function closeSheet() { for (const n of document.querySelectorAll('#scr > .shade, #scr > .sheet')) n.remove(); }
-function openSheet(title, rows, onPick) {
-  closeSheet();
-  const shade = el('div', 'shade');
-  shade.addEventListener('click', closeSheet);
-  const sheet = el('div', 'sheet');
-  sheet.setAttribute('role', 'dialog');
-  sheet.append(el('div', 'grab'), el('div', 'sheet-title', title));
-  let picked = null;
-  const send = el('button', 'sheet-send', 'Send');
-  send.type = 'button';
-  send.disabled = true;
-  for (const r of rows) {
-    const row = el('div', 'srow');
-    const text = el('div');
-    text.style.flex = '1';
-    text.append(r.title);
-    if (r.description) text.append(el('small', '', r.description));
-    const radio = el('div', 'radio');
-    row.append(text, radio);
-    row.addEventListener('click', () => {
-      for (const x of sheet.querySelectorAll('.radio')) x.classList.remove('on');
-      radio.classList.add('on');
-      picked = r;
-      send.disabled = false;
-    });
-    sheet.append(row);
-  }
-  send.addEventListener('click', () => { if (picked) { closeSheet(); onPick(picked); } });
-  sheet.append(send);
-  $('scr').append(shade, sheet);
-}
 
 // ---------- the studio's own line, outside the chat ----------
 let noteTimer = null;
 const wide = () => window.matchMedia('(min-width:601px)').matches;
 let standing = '';
-/** `stay`: the line that is shown whenever nothing else is being said (beside the phone; on a real phone it shows once). */
+/** `stay`: the line shown whenever nothing else is being said (beside the phone; on a real phone it shows once). */
 function say(text, bad = false, stay = false) {
   const n = $('note');
   clearTimeout(noteTimer);
@@ -211,6 +114,332 @@ function say(text, bad = false, stay = false) {
   n.classList.toggle('bad', bad);
   if (!(stay && wide())) noteTimer = setTimeout(() => { n.textContent = wide() ? standing : ''; n.classList.remove('bad'); }, 6000);
 }
+
+// ---------- the people being played ----------
+// A person: { id, name, rows (their chat with bubl), last, unread, busy, peers (chats with other people: forwarded messages),
+//             view ('bubl' | 'list' | a peer's name), draft }
+let source = null;
+const people = [];
+let current = null;
+let beside = null;
+const person = (id) => people.find((p) => p.id === id);
+function addPerson(p) {
+  const made = { id: p.id, name: p.name, rows: [], last: 0, unread: 0, busy: false, peers: new Map(), view: 'bubl', draft: '' };
+  people.push(made);
+  return made;
+}
+
+// ---------- one phone ----------
+class Phone {
+  constructor() {
+    this.root = $('phoneT').content.firstElementChild.cloneNode(true);
+    const q = (s) => this.root.querySelector(s);
+    this.scr = q('.scr'); this.thread = q('.wa-body'); this.field = q('.cfield'); this.send = q('.cmic');
+    this.name = q('.wa-nm'); this.sub = q('.wa-sb'); this.av = q('.wa-av'); this.comp = q('.comp'); this.who = q('.dlab'); this.back = q('.wa-back');
+    this.who_ = null;
+    this.back.append(ICON.back());
+    this.back.addEventListener('click', () => { if (this.who_) { this.who_.view = this.who_.view === 'list' ? 'bubl' : 'list'; this.draw(); } });
+    this.comp.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const p = this.who_;
+      const text = this.field.value.trim();
+      if (!p || p.view !== 'bubl') return;
+      if (!text) { this.field.focus(); return; }
+      this.field.value = ''; p.draft = ''; this.sendIcon();
+      act(p, { text }, text);
+    });
+    this.field.addEventListener('input', () => { if (this.who_) this.who_.draft = this.field.value; this.sendIcon(); });
+  }
+  sendIcon() { this.send.replaceChildren(this.field.value.trim() ? ICON.send() : ICON.mic()); }
+  toBottom() { this.thread.scrollTop = this.thread.scrollHeight; }
+  closeSheet() { for (const n of this.scr.querySelectorAll(':scope > .shade, :scope > .sheet')) n.remove(); }
+  show(p) { this.who_ = p; this.root.hidden = !p; if (p) { p.unread = 0; this.draw(); } }
+
+  /** Draws everything from the person's own state. */
+  draw() {
+    const p = this.who_;
+    if (!p) return;
+    this.closeSheet();
+    this.who.replaceChildren(p.name, el('span', '', 'simulated phone'));
+    this.thread.replaceChildren();
+    this.newest = null;
+    const chat = p.view === 'bubl';
+    this.comp.hidden = !chat;
+    this.back.style.visibility = p.peers.size ? 'visible' : 'hidden';
+    this.av.replaceChildren();
+    if (p.view === 'list') return this.drawList(p);
+    if (!chat) return this.drawPeer(p, p.view);
+    const img = el('img'); img.src = 'media/bubl-mark.svg'; img.alt = '';
+    this.av.append(img);
+    this.name.textContent = source.chat;
+    this.sub.textContent = p.busy ? 'typing…' : 'business account';
+    this.field.value = p.draft; this.sendIcon();
+    this.thread.append(el('div', 'day', 'Today'));
+    for (const row of p.rows) this.drawRow(p, row);
+    this.toBottom();
+  }
+
+  /** WhatsApp's list of chats: bubl, and anyone who forwarded this person a message. */
+  drawList(p) {
+    this.name.textContent = 'Chats';
+    this.sub.textContent = p.name;
+    const row = (title, last, open, mark) => {
+      const r = el('div', 'crow');
+      const a = el('div', 'wa-av');
+      if (mark) { const i = el('img'); i.src = 'media/bubl-mark.svg'; i.alt = ''; a.append(i); } else a.append(el('span', 'ini', title.slice(0, 1).toUpperCase()));
+      const t = el('div', 'ctext');
+      t.append(el('b', '', title), el('small', '', last));
+      r.append(a, t);
+      r.addEventListener('click', () => { p.view = open; this.draw(); });
+      this.thread.append(r);
+    };
+    const lastOf = (rows) => { const m = rows.at(-1)?.message; return m ? String(m.text?.body ?? m.interactive?.body?.text ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? '').split('\n')[0] : 'business account'; };
+    row(source.chat, lastOf(p.rows), 'bubl', true);
+    for (const [name, list] of p.peers) row(name, list.at(-1).text.split('\n')[0], name, false);
+  }
+
+  /** A chat with another person: the messages they forwarded. bubl is not in this chat and never sees it. */
+  drawPeer(p, name) {
+    this.name.textContent = name;
+    this.sub.textContent = 'tap here for contact info';
+    this.av.append(el('span', 'ini', name.slice(0, 1).toUpperCase()));
+    this.thread.append(el('div', 'day', 'Today'));
+    for (const m of p.peers.get(name) ?? []) {
+      const b = el('div', 'in');
+      const f = el('span', 'fwd'); f.append(ICON.forwarded(), 'Forwarded');
+      // an In or Out link opens this person's own chat with bubl, with the answer already written; they press Send
+      b.append(f, rich(m.text, (wa) => { if (!wa.share) { p.view = 'bubl'; p.draft = wa.text; this.draw(); this.field.focus(); } }), stamp(m.at));
+      this.thread.append(b);
+    }
+    this.toBottom();
+  }
+
+  drawRow(p, row) {
+    const m = row.message ?? {};
+    const onLink = (wa) => (wa.share ? forward(p, wa.text) : (p.draft = wa.text, this.draw(), this.field.focus()));
+    if (row.direction === 'in') {
+      const b = el('div', 'out');
+      b.append(rich(String(m.text?.body ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? '')), stamp(row.at, row.pending ? 'sent' : 'read'));
+      this.thread.append(b);
+      return;
+    }
+    if (row.state === 'failed') return;
+    if (m.type === 'text') {
+      const b = el('div', 'in');
+      b.dataset.what = row.what;
+      b.append(rich(String(m.text?.body ?? ''), onLink), stamp(row.at));
+      this.thread.append(b);
+      return;
+    }
+    const i = m.interactive ?? {};
+    const g = el('div', 'grp');
+    g.dataset.what = row.what;
+    const b = el('div', 'in');
+    const picture = safeUrl(i.header?.image?.link);
+    if (picture) {
+      g.classList.add('pic');
+      const img = el('img', 'img');
+      img.alt = '';
+      img.src = picture;
+      img.addEventListener('load', () => this.toBottom());
+      b.append(img);
+    }
+    b.append(rich(String(i.body?.text ?? ''), onLink));
+    if (i.footer?.text) b.append(el('span', 'ft', i.footer.text));
+    b.append(stamp(row.at));
+    g.append(b);
+    const tap = (t) => act(p, { tap: t, stale: g !== this.newest }, t.title);
+    if (i.type === 'button') {
+      for (const x of i.action?.buttons ?? []) {
+        const btn = el('button', 'wbtn');
+        btn.type = 'button';
+        btn.append(ICON.reply(), x.reply.title);
+        btn.addEventListener('click', () => tap({ id: x.reply.id, title: x.reply.title, kind: 'button' }));
+        g.append(btn);
+      }
+      this.newest = g;
+    } else if (i.type === 'list') {
+      const btn = el('button', 'wbtn');
+      btn.type = 'button';
+      btn.append(ICON.list(), i.action?.button ?? '');
+      const rows = (i.action?.sections ?? []).flatMap((s) => s.rows ?? []);
+      btn.addEventListener('click', () => this.openSheet(i.action?.button ?? '', rows, (r) => tap({ id: r.id, title: r.title, kind: 'list' })));
+      g.append(btn);
+      this.newest = g;
+    } else if (i.type === 'cta_url') {
+      const prm = i.action?.parameters ?? {};
+      const wa = waLink(prm.url);
+      const url = safeUrl(prm.url);
+      const a = el('a', 'wbtn');
+      a.append(ICON.open(), prm.display_text ?? '');
+      if (wa) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onLink(wa); }); }
+      else if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+      else { a.setAttribute('aria-disabled', 'true'); a.addEventListener('click', () => say('That page is not published beside this studio yet.')); }
+      g.append(a);
+    }
+    this.thread.append(g);
+  }
+
+  /** WhatsApp's pick-list, over the chat. */
+  openSheet(title, rows, onPick) {
+    this.closeSheet();
+    const shade = el('div', 'shade');
+    shade.addEventListener('click', () => this.closeSheet());
+    const sheet = el('div', 'sheet');
+    sheet.setAttribute('role', 'dialog');
+    sheet.append(el('div', 'grab'), el('div', 'sheet-title', title));
+    let picked = null;
+    const send = el('button', 'sheet-send', 'Send');
+    send.type = 'button';
+    send.disabled = true;
+    for (const r of rows) {
+      const row = el('div', 'srow');
+      const text = el('div');
+      text.style.flex = '1';
+      text.append(r.title);
+      if (r.description) text.append(el('small', '', r.description));
+      const radio = el('div', 'radio');
+      row.append(text, radio);
+      row.addEventListener('click', () => {
+        for (const x of sheet.querySelectorAll('.radio')) x.classList.remove('on');
+        radio.classList.add('on');
+        picked = r;
+        send.disabled = false;
+      });
+      sheet.append(row);
+    }
+    send.addEventListener('click', () => { if (picked) { this.closeSheet(); onPick(picked); } });
+    sheet.append(send);
+    this.scr.append(shade, sheet);
+  }
+}
+
+const phones = [new Phone(), new Phone()];
+/** Which phones are in view: the person being played and, on a wide screen, the one played before them. */
+function layout() {
+  const two = window.matchMedia('(min-width:1040px)').matches && beside && beside !== current;
+  phones[0].show(two ? beside : current);
+  phones[1].show(two ? current : null);
+  drawPeople();
+}
+const phoneOf = (p) => phones.find((x) => x.who_ === p && !x.root.hidden);
+function redraw(p) { const ph = phoneOf(p); if (ph) { p.unread = 0; ph.draw(); } drawPeople(); }
+function select(p) { if (p === current) return; beside = current; current = p; layout(); }
+
+function drawPeople() {
+  const box = $('people');
+  box.replaceChildren();
+  if (!source || source.demo) { box.hidden = true; return; }
+  box.hidden = false;
+  for (const p of people) {
+    const c = el('button', `chip${p === current ? ' on' : ''}`, p.name);
+    c.type = 'button';
+    if (p.unread && !phoneOf(p)) c.append(el('span', 'dot', String(p.unread)));
+    c.addEventListener('click', () => select(p));
+    box.append(c);
+  }
+  const plus = el('button', 'chip', '+ Friend');
+  plus.type = 'button';
+  plus.addEventListener('click', async () => { const p = await askName('A simulated friend', 'Their first name, as WhatsApp would show it.'); if (p) select(p); });
+  box.append(plus);
+}
+
+/** New messages for a person: drawn if their phone is in view, counted on their name if not. */
+function take(p, rows) {
+  if (!rows.length) return;
+  for (const r of rows) {
+    if (r.direction === 'out' && r.state === 'failed') say(`One of bubl's answers to ${p.name} could not be delivered${r.problem ? `: ${r.problem}` : '.'}`, true);
+    p.rows.push(r);
+  }
+  const fromBubl = rows.filter((r) => r.direction === 'out' && r.state !== 'failed').length;
+  if (phoneOf(p) && p.view === 'bubl') redraw(p); else { p.unread += fromBubl; redraw(p); }
+}
+
+async function act(p, input, shown) {
+  if (p.busy || !source) return;
+  p.busy = true;
+  const mine = { direction: 'in', pending: true, message: { type: 'text', text: { body: shown } } };
+  p.rows.push(mine);
+  redraw(p);
+  try {
+    const r = await source.act(p, input);
+    p.rows.splice(p.rows.indexOf(mine), 1);
+    if (r.note) {
+      say(r.note, !!r.bad);
+      if (r.keep && input.text) p.draft = input.text;
+    }
+    p.busy = false;
+    take(p, r.rows ?? []);
+    redraw(p);
+    // what this did may have reached someone else's chat (a friend answered: the host is told)
+    if (!source.demo) await others(p);
+  } catch (e) {
+    p.rows.splice(p.rows.indexOf(mine), 1);
+    say(e.message || 'That could not be done just now.', true);
+  } finally {
+    p.busy = false;
+    redraw(p);
+  }
+}
+async function others(except) { for (const p of people) if (p !== except && !p.busy) take(p, await source.more(p)); }
+
+// ---------- forwarding bubl's message to a friend ----------
+/** WhatsApp's "Send to…": pick a simulated friend, or make one. The message lands in their chat with the sender. */
+async function forward(from, text) {
+  if (source.demo) return say('This is a recording, so there are no friends to forward to. Connect staging to play your friends too.');
+  const to = await chooser(from);
+  if (!to) return;
+  const list = to.peers.get(from.name) ?? [];
+  list.push({ text, at: new Date().toISOString() });
+  to.peers.set(from.name, list);
+  to.view = from.name;
+  select(to);
+  redraw(to);
+}
+function overlay(build) {
+  return new Promise((done) => {
+    const wrap = el('div', 'veil');
+    const card = el('form', 'card');
+    const close = (v) => { wrap.remove(); done(v); };
+    wrap.addEventListener('click', (e) => { if (e.target === wrap) close(null); });
+    build(card, close);
+    wrap.append(card);
+    document.body.append(wrap);
+  });
+}
+function nameForm(card, close, title, text) {
+  card.append(el('h1', '', title), el('p', '', text));
+  const input = el('input');
+  input.type = 'text'; input.maxLength = 24; input.placeholder = 'Omar'; input.autocomplete = 'off';
+  const go = el('button', 'go', 'Add');
+  go.type = 'submit';
+  const err = el('p', 'err');
+  card.append(input, go, err);
+  card.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = input.value.trim();
+    if (!name) return input.focus();
+    go.disabled = true;
+    try { close(addPerson(await source.newPerson(name))); } catch (x) { err.textContent = x.message || 'That could not be done just now.'; go.disabled = false; }
+  });
+  setTimeout(() => input.focus(), 0);
+}
+const askName = (title, text) => overlay((card, close) => nameForm(card, close, title, text));
+const chooser = (from) => overlay((card, close) => {
+  const rest = people.filter((p) => p !== from);
+  if (!rest.length) return nameForm(card, close, 'Send to…', `Who does ${from.name} forward it to? A simulated friend, by first name.`);
+  card.append(el('h1', '', 'Send to…'), el('p', '', `Who does ${from.name} forward it to?`));
+  for (const p of rest) {
+    const b = el('button', 'pick', p.name);
+    b.type = 'button';
+    b.addEventListener('click', () => close(p));
+    card.append(b);
+  }
+  const more = el('button', 'link', 'A new friend');
+  more.type = 'button';
+  more.addEventListener('click', () => { card.replaceChildren(); nameForm(card, close, 'Send to…', 'Their first name, as WhatsApp would show it.'); });
+  card.append(more);
+});
 
 // ---------- demo mode: the engine's recorded answers ----------
 /** The same reading the engine gives a typed line: lower case, no accents, punctuation as spaces. */
@@ -224,12 +453,12 @@ async function demoSource() {
   let n = 0;
   return {
     demo: true,
-    person: rec.person,
     chat: rec.line_name,
     lines: rec.lines,
     recordedFor: rec.recorded_for,
+    async people() { return [{ id: 'demo', name: rec.person }]; },
     async start() { return []; },
-    async act(input) {
+    async act(_p, input) {
       if (input.tap && input.stale) return { note: 'This is a recording, so only the newest message’s buttons answer here. On the real engine an old button answers with where things stand now.' };
       const edge = rec.nodes[at]?.[input.tap ? `tap:${input.tap.title}` : `text:${plain(input.text)}`];
       if (!edge) return { note: `This is a recording: it knows ${rec.lines.map((l) => `“${l}”`).join(', ')} and every button. Connect staging to type anything.`, keep: true };
@@ -237,6 +466,7 @@ async function demoSource() {
       await sleep(450);
       return { rows: edge.messages.map((i) => ({ ...place(rec.messages[i]), id: ++n, at: new Date().toISOString() })) };
     },
+    async more() { return []; },
     async reset() { at = rec.start; },
   };
 }
@@ -268,84 +498,51 @@ async function liveSource() {
     try { j = await res.json(); } catch { /* not JSON */ }
     return j && typeof j.ok === 'boolean' ? { ...j, status: res.status } : { ok: false, status: res.status, reason: 'That could not be done just now. Please try again in a moment.' };
   }
-  let person = null;
-  let last = 0;
-  const fresh = (rows) => { for (const r of rows) last = Math.max(last, Number(r.id) || 0); return rows; };
+  const fresh = (p, rows) => { for (const r of rows) p.last = Math.max(p.last, Number(r.id) || 0); return rows; };
+  let mine = [];
   return {
     demo: false,
     sb,
-    call,
-    /** Who is signed in, and their simulated phone on the guests' line (made on first use). */
+    /** Who is signed in, and their simulated phones on the guests' line (the first is made on first use). */
     async enter() {
       const s = await call('state');
       if (!s.ok) return s;
       const line = (s.lines ?? []).find((l) => l.key === 'bubl');
-      person = (s.people ?? []).find((p) => p.line === 'bubl' && p.mine) ?? null;
-      if (!person) {
+      mine = (s.people ?? []).filter((p) => p.line === 'bubl' && p.mine).map((p) => ({ id: p.id, name: p.name }));
+      if (!mine.length) {
         const made = await call('person', { line: 'bubl', name: s.operator });
         if (!made.ok) return made;
-        person = { id: made.person.id, name: s.operator };
+        mine = [{ id: made.person.id, name: s.operator }];
       }
-      this.person = person.name;
       this.chat = line?.name ?? 'bubl';
       this.connected = !!line?.connected;
       return { ok: true };
     },
-    async start() { last = 0; const f = await call('feed', { person: person.id }); return f.ok ? fresh(f.messages) : []; },
-    async act(input) {
-      const r = await call('say', { person: person.id, after: last, ...(input.tap ? { tap: { id: input.tap.id, title: input.tap.title, kind: input.tap.kind } } : { text: input.text }) });
-      return r.ok ? { rows: fresh(r.messages) } : { note: r.reason, bad: true, keep: true };
+    async people() { return mine; },
+    async newPerson(name) {
+      const made = await call('person', { line: 'bubl', name });
+      if (!made.ok) throw new Error(made.reason);
+      return { id: made.person.id, name };
     },
-    /** Anything that arrived late (an answer that had to be tried again). */
-    async more() { const f = await call('feed', { person: person.id, after: last }); return f.ok ? fresh(f.messages) : []; },
-    async reset() { const r = await call('reset', { person: person.id }); if (!r.ok) throw new Error(r.reason); },
+    async start(p) { p.last = 0; const f = await call('feed', { person: p.id }); return f.ok ? fresh(p, f.messages) : []; },
+    async act(p, input) {
+      const r = await call('say', { person: p.id, after: p.last, ...(input.tap ? { tap: { id: input.tap.id, title: input.tap.title, kind: input.tap.kind } } : { text: input.text }) });
+      return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason, bad: true, keep: true };
+    },
+    /** Anything that arrived since (the host being told, or an answer that had to be tried again). */
+    async more(p) { const f = await call('feed', { person: p.id, after: p.last }); return f.ok ? fresh(p, f.messages) : []; },
+    async reset(p) { const r = await call('reset', { person: p.id }); if (!r.ok) throw new Error(r.reason); },
   };
 }
 
 // ---------- the page ----------
-let source = null;
-let busy = false;
-const field = $('field');
-const sendBtn = $('send');
-function sendIcon() { sendBtn.replaceChildren(field.value.trim() ? ICON.send() : ICON.mic()); }
-function typing(on) { $('chatSub').textContent = on ? 'typing…' : 'business account'; }
-
-async function act(input, shown) {
-  if (busy || !source) return;
-  busy = true;
-  const mine = drawMine(shown, undefined, 'pending');
-  typing(true);
-  try {
-    const r = await source.act(input);
-    mine.remove();
-    if (r.note) {
-      say(r.note, !!r.bad);
-      if (r.keep && input.text) { field.value = input.text; sendIcon(); }
-    }
-    if (r.rows) draw(r.rows, onTap);
-  } catch (e) {
-    mine.remove();
-    say(e.message || 'That could not be done just now.', true);
-  } finally {
-    typing(false);
-    busy = false;
-  }
-}
-function onTap(tap, group) { act({ tap, stale: group !== newestButtons }, tap.title); }
-
-$('composer').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const text = field.value.trim();
-  if (!text) { field.focus(); return; }
-  field.value = '';
-  sendIcon();
-  act({ text }, text);
-});
-field.addEventListener('input', sendIcon);
 $('reset').addEventListener('click', async () => {
-  if (busy || !source) return;
-  busy = true;
-  try { await source.reset(); clearThread(); say('Started again from an empty chat.'); } catch (e) { say(e.message || 'Reset did not work just now.', true); } finally { busy = false; }
+  if (!source || people.some((p) => p.busy)) return;
+  try {
+    for (const p of people) { await source.reset(p); p.rows = []; p.peers = new Map(); p.view = 'bubl'; p.draft = ''; p.unread = 0; }
+    layout();
+    say('Started again from empty chats.');
+  } catch (e) { say(e.message || 'Reset did not work just now.', true); }
 });
 
 async function open(src) {
@@ -353,10 +550,10 @@ async function open(src) {
   $('gate').hidden = true;
   $('stage').hidden = false;
   $('reset').hidden = false;
-  $('chatName').textContent = src.chat;
-  $('who').replaceChildren(src.person, el('span', '', 'simulated phone'));
-  clearThread();
-  draw(await src.start(), onTap);
+  for (const p of await src.people()) addPerson(p);
+  current = people[0];
+  for (const p of people) p.rows = await src.start(p);
+  layout();
   if (src.demo) {
     const strip = $('strip');
     strip.hidden = false;
@@ -364,7 +561,7 @@ async function open(src) {
     for (const line of src.lines) {
       const c = el('button', 'chip', line);
       c.type = 'button';
-      c.addEventListener('click', () => { field.value = line; sendIcon(); field.focus(); });
+      c.addEventListener('click', () => { current.draft = line; redraw(current); phoneOf(current)?.field.focus(); });
       strip.append(c);
     }
     const day = new Date(src.recordedFor).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -374,8 +571,9 @@ async function open(src) {
     meta.hidden = false;
     meta.textContent = src.connected ? 'Meta: connected' : 'Meta: not connected yet';
     meta.classList.toggle('off', !src.connected);
-    // an answer that had to be tried again arrives a little later; look for it while the page is in view
-    setInterval(async () => { if (!document.hidden && !busy) draw(await src.more(), onTap); }, 6000);
+    say('You are playing simulated phones on the real engine. Use Share on bubl’s message to forward it to a friend.', false, true);
+    // anything that arrives later (the host being told, an answer tried again): look for it while the page is in view
+    setInterval(() => { if (!document.hidden) others(null).catch(() => {}); }, 6000);
   }
 }
 
@@ -440,22 +638,24 @@ function gate(src) {
   return enter();
 }
 
+for (const ph of phones) { ph.root.hidden = true; $('phones').append(ph.root); }
+
 // a real phone's keyboard changes how much of the page is in view; the chat follows it
 if (window.visualViewport) {
-  const fit = () => { document.documentElement.style.setProperty('--vvh', `${window.visualViewport.height}px`); toBottom(); };
+  const fit = () => { document.documentElement.style.setProperty('--vvh', `${window.visualViewport.height}px`); for (const ph of phones) ph.toBottom(); };
   window.visualViewport.addEventListener('resize', fit);
   fit();
 }
-// On a laptop the phone is drawn at its true size, 360 x 760. If the window is too short to hold it, the whole
+// On a laptop each phone is drawn at its true size, 360 x 760. If the window is too short to hold it, the whole
 // phone is made smaller in proportion, so the chat and the message field are always in view.
 function fitPhone() {
   const room = window.innerHeight - 52 - 40;
   document.documentElement.style.setProperty('--k', String(Math.min(1, Math.max(0.6, room / 760))));
+  if (source) layout();
 }
 window.addEventListener('resize', fitPhone);
 fitPhone();
 
-sendIcon();
 const mode = $('mode');
 if (LIVE) {
   $('modeShort').textContent = 'TEST';
