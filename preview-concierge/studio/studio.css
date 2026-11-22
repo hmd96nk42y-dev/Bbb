@@ -49,6 +49,14 @@
 .in,.out{overflow-wrap:anywhere;white-space:pre-wrap}
 .grp.pic{width:84%}                                 /* a message with a picture is as wide as a bubble may be */
 .grp .img{aspect-ratio:1200/628;margin-bottom:6px}  /* WhatsApp's own shape for the picture on top of a message */
+/* a photo with words under it: the 3D view in the app's own frame (390 x 506), in a bubble as wide as WhatsApp draws a photo */
+.in.pic{width:70%}
+.img.photo{aspect-ratio:390/506;margin-bottom:6px}
+/* WhatsApp's forward button beside a message that is meant to be passed on */
+.fwrap{display:flex;align-items:center;gap:8px;align-self:stretch}
+.fwrap>.in{flex:0 1 auto;min-width:0}
+.fwrap>.in:not(.pic){max-width:84%}
+.fbtn{width:30px;height:30px;border-radius:50%;border:0;background:#1F2C34;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
 .ft{display:block;color:#8696A0;font-size:11.5px;margin-top:4px}
 .wbtn{cursor:pointer;text-decoration:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 .wbtn:active{background:#26343D}

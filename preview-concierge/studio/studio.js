@@ -53,6 +53,7 @@ const ICON = {
   list: () => icon('M2 4h12M2 8h12M2 12h12'),
   open: () => icon('M6 3H3v10h10v-3M9 2h5v5M14 2L7 9'),
   forwarded: () => icon('M9 3l5 5-5 5M14 8H6a4 4 0 00-4 4', { w: 11, stroke: '#8696A0' }),
+  forward: () => icon('M9 3l5 5-5 5M14 8H6a4 4 0 00-4 4', { w: 15, stroke: '#E9EDEF' }),
   ticks: (read) => icon('M1 6l3 3 6-7M6 9l1 1 6-8', { box: '0 0 16 11', w: 15, h: 11, sw: '1.5', stroke: read ? '#53BDEB' : '#8BA39A' }),
   mic: () => icon([{ rect: { x: 6, y: 2, width: 4, height: 8, rx: 2, fill: '#0B141A' } }, { d: 'M4 8a4 4 0 008 0M8 12v2', stroke: '#0B141A' }], { w: 16, sw: '1.5' }),
   send: () => icon('M3 8h9M8 4l4 4-4 4', { w: 16, sw: '1.8', stroke: '#0B141A' }),
@@ -207,8 +208,17 @@ class Phone {
     for (const m of p.peers.get(name) ?? []) {
       const b = el('div', 'in');
       const f = el('span', 'fwd'); f.append(ICON.forwarded(), 'Forwarded');
+      if (m.image) {
+        b.classList.add('pic');
+        const img = el('img', 'img photo');
+        img.alt = '';
+        img.src = m.image;
+        img.addEventListener('load', () => this.toBottom());
+        f.style.marginBottom = '4px';
+        b.append(f, img);
+      } else b.append(f);
       // an In or Out link opens this person's own chat with bubl, with the answer already written; they press Send
-      b.append(f, rich(m.text, (wa) => { if (!wa.share) { p.view = 'bubl'; p.draft = wa.text; this.draw(); this.field.focus(); } }), stamp(m.at));
+      b.append(rich(m.text, (wa) => { if (!wa.share) { p.view = 'bubl'; p.draft = wa.text; this.draw(); this.field.focus(); } }), stamp(m.at));
       this.thread.append(b);
     }
     this.toBottom();
@@ -216,7 +226,7 @@ class Phone {
 
   drawRow(p, row) {
     const m = row.message ?? {};
-    const onLink = (wa) => (wa.share ? forward(p, wa.text) : (p.draft = wa.text, this.draw(), this.field.focus()));
+    const onLink = (wa) => (wa.share ? forward(p, { text: wa.text, image: null }) : (p.draft = wa.text, this.draw(), this.field.focus()));
     if (row.direction === 'in') {
       const b = el('div', 'out');
       b.append(rich(String(m.text?.body ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? '')), stamp(row.at, row.pending ? 'sent' : 'read'));
@@ -224,11 +234,31 @@ class Phone {
       return;
     }
     if (row.state === 'failed') return;
-    if (m.type === 'text') {
+    if (m.type === 'text' || m.type === 'image') {
+      const words = String(m.type === 'image' ? (m.image?.caption ?? '') : (m.text?.body ?? ''));
+      const picture = m.type === 'image' ? safeUrl(m.image?.link) : null;
       const b = el('div', 'in');
       b.dataset.what = row.what;
-      b.append(rich(String(m.text?.body ?? ''), onLink), stamp(row.at));
-      this.thread.append(b);
+      if (picture) {
+        b.classList.add('pic');
+        const img = el('img', 'img photo');
+        img.alt = '';
+        img.src = picture;
+        img.addEventListener('load', () => this.toBottom());
+        b.append(img);
+      }
+      b.append(rich(words, onLink), stamp(row.at));
+      // the message bubl wrote to be forwarded gets WhatsApp's forward button beside it: "Send to…"
+      if (row.what === 'invite' || row.what === 'nudge') {
+        const wrap = el('div', 'fwrap');
+        const f = el('button', 'fbtn');
+        f.type = 'button';
+        f.setAttribute('aria-label', 'Forward');
+        f.append(ICON.forward());
+        f.addEventListener('click', () => forward(p, { text: words, image: picture }));
+        wrap.append(b, f);
+        this.thread.append(wrap);
+      } else this.thread.append(b);
       return;
     }
     const i = m.interactive ?? {};
@@ -384,13 +414,13 @@ async function act(p, input, shown) {
 async function others(except) { for (const p of people) if (p !== except && !p.busy) take(p, await source.more(p)); }
 
 // ---------- forwarding bubl's message to a friend ----------
-/** WhatsApp's "Send to…": pick a simulated friend, or make one. The message lands in their chat with the sender. */
-async function forward(from, text) {
+/** WhatsApp's "Send to…": pick a simulated friend, or make one. The message (its photo and its words) lands in their chat with the sender. */
+async function forward(from, item) {
   if (source.demo) return say('This is a recording, so there are no friends to forward to. Connect staging to play your friends too.');
   const to = await chooser(from);
   if (!to) return;
   const list = to.peers.get(from.name) ?? [];
-  list.push({ text, at: new Date().toISOString() });
+  list.push({ text: item.text, image: item.image, at: new Date().toISOString() });
   to.peers.set(from.name, list);
   to.view = from.name;
   select(to);
@@ -571,7 +601,7 @@ async function open(src) {
     meta.hidden = false;
     meta.textContent = src.connected ? 'Meta: connected' : 'Meta: not connected yet';
     meta.classList.toggle('off', !src.connected);
-    say('You are playing simulated phones on the real engine. Use Share on bubl’s message to forward it to a friend.', false, true);
+    say('You are playing simulated phones on the real engine. To play a friend, tap the forward arrow beside the message bubl writes for your crew.', false, true);
     // anything that arrives later (the host being told, an answer tried again): look for it while the page is in view
     setInterval(() => { if (!document.hidden) others(null).catch(() => {}); }, 6000);
   }
