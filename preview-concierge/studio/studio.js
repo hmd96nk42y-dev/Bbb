@@ -74,7 +74,7 @@ function waLink(u) {
 }
 
 // ---------- WhatsApp's own text marks (*bold* _italic_ ~struck~) and links ----------
-function rich(text, onLink) {
+function rich(text, onLink, onWebLink) {
   const frag = document.createDocumentFragment();
   const re = /(https:\/\/[^\s]+)|\*(\S(?:[^*\n]*\S)?)\*|_(\S(?:[^_\n]*\S)?)_|~(\S(?:[^~\n]*\S)?)~/g;
   let at = 0;
@@ -85,6 +85,7 @@ function rich(text, onLink) {
       const wa = waLink(m[1]);
       const url = safeUrl(m[1]);
       if (wa && onLink) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onLink(wa); }); }
+      else if (url && onWebLink && onWeb(url)) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onWebLink(url); }); }
       else if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
       frag.append(a);
     } else {
@@ -119,15 +120,19 @@ function say(text, bad = false, stay = false) {
 }
 
 // ---------- the people being played ----------
-// A person: { id, name, rows (their chat with bubl), last, unread, busy, peers (chats with other people: forwarded messages),
-//             view ('bubl' | 'list' | a peer's name), draft }
+// A person: { id, name, line ('bubl': a guest's phone | 'partners': a partner's or the team's phone), number (the simulated
+//             number, no phone can have it), rows (their chat with bubl), last, unread, busy, peers (chats with other
+//             people: forwarded messages), view ('bubl' | 'list' | a peer's name), draft }
 let source = null;
 const people = [];
 let current = null;
 let beside = null;
 const person = (id) => people.find((p) => p.id === id);
+/** The chat this phone has with bubl, by the name it is saved under: bubl concierge for a guest, bubl partners for a partner. */
+const chatName = (p) => source.chats?.[p.line] ?? source.chat;
+const isPartner = (p) => p.line === 'partners';
 function addPerson(p) {
-  const made = { id: p.id, name: p.name, rows: [], last: 0, unread: 0, busy: false, peers: new Map(), view: 'bubl', draft: '' };
+  const made = { id: p.id, name: p.name, line: p.line ?? 'bubl', number: p.number ?? null, rows: [], last: 0, unread: 0, busy: false, peers: new Map(), view: 'bubl', draft: '' };
   people.push(made);
   return made;
 }
@@ -164,7 +169,10 @@ class Phone {
     const back = el('button', 'web-back', 'Chat');
     back.type = 'button';
     back.prepend(ICON.back());
-    back.addEventListener('click', async () => { this.closeWeb(); try { take(p, await source.more(p)); } catch { /* shown at the next refresh */ } });
+    back.addEventListener('click', async () => {
+      this.closeWeb();
+      try { take(p, await source.more(p)); } catch { /* shown at the next refresh */ }
+    });
     const who = el('button', 'web-who', `${r.name || p.name} · +${r.number}`);
     who.type = 'button';
     who.title = 'The number to type where the page asks for it. Tap to copy.';
@@ -203,7 +211,7 @@ class Phone {
     const p = this.who_;
     if (!p) return;
     this.closeSheet();
-    this.who.replaceChildren(p.name, el('span', '', 'simulated phone'));
+    this.who.replaceChildren(p.name, el('span', '', p.number ? `simulated phone · +${p.number}` : 'simulated phone'));
     this.thread.replaceChildren();
     this.newest = null;
     const chat = p.view === 'bubl';
@@ -214,7 +222,7 @@ class Phone {
     if (!chat) return this.drawPeer(p, p.view);
     const img = el('img'); img.src = 'media/bubl-mark.svg'; img.alt = '';
     this.av.append(img);
-    this.name.textContent = source.chat;
+    this.name.textContent = chatName(p);
     this.sub.textContent = p.busy ? 'typing…' : 'business account';
     this.field.value = p.draft; this.sendIcon();
     this.thread.append(el('div', 'day', 'Today'));
@@ -237,7 +245,7 @@ class Phone {
       this.thread.append(r);
     };
     const lastOf = (rows) => { const m = rows.at(-1)?.message; return m ? String(m.text?.body ?? m.interactive?.body?.text ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? '').split('\n')[0] : 'business account'; };
-    row(source.chat, lastOf(p.rows), 'bubl', true);
+    row(chatName(p), lastOf(p.rows), 'bubl', true);
     for (const [name, list] of p.peers) row(name, list.at(-1).text.split('\n')[0], name, false);
   }
 
@@ -259,8 +267,9 @@ class Phone {
         f.style.marginBottom = '4px';
         b.append(f, img);
       } else b.append(f);
-      // an In or Out link opens this person's own chat with bubl, with the answer already written; they press Send
-      b.append(rich(m.text, (wa) => { if (!wa.share) { p.view = 'bubl'; p.draft = wa.text; this.draw(); this.field.focus(); } }), stamp(m.at));
+      // an In or Out link opens this person's own chat with bubl, with the answer already written; they press Send.
+      // A link to the venue's web app (a table a partner sent them) opens the real page here, as this guest.
+      b.append(rich(m.text, (wa) => { if (!wa.share) { p.view = 'bubl'; p.draft = wa.text; this.draw(); this.field.focus(); } }, isPartner(p) ? null : (url) => openWeb(this, p, url, null)), stamp(m.at));
       this.thread.append(b);
     }
     this.toBottom();
@@ -291,7 +300,7 @@ class Phone {
       }
       b.append(rich(words, onLink), stamp(row.at));
       // the message bubl wrote to be forwarded gets WhatsApp's forward button beside it: "Send to…"
-      if (row.what === 'invite' || row.what === 'nudge') {
+      if (row.what === 'invite' || row.what === 'nudge' || row.what === 'table_offer') {
         const wrap = el('div', 'fwrap');
         const f = el('button', 'fbtn');
         f.type = 'button';
@@ -398,7 +407,17 @@ function layout() {
 }
 const phoneOf = (p) => phones.find((x) => x.who_ === p && !x.root.hidden);
 function redraw(p) { const ph = phoneOf(p); if (ph) { p.unread = 0; ph.draw(); } drawPeople(); }
-function select(p) { if (p === current) return; beside = current; current = p; layout(); }
+function select(p) { if (p === current) return; beside = current; current = p; layout(); hint(p); }
+/** The line beside the phones, for the person now being played. */
+function hint(p) {
+  if (!source || source.demo || !p) return;
+  if (!isPartner(p)) return say(STANDING, false, true);
+  const known = p.rows.some((r) => r.direction === 'out' && r.what !== 'partners_unknown');
+  say(known
+    ? `${p.name} is on the ${chatName(p)} chat. To send a table to a simulated guest, type that guest’s own number: tap their name above, then their number to copy it.`
+    : `${p.name} is on the ${chatName(p)} chat as +${p.number}. bubl knows a partner only by the number a venue signed: in OPS, add a promoter with this mobile, pick their tables and sign. Then say hello here.`, false, true);
+}
+const STANDING = 'You are playing simulated phones on the real engine. To play a friend, tap the forward arrow beside the message bubl writes for your crew.';
 
 function drawPeople() {
   const box = $('people');
@@ -406,16 +425,33 @@ function drawPeople() {
   if (!source || source.demo) { box.hidden = true; return; }
   box.hidden = false;
   for (const p of people) {
-    const c = el('button', `chip${p === current ? ' on' : ''}`, p.name);
+    const c = el('button', `chip${p === current ? ' on' : ''}`, isPartner(p) ? `${p.name} · partner` : p.name);
     c.type = 'button';
     if (p.unread && !phoneOf(p)) c.append(el('span', 'dot', String(p.unread)));
     c.addEventListener('click', () => select(p));
     box.append(c);
+    // beside the name being played, that phone's number: what a promoter types to send this guest a table, and what
+    // OPS is given to make a phone a promoter's. No phone can have it.
+    if (p === current && p.number) {
+      const num = el('button', 'chip num', `+${p.number}`);
+      num.type = 'button';
+      num.title = `${p.name}’s simulated number. Tap to copy.`;
+      num.addEventListener('click', async () => { try { await navigator.clipboard.writeText(`+${p.number}`); say('Number copied.'); } catch { say(`The number is +${p.number}`); } });
+      box.append(num);
+    }
   }
   const plus = el('button', 'chip', '+ Friend');
   plus.type = 'button';
   plus.addEventListener('click', async () => { const p = await askName('A simulated friend', 'Their first name, as WhatsApp would show it.'); if (p) select(p); });
   box.append(plus);
+  // a phone on the other chat: a promoter, a concierge, someone on the venue's team
+  if (source.chats?.partners) {
+    const partner = el('button', 'chip', '+ Partner');
+    partner.type = 'button';
+    partner.addEventListener('click', async () => { const p = await askName('A simulated partner', `Their first name. This phone opens the ${source.chats.partners} chat.`, 'partners'); if (p) select(p); });
+    box.append(partner);
+  }
+
 }
 
 /** New messages for a person: drawn if their phone is in view, counted on their name if not. */
@@ -426,6 +462,8 @@ function take(p, rows) {
     p.rows.push(r);
   }
   const fromBubl = rows.filter((r) => r.direction === 'out' && r.state !== 'failed').length;
+  // bubl wrote while this phone was showing a chat with a friend: the phone goes to bubl's chat, where the news is
+  if (fromBubl && p.view !== 'bubl' && p.view !== 'list') p.view = 'bubl';
   if (phoneOf(p) && p.view === 'bubl') redraw(p); else { p.unread += fromBubl; redraw(p); }
 }
 
@@ -550,7 +588,7 @@ function overlay(build) {
     document.body.append(wrap);
   });
 }
-function nameForm(card, close, title, text) {
+function nameForm(card, close, title, text, line = 'bubl') {
   card.append(el('h1', '', title), el('p', '', text));
   const input = el('input');
   input.type = 'text'; input.maxLength = 24; input.placeholder = 'Omar'; input.autocomplete = 'off';
@@ -563,13 +601,14 @@ function nameForm(card, close, title, text) {
     const name = input.value.trim();
     if (!name) return input.focus();
     go.disabled = true;
-    try { close(addPerson(await source.newPerson(name))); } catch (x) { err.textContent = x.message || 'That could not be done just now.'; go.disabled = false; }
+    try { close(addPerson(await source.newPerson(name, line))); } catch (x) { err.textContent = x.message || 'That could not be done just now.'; go.disabled = false; }
   });
   setTimeout(() => input.focus(), 0);
 }
-const askName = (title, text) => overlay((card, close) => nameForm(card, close, title, text));
+const askName = (title, text, line = 'bubl') => overlay((card, close) => nameForm(card, close, title, text, line));
 const chooser = (from) => overlay((card, close) => {
-  const rest = people.filter((p) => p !== from);
+  // a forwarded message goes to a guest's phone (a partner's phone is for its chat with bubl)
+  const rest = people.filter((p) => p !== from && !isPartner(p));
   if (!rest.length) return nameForm(card, close, 'Send to…', `Who does ${from.name} forward it to? A simulated friend, by first name.`);
   card.append(el('h1', '', 'Send to…'), el('p', '', `Who does ${from.name} forward it to?`));
   for (const p of rest) {
@@ -651,21 +690,26 @@ async function liveSource() {
       const s = await call('state');
       if (!s.ok) return s;
       const line = (s.lines ?? []).find((l) => l.key === 'bubl');
-      mine = (s.people ?? []).filter((p) => p.line === 'bubl' && p.mine).map((p) => ({ id: p.id, name: p.name }));
+      // the guests' phones first, then the partners' (a line that is switched off has no phones here)
+      const on = (key) => (s.lines ?? []).some((l) => l.key === key && l.mode !== 'off');
+      const own = (key) => (on(key) ? (s.people ?? []).filter((p) => p.line === key && p.mine).map((p) => ({ id: p.id, name: p.name, line: key, number: p.wa_id })) : []);
+      mine = own('bubl');
       if (!mine.length) {
         const made = await call('person', { line: 'bubl', name: s.operator });
         if (!made.ok) return made;
-        mine = [{ id: made.person.id, name: s.operator }];
+        mine = [{ id: made.person.id, name: s.operator, line: 'bubl', number: made.person.wa_id }];
       }
+      mine = [...mine, ...own('partners')];
+      this.chats = Object.fromEntries((s.lines ?? []).filter((l) => l.mode !== 'off').map((l) => [l.key, l.name]));
       this.chat = line?.name ?? 'bubl';
       this.connected = !!line?.connected;
       return { ok: true };
     },
     async people() { return mine; },
-    async newPerson(name) {
-      const made = await call('person', { line: 'bubl', name });
+    async newPerson(name, line = 'bubl') {
+      const made = await call('person', { line, name });
       if (!made.ok) throw new Error(made.reason);
-      return { id: made.person.id, name };
+      return { id: made.person.id, name, line, number: made.person.wa_id };
     },
     async start(p) { p.last = 0; const f = await call('feed', { person: p.id }); return f.ok ? fresh(p, f.messages) : []; },
     async act(p, input) {
@@ -721,7 +765,7 @@ async function open(src) {
     meta.hidden = false;
     meta.textContent = src.connected ? 'Meta: connected' : 'Meta: not connected yet';
     meta.classList.toggle('off', !src.connected);
-    say('You are playing simulated phones on the real engine. To play a friend, tap the forward arrow beside the message bubl writes for your crew.', false, true);
+    say(STANDING, false, true);
     // anything that arrives later (the host being told, an answer tried again): look for it while the page is in view
     setInterval(() => { if (!document.hidden) others(null).catch(() => {}); }, 6000);
   }

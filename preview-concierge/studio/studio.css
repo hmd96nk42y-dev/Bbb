@@ -71,7 +71,7 @@ button.cmic{border:0;padding:0;cursor:pointer;flex:none;-webkit-tap-highlight-co
 .sheet-send:disabled{opacity:.45;cursor:default}
 .tm svg{vertical-align:-1px;margin-left:3px}
 .wa-back{border:0;background:none;padding:0;display:flex;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.lnk{color:#53BDEB;text-decoration:underline;word-break:break-all}
+.lnk{color:#53BDEB;text-decoration:underline;word-break:break-all;font-feature-settings:"calt" 0}
 .comp[hidden]{display:none}
 /* a message someone forwarded, and WhatsApp's list of chats (not in the canvas; drawn in its colours and sizes) */
 .fwd{display:flex;align-items:center;gap:4px;color:#8696A0;font-size:11px;font-style:italic;margin-bottom:2px}
@@ -106,6 +106,7 @@ body{background:#FBFAF7;font-family:Inter,system-ui,sans-serif;color:#141413;dis
 .strip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:#5E5D59}
 .chip{font:500 12px Inter,sans-serif;padding:6px 11px;border-radius:999px;border:1px solid #DDD8CE;background:#fff;color:#141413;cursor:pointer;white-space:nowrap;flex:none}
 .chip.on{background:#141413;border-color:#141413;color:#fff}
+.chip.num{border-style:dashed;color:#5E5D59;font-variant-numeric:tabular-nums}
 .dot{display:inline-block;min-width:16px;height:16px;line-height:16px;border-radius:8px;background:#21C063;color:#0B141A;font-size:10.5px;font-weight:600;text-align:center;margin-left:6px;padding:0 4px;box-sizing:border-box}
 /* the venue's web app inside the phone, opened as the simulated guest */
 .web{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;background:#000}
