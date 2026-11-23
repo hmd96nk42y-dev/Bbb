@@ -1,0 +1,32 @@
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--c-guest:#D4A0B8;--c-kitchen:#E89A4F;--acc:var(--c-guest);
+        --sat:env(safe-area-inset-top,0px);}
+  html,body{height:100%;width:100%;overflow:hidden;background:#000;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;}
+
+  /* Default (Safari tab): inset:0 + 100% works perfectly. */
+  iframe#screen{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;z-index:1;
+    background:transparent;opacity:0;transition:opacity .4s ease;}
+  /* STANDALONE ONLY: html/body get .pwa, and we drive the iframe height from JS in px.
+     In standalone, inset:0/100%/100% measure short against iOS's broken ICB; an explicit
+     px height from the live measurement is the only thing that fills to the true bottom. */
+  body.pwa #screen{height:var(--ph,100%);}
+  iframe#screen.ready{opacity:1;}
+  @media(min-width:640px){
+    iframe#screen{width:min(440px,100vw);left:50%;transform:translateX(-50%);
+      box-shadow:0 0 0 1px rgba(255,255,255,.06),0 40px 120px -30px rgba(0,0,0,.7);}
+  }
+
+  /* notch band keeps the iOS clock legible regardless of app colour */
+  .topscrim{position:fixed;top:0;left:0;right:0;height:var(--sat);z-index:900;pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,.34),rgba(0,0,0,0));}
+
+  .loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;
+    pointer-events:none;opacity:0;transition:opacity .25s ease;}
+  .loader.on{opacity:1;}
+  .loader .ring{width:30px;height:30px;border-radius:50%;
+    border:2.5px solid rgba(150,150,160,.3);border-top-color:rgba(150,150,160,.85);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* role switcher removed */

@@ -1,0 +1,47 @@
+/* price-point links (custom split) */
+.pp-row{display:grid;grid-template-columns:12px 1fr 34px 34px;grid-template-areas:"dot amt am ap" "dot cnt cm cp" "dot ft ft ft";column-gap:8px;row-gap:6px;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.07)}
+.pp-row>i{grid-area:dot;align-self:start;margin-top:12px;width:10px;height:10px;border-radius:5px;box-shadow:0 0 10px currentColor}
+.pp-amt{grid-area:amt;position:relative;height:34px;display:flex;align-items:center}
+.pp-amt b,.pp-amt em{position:absolute;left:0;font:400 20px/1 var(--disp);transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1),filter .45s}
+.pp-amt b small{font:600 12px/1 inherit;font-family:inherit;color:var(--mute);margin-left:6px;letter-spacing:0}
+.pp-amt em{font-style:normal;opacity:0;transform:translateY(10px) scale(.96);filter:blur(4px);background:linear-gradient(90deg,#39FF14,#00E5FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pp-row.inv .pp-amt b{opacity:0;transform:translateY(-10px) scale(.96);filter:blur(4px)}
+.pp-row.inv .pp-amt em{opacity:1;transform:none;filter:none}
+.pp-row.inv>i{color:#39FF14!important;background:#39FF14!important}
+.pp-row.morph{animation:ppGlow 1.1s ease}
+@keyframes ppGlow{0%{box-shadow:none}35%{box-shadow:0 0 0 1px rgba(57,255,20,.5) inset,0 0 26px -6px rgba(57,255,20,.7)}100%{box-shadow:none}}
+.pp-cnt{grid-area:cnt;font-size:13px;color:var(--ink2)}
+.pp-am{grid-area:am}.pp-ap{grid-area:ap}.pp-cm{grid-area:cm}.pp-cp{grid-area:cp}
+.pp-ft{grid-area:ft;display:flex;align-items:center;gap:8px;justify-content:space-between;margin-top:2px}
+.pp-ft span{font-size:12.5px;color:var(--mute)}
+.pp-ok{height:34px;padding:0 16px;border-radius:17px;background:#fff;color:#000;font-weight:700;font-size:13px;box-shadow:0 0 0 1px rgba(255,255,255,.16) inset}
+.pp-ok:disabled{opacity:.35}
+.pp-lk{grid-area:ft;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;border-radius:12px;background:rgba(255,255,255,.05);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset;animation:ppIn .5s cubic-bezier(.2,.8,.2,1)}
+.pp-lk span{flex:1;min-width:0;font:600 12px/1.2 ui-monospace,Menlo,monospace;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-lk button{height:30px;padding:0 12px;border-radius:15px;background:rgba(255,255,255,.08);box-shadow:0 0 0 1px rgba(255,255,255,.16) inset;color:#fff;font-weight:700;font-size:12px}
+.pp-lk button.pri{background:#fff;color:#000}
+@keyframes ppIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pp-left{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+.pp-left b{font:400 20px/1 var(--disp)}.pp-left span{font-size:12.5px;color:var(--ink2)}
+.pp-left.zero b{color:#39FF14}
+.pp-add{width:100%;height:42px;margin-top:10px;border-radius:12px;background:rgba(255,255,255,.04);box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;border:0;color:#fff;font-weight:700;font-size:13px}
+.pp-note{font-size:12px;line-height:1.45;color:var(--mute);margin:10px 0 0}
+/* who claimed each link */
+.pp-gs{grid-area:ft;display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.pp-g{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.035)}
+.pp-g em{font-style:normal;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:10px;background:rgba(255,255,255,.06);color:var(--ink2)}
+.pp-g em.cf{color:#00E5FF;background:rgba(0,229,255,.08)}
+.pp-g em.pd{color:#39FF14;background:rgba(57,255,20,.08)}
+.pp-rm{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;font-size:12.5px;color:var(--ink2)}
+.pp-tg{width:44px;height:26px;border-radius:13px;background:rgba(255,255,255,.12);position:relative;flex:none;border:0;transition:background .25s}
+.pp-tg::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:10px;background:#fff;transition:transform .25s}
+.pp-tg.on{background:#25D366}.pp-tg.on::after{transform:translateX(18px)}
+.dep-reset{background:rgba(255,255,255,.04);color:var(--ink2);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset}
+.dep-late{margin-top:10px;padding:12px 14px;border-radius:14px;background:rgba(255,45,85,.07);box-shadow:0 0 0 1px rgba(255,45,85,.3) inset;font-size:13px;line-height:1.45;color:var(--ink2)}
+.dep-late b{display:block;color:#fff;font-size:14px;margin-bottom:3px}
+/* real names, held cards */
+.id-note{display:flex;gap:8px;align-items:flex-start;margin:12px 0 2px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset;font-size:12.5px;line-height:1.4;color:var(--ink2)}
+.id-note svg{flex:none;width:16px;height:16px;margin-top:1px}
+.pay-held{display:flex;gap:8px;align-items:center;justify-content:center;margin:-4px 0 14px;font-size:12.5px;color:var(--ink2)}
+.pay-held i{width:7px;height:7px;border-radius:4px;background:#00E5FF;box-shadow:0 0 8px #00E5FF}
+.pay-fee{display:block;margin-top:6px;font-size:12.5px;color:var(--mute)}

@@ -417,7 +417,7 @@ async function others(except) { for (const p of people) if (p !== except && !p.b
 
 // ---------- the web step, played by the studio for a simulated guest ----------
 
-/** The kind of table a "Pick my table" link is for, if that is what this link is. */
+/** The kind of table an "Open the venue" link lights, if that is what this link is. */
 function webStep(url) {
   try { return url ? new URL(url).searchParams.get('tier') : null; } catch { return null; }
 }
