@@ -8,9 +8,10 @@
       Someone already signed in on this browser stays signed in: the chat never signs anyone out or swaps accounts.
    2. Opening from its own address. ?e=<night> opens that night, ?n=<guests> sets the party, and ?tier=<kind of
       table> lights the open tables of that kind the way the build's own budget search lights its matches: by
-      recolouring the tables' own details. Nothing is drawn on top. Tables of that kind that are taken or too small
-      for the party are not lit: they look unavailable, as they do today. The venue opens whole, in its 3D view at
-      an angle, so the guest sees where that section sits; they tap it and pick the exact table, or any other.
+      recolouring the tables' own details: their glow, and their seats in their section's own colour. Nothing is
+      drawn on top. Tables of that kind that are taken or too small for the party are not lit: they look
+      unavailable, as they do today. The venue opens whole, in its 3D view at an angle, so the guest sees where
+      that section sits; they tap it and pick the exact table, or any other.
    3. The page's own WhatsApp button is shown again, pointing at bubl's number, once bubl has one. */
 (function(){
 if(!LIVE)return;
@@ -33,8 +34,27 @@ let lit=null,opened=false;   /* lit: the kind of table bubl suggested, by the ve
 const litIds=()=>TABLES.filter(t=>t.tier===lit&&!t.req&&tableOpen(t)).map(t=>t.id);
 /* the suggestion steps aside once the guest has a table, is buying tickets, or searches by budget themselves */
 const litNow=()=>!!lit&&!S.boothId&&!S.tixMode&&!BUD.on&&!BUD.search;
+/* The lit tables' own seats also take their section's own colour (Sk, 23 Nov 2026: "right much better"), with the
+   seat colouring the venue view already has for public tables; a public table keeps its own colour. The colours are
+   the 3D venue's own, read from it: none is written here. */
+const postAsBuilt=window.dollPost;
+let seatsAsSent={},coloured=false;   /* seatsAsSent: the seat colours the page itself last sent (public tables) */
+function litColours(){
+  const m={};
+  try{const w=dollFrame&&dollFrame.contentWindow;if(!w||!w.TIER||!w.UshVenue)return m;
+    const kind={};w.UshVenue.tables.forEach(t=>{kind[t.id]=t.tier;});
+    litIds().forEach(id=>{const c=w.TIER[kind[id]]&&w.TIER[kind[id]].c;if(typeof c==='number')m[id]='#'+c.toString(16).padStart(6,'0');});}catch(_){}
+  return m;
+}
+window.dollPost=function(m){
+  if(m&&m.cmd==='social'){seatsAsSent=m.map||{};if(litNow()){coloured=true;m=Object.assign({},m,{map:Object.assign(litColours(),seatsAsSent)});}}
+  return postAsBuilt.call(this,m);
+};
 const syncAsBuilt=window.syncBudget;
-window.syncBudget=function(){syncAsBuilt.apply(this,arguments);if(litNow())dollPost({cmd:'budget',on:true,ids:litIds()});};
+window.syncBudget=function(){syncAsBuilt.apply(this,arguments);
+  if(litNow()){dollPost({cmd:'budget',on:true,ids:litIds()});dollPost({cmd:'social',map:seatsAsSent});}
+  else if(coloured){coloured=false;dollPost({cmd:'social',map:seatsAsSent});}   /* the suggestion stepped aside: the seats go back to their own */
+};
 function whenRoomShows(fn){let tries=0;const t=setInterval(()=>{const up=dollReady;   /* the 3D venue has spoken: it is listening */
   if(up||++tries>300){clearInterval(t);if(up)fn();}},100);}
 /* The whole venue in its 3D view, at an angle with the city line behind it, so the guest sees where the lit section
