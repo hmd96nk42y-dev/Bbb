@@ -17,9 +17,7 @@ if(!LIVE)return;
 const q=new URLSearchParams(location.search);
 
 /* ---- 1. signed in from the chat ---- */
-let key=null;
-try{const host=window.parent,m=/(?:^#|&)k=([A-Za-z0-9_-]{43})(?:&|$)/.exec(host.location.hash||'');
-  if(m){key=m[1];host.history.replaceState(null,'',host.location.pathname+host.location.search);}}catch(_){}
+const key=BUBL.auth.takeChatKey();   /* already taken out of the address, the moment the page started (engine/api.js) */
 const entered=(async()=>{
   if(!key)return false;
   if(await BUBL.auth.phone())return false;

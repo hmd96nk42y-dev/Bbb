@@ -49,6 +49,15 @@
     if (/fetch|network/i.test(m)) return no('offline', OFFLINE);
     return no('unavailable', LATER);
   }
+  /* A one-time key from one of bubl concierge's buttons (after the "#"): taken out of the address the moment the page
+     starts, before anything else loads, so it is never left where it could be copied or shared. */
+  var chatKey = null;
+  if (live) {
+    try {
+      var host = root.parent, found = /(?:^#|&)k=([A-Za-z0-9_-]{43})(?:&|$)/.exec(host.location.hash || '');
+      if (found) { chatKey = found[1]; host.history.replaceState(null, '', host.location.pathname + host.location.search); }
+    } catch (_) {}
+  }
   var auth = {
     /** Sends the login code. channel: 'sms' until BUBL's WhatsApp sender exists (docs/runbooks/phone-sign-in.md). */
     async sendCode(e164, channel) {
@@ -65,6 +74,8 @@
       try { var s = await sb().auth.getSession(), u = s.data.session && s.data.session.user; return u && u.phone ? '+' + String(u.phone).replace(/^\+/, '') : null; } catch (_) { return null; }
     },
     async signOut() { if (live) { try { await sb().auth.signOut(); } catch (_) {} } },
+    /** The key bubl's button carried, once. */
+    takeChatKey() { var k = chatKey; chatKey = null; return k; },
     /** A sign-in handed over by bubl concierge, for the guest whose own chat the link came from (js/live-concierge.js). */
     async enter(session) {
       if (!live || !session || !session.access_token || !session.refresh_token) return false;
