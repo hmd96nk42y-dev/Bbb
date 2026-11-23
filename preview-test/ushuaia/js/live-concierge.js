@@ -9,8 +9,8 @@
    2. Opening from its own address. ?e=<night> opens that night, ?n=<guests> sets the party, and ?tier=<kind of
       table> lights the open tables of that kind the way the build's own budget search lights its matches: by
       recolouring the tables' own details. Nothing is drawn on top. Tables of that kind that are taken or too small
-      for the party are not lit: they look unavailable, as they do today. The guest picks the exact table, and may
-      still tap any other table.
+      for the party are not lit: they look unavailable, as they do today. The venue opens whole, in plan view, so
+      the guest sees where that section sits; they tap it and pick the exact table, and may still tap any other.
    3. The page's own WhatsApp button is shown again, pointing at bubl's number, once bubl has one. */
 (function(){
 if(!LIVE)return;
@@ -37,12 +37,12 @@ const syncAsBuilt=window.syncBudget;
 window.syncBudget=function(){syncAsBuilt.apply(this,arguments);if(litNow())dollPost({cmd:'budget',on:true,ids:litIds()});};
 function whenRoomShows(fn){let tries=0;const t=setInterval(()=>{const up=dollReady&&$('#roomCanvas').classList.contains('ready');
   if(up||++tries>150){clearInterval(t);if(up)fn();}},200);}
-/* the part of the venue where most of the lit tables are, shown the way the build's own budget search shows one */
+/* the whole venue in plan view, so the guest sees where the lit section sits (Sk, 23 Nov 2026), shown the way the
+   build's own budget search shows its matches. The guest taps the section, then the table, as always. */
 function showLit(){
-  const n={};litIds().forEach(id=>{const s=T(id).sec;n[s]=(n[s]||0)+1;});
-  const best=Object.keys(n).sort((a,b)=>n[b]-n[a])[0];if(!best)return;
-  dollPost({cmd:'focus',zone:best});
-  const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-110),behavior:'smooth'});
+  if(!litIds().length)return;
+  S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});dollPost({cmd:'focus',zone:'all'});
+  const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-150),behavior:'smooth'});
 }
 function fromChat(){
   if(opened)return;opened=true;
