@@ -14,7 +14,9 @@
     if (!el) {
       el = document.createElement('div'); el.id = 'opsSignIn';
       el.style.cssText = 'position:fixed;inset:0;z-index:900;background:#000;display:flex;align-items:flex-end;justify-content:center';
-      document.body.appendChild(el);
+      /* inside the app: OPS's colours and type are set on #app, not on the page, so outside it this screen's words
+         came out black on black (found on the published test-mode page, 23 Nov 2026) */
+      (document.getElementById('app') || document.body).appendChild(el);
     }
     el.innerHTML = '<div class="sheet on" style="position:relative;width:100%;max-width:520px;max-height:100%;transform:none">'
       + '<div class="sh-hd" style="padding-top:22px"><div class="t"><h3>' + esc(title) + '</h3><p>' + esc(sub) + '</p></div></div>'
