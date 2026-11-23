@@ -171,10 +171,21 @@ class Phone {
     who.addEventListener('click', async () => { try { await navigator.clipboard.writeText(`+${r.number}`); say('Number copied.'); } catch { say(`The number is +${r.number}`); } });
     top.append(back, who);
     if (tier) {
-      const hold = el('button', 'web-hold', 'Hold one for me');
+      // A table picked for the guest is only proposed (Sk, 23 Nov 2026): the page opens again with one table of this
+      // kind selected and its own sheet open. The guest confirms it there with the page's own button, or closes
+      // the sheet and taps another. Nothing is held until they do.
+      const hold = el('button', 'web-hold', 'Pick one for me');
       hold.type = 'button';
-      hold.title = 'The studio picks a free table of this kind and holds it, by the same booking rules.';
-      hold.addEventListener('click', () => { this.closeWeb(); playWebStep(p, tier, url); });
+      hold.title = 'The page selects a free table of this kind. Confirm it there, or tap another: nothing is held until you do.';
+      hold.addEventListener('click', async () => {
+        if (p.busy) return;
+        const again = /[?&]pick=/.test(url) ? url : `${url}${url.includes('?') ? '&' : '?'}pick=1`;
+        let next;
+        try { next = await source.open(p, again); } catch { next = { ok: false, reason: '' }; }
+        if (next.ok) return this.showWeb(p, next, tier, url);
+        this.closeWeb();
+        playWebStep(p, tier, url, next.reason);
+      });
       top.append(hold);
     }
     const frame = el('iframe', 'web-frame');

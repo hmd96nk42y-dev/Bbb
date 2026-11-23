@@ -12,6 +12,10 @@
       drawn on top. Tables of that kind that are taken or too small for the party are not lit: they look
       unavailable, as they do today. The venue opens whole, in its 3D view at an angle, so the guest sees where
       that section sits; they tap it and pick the exact table, or any other.
+      ?pick=1 also proposes one table of that kind (Sk, 23 Nov 2026: a table picked for the guest is shown before
+      anything is confirmed, to change or to confirm). The table is selected exactly as a tap selects it, with its
+      own sheet open: its own button holds it, and closing the sheet and tapping another table changes it. Nothing
+      is held by the page itself.
    3. The page's own WhatsApp button is shown again, pointing at bubl's number, once bubl has one. */
 (function(){
 if(!LIVE)return;
@@ -29,7 +33,7 @@ const startAsBuilt=window.openGuestLink;
 window.openGuestLink=async function(){await entered;return startAsBuilt.apply(this,arguments);};
 
 /* ---- 2. the night, the party and the kind of table bubl spoke of ---- */
-const want={e:q.get('e'),tier:q.get('tier'),n:parseInt(q.get('n')||'',10)};
+const want={e:q.get('e'),tier:q.get('tier'),n:parseInt(q.get('n')||'',10),pick:q.get('pick')};
 let lit=null,opened=false;   /* lit: the kind of table bubl suggested, by the venue's own key */
 const litIds=()=>TABLES.filter(t=>t.tier===lit&&!t.req&&tableOpen(t)).map(t=>t.id);
 /* the suggestion steps aside once the guest has a table, is buying tickets, or searches by budget themselves */
@@ -74,6 +78,25 @@ function showLit(){
   S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});dollPost({cmd:'focus',zone:'all'});holdAngle();
   const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-150),behavior:'smooth'});
 }
+/* The table proposed: the one named if it is still open, or the first open one of the lit kind that fits the party.
+   It is shown the way the build's own helper shows a table it found: the venue goes to its section, then the table
+   is picked as a tap picks it. Between the two the table is seen glowing where it stands, by the venue view's own
+   selection, for a moment: on a phone the table's sheet then covers most of the venue. A guest who taps a table
+   themselves in that moment has chosen, and nothing more is proposed. */
+function proposed(){const open=litIds().map(T).filter(t=>t&&(!S.party||fits(t,S.party)));return open.find(t=>t.id===want.pick)||open[0]||null;}
+function propose(){
+  const t=proposed();if(!t||S.boothId||!litNow())return;
+  letGo();dollPost({cmd:'focus',zone:t.sec});
+  const still=()=>!S.boothId&&litNow()&&!S.pick;
+  setTimeout(()=>{if(!still())return;
+    /* The venue view answers a selection by opening the table's sheet at once. For the proposed table that answer
+       is held back for a moment (a tap on any other table is not), then given exactly as built. */
+    const pickAsBuilt=window.onPick;let done=false;
+    const giveBack=()=>{done=true;window.onPick=pickAsBuilt;};
+    window.onPick=function(id){if(id===t.id&&!done)return;giveBack();return pickAsBuilt.apply(this,arguments);};
+    dollPost({cmd:'select',id:t.id});
+    setTimeout(()=>{if(done)return;giveBack();if(still())pickAsBuilt(t.id);},3600);},900);
+}
 function fromChat(){
   if(opened)return;opened=true;
   if(S.boothId||window.GUEST)return;   /* the guest already has a table, or opened an invitation: the page shows that, as it always does */
@@ -84,7 +107,7 @@ function fromChat(){
   if(want.tier&&TIERS[want.tier]&&!TIERS[want.tier].req)lit=want.tier;
   afterPick();
   if(lit){S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});}   /* from the first frame: the venue never shows flat first and then turns */
-  if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();}});
+  if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();if(want.pick)setTimeout(propose,1400);}});
 }
 const restoreAsBuilt=window.restoreMine;
 window.restoreMine=async function(){const r=await restoreAsBuilt.apply(this,arguments);try{fromChat();}catch(_){}return r;};
