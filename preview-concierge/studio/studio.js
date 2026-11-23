@@ -302,7 +302,9 @@ class Phone {
       const url = safeUrl(prm.url);
       const a = el('a', 'wbtn');
       a.append(ICON.open(), prm.display_text ?? '');
+      const tier = webStep(url);
       if (wa) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onLink(wa); }); }
+      else if (tier && source && !source.demo) { a.href = url; a.addEventListener('click', (e) => { e.preventDefault(); playWebStep(p, tier, url); }); }
       else if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
       else { a.setAttribute('aria-disabled', 'true'); a.addEventListener('click', () => say('That page is not published beside this studio yet.')); }
       g.append(a);
@@ -412,6 +414,52 @@ async function act(p, input, shown) {
   }
 }
 async function others(except) { for (const p of people) if (p !== except && !p.busy) take(p, await source.more(p)); }
+
+// ---------- the web step, played by the studio for a simulated guest ----------
+
+/** The kind of table a "Pick my table" link is for, if that is what this link is. */
+function webStep(url) {
+  try { return url ? new URL(url).searchParams.get('tier') : null; } catch { return null; }
+}
+
+/**
+ * A real guest opens the venue here, signs in with a code sent to their phone and picks the table. A simulated person
+ * is on a number no phone can have, so no code can reach them. The studio offers to hold a table of that kind for
+ * them, through the same booking rules the web app uses; bubl then hears of it as it does for a real guest.
+ */
+function playWebStep(p, tier, url) {
+  return overlay((card, close) => {
+    card.append(
+      el('h1', '', 'On the web'),
+      el('p', '', `A real guest opens your web app here, signs in with a code and picks the table. ${p.name} is simulated and cannot receive a code, so the studio can hold a table of this kind for ${p.name}, by the same booking rules.`),
+    );
+    const go = el('button', 'go', 'Hold a table');
+    go.type = 'submit';
+    const open = el('button', 'link', 'Open the venue page instead');
+    open.type = 'button';
+    open.addEventListener('click', () => { window.open(url, '_blank', 'noopener'); close(null); });
+    const err = el('p', 'err');
+    card.append(go, open, err);
+    card.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (p.busy) return;
+      go.disabled = true;
+      p.busy = true;
+      try {
+        const r = await source.hold(p, tier);
+        if (r.note) { err.textContent = r.note; go.disabled = false; return; }
+        close(true);
+        take(p, r.rows ?? []);
+      } catch (x) {
+        err.textContent = x.message || 'That could not be done just now.';
+        go.disabled = false;
+      } finally {
+        p.busy = false;
+        redraw(p);
+      }
+    });
+  });
+}
 
 // ---------- forwarding bubl's message to a friend ----------
 /** WhatsApp's "Send to…": pick a simulated friend, or make one. The message (its photo and its words) lands in their chat with the sender. */
@@ -558,6 +606,11 @@ async function liveSource() {
     async act(p, input) {
       const r = await call('say', { person: p.id, after: p.last, ...(input.tap ? { tap: { id: input.tap.id, title: input.tap.title, kind: input.tap.kind } } : { text: input.text }) });
       return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason, bad: true, keep: true };
+    },
+    /** The studio holds a table of this kind for a simulated guest (the web step, played here). */
+    async hold(p, tier) {
+      const r = await call('hold', { person: p.id, tier, after: p.last });
+      return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason };
     },
     /** Anything that arrived since (the host being told, or an answer that had to be tried again). */
     async more(p) { const f = await call('feed', { person: p.id, after: p.last }); return f.ok ? fresh(p, f.messages) : []; },
