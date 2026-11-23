@@ -414,8 +414,8 @@ function hint(p) {
   if (!isPartner(p)) return say(STANDING, false, true);
   const known = p.rows.some((r) => r.direction === 'out' && r.what !== 'partners_unknown');
   say(known
-    ? `${p.name} is on the ${chatName(p)} chat. To send a table to a simulated guest, type that guest’s own number: tap their name above, then their number to copy it.`
-    : `${p.name} is on the ${chatName(p)} chat as +${p.number}. bubl knows a partner only by the number a venue signed: in OPS, add a promoter with this mobile, pick their tables and sign. Then say hello here.`, false, true);
+    ? `${p.name} is on the ${chatName(p)} chat. A simulated guest is known by their own number: tap their name above, then their number to copy it.`
+    : `${p.name} is on the ${chatName(p)} chat as +${p.number}. bubl knows this phone only by what a venue made of that number. A promoter: in OPS, add a promoter with this mobile, pick their tables and sign. The venue’s team: on GitHub, run “Add staff on staging” with this mobile. Then say hello here.`, false, true);
 }
 const STANDING = 'You are playing simulated phones on the real engine. To play a friend, tap the forward arrow beside the message bubl writes for your crew.';
 
@@ -699,6 +699,7 @@ async function liveSource() {
         if (!made.ok) return made;
         mine = [{ id: made.person.id, name: s.operator, line: 'bubl', number: made.person.wa_id }];
       }
+      // (a partner's phone is not asked for by name at first use: it is made with "+ Partner")
       mine = [...mine, ...own('partners')];
       this.chats = Object.fromEntries((s.lines ?? []).filter((l) => l.mode !== 'off').map((l) => [l.key, l.name]));
       this.chat = line?.name ?? 'bubl';
