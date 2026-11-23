@@ -9,8 +9,8 @@
    2. Opening from its own address. ?e=<night> opens that night, ?n=<guests> sets the party, and ?tier=<kind of
       table> lights the open tables of that kind the way the build's own budget search lights its matches: by
       recolouring the tables' own details. Nothing is drawn on top. Tables of that kind that are taken or too small
-      for the party are not lit: they look unavailable, as they do today. The venue opens whole, in plan view, so
-      the guest sees where that section sits; they tap it and pick the exact table, and may still tap any other.
+      for the party are not lit: they look unavailable, as they do today. The venue opens whole, in its 3D view at
+      an angle, so the guest sees where that section sits; they tap it and pick the exact table, or any other.
    3. The page's own WhatsApp button is shown again, pointing at bubl's number, once bubl has one. */
 (function(){
 if(!LIVE)return;
@@ -35,13 +35,23 @@ const litIds=()=>TABLES.filter(t=>t.tier===lit&&!t.req&&tableOpen(t)).map(t=>t.i
 const litNow=()=>!!lit&&!S.boothId&&!S.tixMode&&!BUD.on&&!BUD.search;
 const syncAsBuilt=window.syncBudget;
 window.syncBudget=function(){syncAsBuilt.apply(this,arguments);if(litNow())dollPost({cmd:'budget',on:true,ids:litIds()});};
-function whenRoomShows(fn){let tries=0;const t=setInterval(()=>{const up=dollReady&&$('#roomCanvas').classList.contains('ready');
-  if(up||++tries>150){clearInterval(t);if(up)fn();}},200);}
-/* the whole venue in plan view, so the guest sees where the lit section sits (Sk, 23 Nov 2026), shown the way the
-   build's own budget search shows its matches. The guest taps the section, then the table, as always. */
+function whenRoomShows(fn){let tries=0;const t=setInterval(()=>{const up=dollReady;   /* the 3D venue has spoken: it is listening */
+  if(up||++tries>300){clearInterval(t);if(up)fn();}},100);}
+/* The whole venue in its 3D view, at an angle with the city line behind it, so the guest sees where the lit section
+   sits (Sk, 23 Nov 2026). The angle is this venue's own: it is given to the 3D venue through the camera hook the
+   build already has, and the venue file itself is not changed. It holds until the guest touches the venue, changes
+   view, or the suggestion steps aside; from then on the 3D view moves as it always does. The guest pinches in or taps
+   the section for the plan, then the table, as always. */
+const OPENING_ANGLE={theta:-2.25,phi:1.33,R:1600,tx:-30,ty:90,tz:470,fov:40};
+let held=null;   /* the 3D venue's own window, while the opening angle is held */
+function letGo(){if(!held)return;const w=held;held=null;try{w.__camO=null;w.removeEventListener('pointerdown',letGo,true);}catch(_){}}
+function holdAngle(){
+  try{const w=dollFrame&&dollFrame.contentWindow;if(!w||held===w)return;letGo();w.__camO=Object.assign({},OPENING_ANGLE);w.addEventListener('pointerdown',letGo,true);held=w;}catch(_){return;}
+  const t=setInterval(()=>{if(!held){clearInterval(t);return;}if(!litNow()||curView()!=='iso'||!dollFrame||dollFrame.contentWindow!==held){letGo();clearInterval(t);}},250);
+}
 function showLit(){
   if(!litIds().length)return;
-  S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});dollPost({cmd:'focus',zone:'all'});
+  S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});dollPost({cmd:'focus',zone:'all'});holdAngle();
   const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-150),behavior:'smooth'});
 }
 function fromChat(){
@@ -53,6 +63,7 @@ function fromChat(){
   if(want.n>=2&&want.n<=16&&!S.party){S.party=want.n;$$('.ppill').forEach(p=>p.classList.toggle('sel',p.textContent===String(want.n)));setLbl('#pkParty',String(want.n));if(window.paintGuests)paintGuests();}
   if(want.tier&&TIERS[want.tier]&&!TIERS[want.tier].req)lit=want.tier;
   afterPick();
+  if(lit){S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});}   /* from the first frame: the venue never shows flat first and then turns */
   if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();}});
 }
 const restoreAsBuilt=window.restoreMine;
