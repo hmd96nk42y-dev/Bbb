@@ -62,6 +62,8 @@ const ICON = {
 
 /** Only a public https address is ever opened or shown as a picture. */
 const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//.test(u) && !u.startsWith('https://demo.invalid') ? u : typeof u === 'string' && /^(media|\.\.?)\//.test(u) ? u : null);
+/** A picture: a published one, or one the back end made and handed over whole (the entry QR, as a PNG). */
+const pictureUrl = (u) => (typeof u === 'string' && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(u) ? u : safeUrl(u));
 /** A "text bubl" link: https://wa.me/<number>?text=…  A "share" link has no number: WhatsApp then asks who to send it to. */
 function waLink(u) {
   let url;
@@ -154,7 +156,36 @@ class Phone {
   sendIcon() { this.send.replaceChildren(this.field.value.trim() ? ICON.send() : ICON.mic()); }
   toBottom() { this.thread.scrollTop = this.thread.scrollHeight; }
   closeSheet() { for (const n of this.scr.querySelectorAll(':scope > .shade, :scope > .sheet')) n.remove(); }
-  show(p) { this.who_ = p; this.root.hidden = !p; if (p) { p.unread = 0; this.draw(); } }
+  /** The venue's web app inside this phone, as this guest. "Chat" brings the chat back, with whatever bubl said meanwhile. */
+  showWeb(p, r, tier, url) {
+    this.closeWeb();
+    const layer = el('div', 'web');
+    const top = el('div', 'web-top');
+    const back = el('button', 'web-back', 'Chat');
+    back.type = 'button';
+    back.prepend(ICON.back());
+    back.addEventListener('click', async () => { this.closeWeb(); try { take(p, await source.more(p)); } catch { /* shown at the next refresh */ } });
+    const who = el('button', 'web-who', `${r.name || p.name} · +${r.number}`);
+    who.type = 'button';
+    who.title = 'The number to type where the page asks for it. Tap to copy.';
+    who.addEventListener('click', async () => { try { await navigator.clipboard.writeText(`+${r.number}`); say('Number copied.'); } catch { say(`The number is +${r.number}`); } });
+    top.append(back, who);
+    if (tier) {
+      const hold = el('button', 'web-hold', 'Hold one for me');
+      hold.type = 'button';
+      hold.title = 'The studio picks a free table of this kind and holds it, by the same booking rules.';
+      hold.addEventListener('click', () => { this.closeWeb(); playWebStep(p, tier, url); });
+      top.append(hold);
+    }
+    const frame = el('iframe', 'web-frame');
+    frame.title = `The venue's web app, as ${r.name || p.name}`;
+    frame.setAttribute('allow', 'clipboard-write; fullscreen');
+    frame.src = r.url;
+    layer.append(top, frame);
+    this.scr.append(layer);
+  }
+  closeWeb() { for (const n of this.scr.querySelectorAll(':scope > .web')) n.remove(); }
+  show(p) { if (this.who_ !== p) this.closeWeb(); this.who_ = p; this.root.hidden = !p; if (p) { p.unread = 0; this.draw(); } }
 
   /** Draws everything from the person's own state. */
   draw() {
@@ -236,7 +267,7 @@ class Phone {
     if (row.state === 'failed') return;
     if (m.type === 'text' || m.type === 'image') {
       const words = String(m.type === 'image' ? (m.image?.caption ?? '') : (m.text?.body ?? ''));
-      const picture = m.type === 'image' ? safeUrl(m.image?.link) : null;
+      const picture = m.type === 'image' ? pictureUrl(m.image?.link) : null;
       const b = el('div', 'in');
       b.dataset.what = row.what;
       if (picture) {
@@ -304,7 +335,7 @@ class Phone {
       a.append(ICON.open(), prm.display_text ?? '');
       const tier = webStep(url);
       if (wa) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onLink(wa); }); }
-      else if (tier && source && !source.demo) { a.href = url; a.addEventListener('click', (e) => { e.preventDefault(); playWebStep(p, tier, url); }); }
+      else if (url && source && !source.demo && onWeb(url)) { a.href = url; a.addEventListener('click', (e) => { e.preventDefault(); openWeb(this, p, url, tier); }); }
       else if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
       else { a.setAttribute('aria-disabled', 'true'); a.addEventListener('click', () => say('That page is not published beside this studio yet.')); }
       g.append(a);
@@ -421,18 +452,39 @@ async function others(except) { for (const p of people) if (p !== except && !p.b
 function webStep(url) {
   try { return url ? new URL(url).searchParams.get('tier') : null; } catch { return null; }
 }
+/** Whether an address is one of the published web app's (the only pages the studio opens as a guest). */
+const WEB_BASE = String(cfg.webBase || '').replace(/\/+$/, '');
+const onWeb = (url) => !!WEB_BASE && typeof url === 'string' && url.startsWith(`${WEB_BASE}/`);
+
+/**
+ * A link to the venue's web app, tapped in a simulated guest's chat. The studio opens the real page inside the phone,
+ * signed in as that guest, the way bubl's button does for a real guest: the page then shows where they stand (their
+ * held table, their share). Where that is not switched on, the studio plays the step instead (below).
+ */
+async function openWeb(phone, p, url, tier) {
+  if (p.busy) return;
+  let r;
+  try { r = await source.open(p, url); } catch { r = { ok: false, reason: '' }; }
+  if (r.ok) return phone.showWeb(p, r, tier, url);
+  if (tier) return playWebStep(p, tier, url, r.reason);
+  window.open(url, '_blank', 'noopener');
+}
 
 /**
  * A real guest opens the venue here, signs in with a code sent to their phone and picks the table. A simulated person
  * is on a number no phone can have, so no code can reach them. The studio offers to hold a table of that kind for
  * them, through the same booking rules the web app uses; bubl then hears of it as it does for a real guest.
  */
-function playWebStep(p, tier, url) {
+function playWebStep(p, tier, url, why) {
   return overlay((card, close) => {
     card.append(
       el('h1', '', 'On the web'),
-      el('p', '', `A real guest opens your web app here, signs in with a code and picks the table. ${p.name} is simulated and cannot receive a code, so the studio can hold a table of this kind for ${p.name}, by the same booking rules.`),
+      el('p', '', `A real guest opens your web app here and picks the table. The studio can hold a table of this kind for ${p.name}, by the same booking rules.${why ? ` (${why})` : ''}`),
     );
+    // the least every member of a table gives: a full name as on their ID, and their number (the simulated one)
+    const name = el('input');
+    name.type = 'text'; name.maxLength = 80; name.autocomplete = 'off'; name.value = p.fullName || p.name; name.setAttribute('aria-label', 'Full name, as on ID');
+    card.append(el('p', 'lab', 'Full name, as on ID'), name);
     const go = el('button', 'go', 'Hold a table');
     go.type = 'submit';
     const open = el('button', 'link', 'Open the venue page instead');
@@ -446,7 +498,9 @@ function playWebStep(p, tier, url) {
       go.disabled = true;
       p.busy = true;
       try {
-        const r = await source.hold(p, tier);
+        if (!name.value.trim()) { name.focus(); go.disabled = false; p.busy = false; return; }
+        p.fullName = name.value.trim();
+        const r = await source.hold(p, tier, p.fullName);
         if (r.note) { err.textContent = r.note; go.disabled = false; return; }
         close(true);
         take(p, r.rows ?? []);
@@ -608,10 +662,12 @@ async function liveSource() {
       return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason, bad: true, keep: true };
     },
     /** The studio holds a table of this kind for a simulated guest (the web step, played here). */
-    async hold(p, tier) {
-      const r = await call('hold', { person: p.id, tier, after: p.last });
+    async hold(p, tier, name) {
+      const r = await call('hold', { person: p.id, tier, name, after: p.last });
       return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason };
     },
+    /** The venue's web app, opened as this simulated guest: its address with a one-time sign-in (see the back end's "open"). */
+    async open(p, url) { return call('open', { person: p.id, url }); },
     /** Anything that arrived since (the host being told, or an answer that had to be tried again). */
     async more(p) { const f = await call('feed', { person: p.id, after: p.last }); return f.ok ? fresh(p, f.messages) : []; },
     async reset(p) { const r = await call('reset', { person: p.id }); if (!r.ok) throw new Error(r.reason); },

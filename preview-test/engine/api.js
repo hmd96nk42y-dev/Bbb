@@ -13,9 +13,11 @@
   var cfg = root.BUBL_CONFIG || {};
   var live = (cfg.mode === 'test' || cfg.mode === 'live') && !!cfg.supabaseUrl && !!cfg.publishableKey;
   var base = String(cfg.supabaseUrl || '').replace(/\/+$/, '');
-  var client = null;
+  var client = null, simGuest = false;
   function sb() {
-    if (!client) client = root.supabase.createClient(base, cfg.publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'bubl.signin' } });
+    if (!client) client = root.supabase.createClient(base, cfg.publishableKey, { auth: simGuest
+      ? { persistSession: false, autoRefreshToken: true, detectSessionInUrl: false }
+      : { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'bubl.signin' } });
     return client;
   }
   var no = function (code, reason) { return { ok: false, code: code, reason: reason }; };
@@ -54,8 +56,12 @@
   var chatKey = null;
   if (live) {
     try {
-      var host = root.parent, found = /(?:^#|&)k=([A-Za-z0-9_-]{43})(?:&|$)/.exec(host.location.hash || '');
-      if (found) { chatKey = found[1]; host.history.replaceState(null, '', host.location.pathname + host.location.search); }
+      var host = root.parent, hash = host.location.hash || '', found = /(?:^#|&)k=([A-Za-z0-9_-]{43})(?:&|$)/.exec(hash);
+      /* opened by the showcase studio as a simulated guest: this page keeps its sign-in in memory only, so whoever is
+         signed in on this browser is neither used nor replaced */
+      simGuest = /(?:^#|&)sim=1(?:&|$)/.test(hash);
+      if (found) chatKey = found[1];
+      if (found || simGuest) host.history.replaceState(null, '', host.location.pathname + host.location.search);
     } catch (_) {}
   }
   var auth = {
