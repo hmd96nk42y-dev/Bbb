@@ -43,15 +43,15 @@ const agList=kind=>((W.live&&W.live.agreements)||[]).filter(a=>a.kind===kind);
 function livePaAll(){return agList('promoter').map(a=>{const o=(a.terms&&a.terms.ops)||{},t=a.terms||{},r=t.rates||{};
   return Object.assign({events:[W.ev.id],tmode:'tab',secs:[],tables:[],cap:0,tix:{early:0,wave:0,vips:0},list:0,one:false,barBase:'over',payDays:0,release:0,settle:'dep',notice:0,law:'dxb',extra:[],ovr:{},removed:{},chg:{},log:[]},o,{
     id:a.id,src:a.key,name:(a.contact&&a.contact.name)||a.label,company:(a.contact&&a.contact.company)||'',ph:(a.contact&&a.contact.phone)||'',email:(a.contact&&a.contact.email)||'',licence:(a.contact&&a.contact.licence)||'',
-    kind:t.exclusive?'exclusive':'promoter',rates:{tix:Number(r.tix||0)*100,tab:Number(r.tab||0)*100,bar:Number(r.bar||0)*100},tables:(a.allocation&&a.allocation.tables)||[],secs:(a.allocation&&a.allocation.sections)||[],
+    kind:t.exclusive?'exclusive':'promoter',greetVip:t.greet_vip===true,_terms:t,rates:{tix:Number(r.tix||0)*100,tab:Number(r.tab||0)*100,bar:Number(r.bar||0)*100},tables:(a.allocation&&a.allocation.tables)||[],secs:(a.allocation&&a.allocation.sections)||[],
     /* signed for the venue; the promoter signs in their own app, which is step 8 */
     status:a.state==='ended'?'revoked':a.state==='paused'?'paused':'sent',created:ms(a.signed_at),sentAt:0,openAt:0,signedAt:0,venueSig:{by:a.signed_by,at:ms(a.signed_at)},promoSig:null});});}
 function paLiveSync(){PA.list=null;HT.list=null;VL.list=null;}
 paStatus=function(a){return a.status==='revoked'?pill('bad','Ended'):a.status==='paused'?pill('mut','Paused'):pill('ok','Signed for '+esc(VENUE.name.split(' ')[0]));};
 /* the agreement's terms, as the back end keeps them: rates as shares, money in minor units, and the wizard's own
    record beside them so the screen opens it again exactly as it was made */
-function paTerms(d){const r=paRates(d),o=JSON.parse(JSON.stringify(d));['_sent','agent','busy','drafting','drafted','zoom','_bumped','_edit','id','src','status'].forEach(k=>delete o[k]);
-  return {rates:{tix:r.tix/100,tab:r.tab/100,bar:r.bar/100},bar_base:d.barBase,pay_days:d.payDays,release_hours:d.release||undefined,settle:d.settle,notice_days:d.notice,exclusive:d.kind==='exclusive',
+function paTerms(d){const r=paRates(d),o=JSON.parse(JSON.stringify(d));['_sent','agent','busy','drafting','drafted','zoom','_bumped','_edit','id','src','status','_terms'].forEach(k=>delete o[k]);
+  return {rates:{tix:r.tix/100,tab:r.tab/100,bar:r.bar/100},bar_base:d.barBase,pay_days:d.payDays,release_hours:d.release||undefined,settle:d.settle,notice_days:d.notice,exclusive:d.kind==='exclusive',greet_vip:d.greetVip===true,
     tickets:d.tix,list_spots:d.list,offers:{allowed:!!(d.offers&&d.offers.on),floor_minor:d.offers?toMinor(d.offers.floor||0):0},ops:o};}
 ON.paSend=()=>{const d=PA.d;for(let k=0;k<3;k++){const e=paCheck(k);if(e){PA.step=k;paRe();toast(e);return;}}
   if(!paRates(d).tix&&!paRates(d).tab&&!paRates(d).bar){PA.step=3;paRe();toast('Set their cut: every rate is still at nothing.');return;}
@@ -60,6 +60,12 @@ ON.paSend=()=>{const d=PA.d;for(let k=0;k<3;k++){const e=paCheck(k);if(e){PA.ste
       terms:paTerms(d),allocation:{tables:d.tmode==='tab'?d.tables:[],sections:d.tmode==='sec'?d.secs:[]},services:d.events.map(id=>EVK[id].sid),contract:paClauses(d).map(c=>c.h+'\n'+c.t).join('\n\n'),pin:pinNow()},
       'Signed for '+esc(VENUE.name)+'.');
     if(!r)return;d._sent=true;d.id=r.id;d.venueSig={by:BUBL.staff.name,at:Date.now()};haptic(20);paRe();});};
+/* "Greet as VIP at the door" (Sk, 24 Nov 2026, answer 126): one term of the venue's agreement, changed with the Manager
+   PIN and written to the audit log with the terms before and after. The door reads it from the agreement itself. */
+ON.paGreet=el=>{const a=paAll().find(x=>x.id===el.dataset.id),on=el.dataset.v==='1';if(!a||!!a.greetVip===on)return;
+  if(!paCanEdit()||a.status==='revoked'){toast(a.status==='revoked'?'This access has ended.':'Only a manager can change a promoter’s terms.');return;}
+  withPin('Greet '+paSrcLabel(a)+'’s guests as VIP at the door: '+(on?'on':'off'),async()=>{
+    const r=await liveDo('agreement-terms',{id:a.id,terms:Object.assign({},a._terms||{},{greet_vip:on}),pin:pinNow()},'Saved. The change is in the audit log with the terms before and after.');if(r)Sheet.close();});};
 ON.paEnd=el=>{const a=paAll().find(x=>x.id===el.dataset.id);if(!a)return;withPin('End '+paSrcLabel(a)+'’s access',async()=>{
   const r=await liveDo('agreement-end',{id:a.id,reason:'Ended from OPS',pin:pinNow()},'Access ended. Their held tables are back on sale.');if(r)Sheet.close();});};
 /* the last step: signed for the venue and saved. Sending and the promoter's own link are step 8. */
