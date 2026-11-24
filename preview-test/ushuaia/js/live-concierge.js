@@ -6,12 +6,19 @@
       guest whose own chat the button was sent to. The page's own start waits for that before it looks at who is
       signed in. A key that was used, is too old, or was never real changes nothing: the guest signs in as today.
       Someone already signed in on this browser stays signed in: the chat never signs anyone out or swaps accounts.
+   1b. What the chat already knows goes into the page's own forms (Sk, 24 Nov 2026: "prefill the hold form from the
+      chat"). With the sign-in bubl also says who the guest is: their number, and their name and email where it has
+      them. The hold form and the invitation's form open with those already in their own boxes, for the guest to
+      check or change. The number the guest is signed in on is proven by that sign-in, so it is taken as it is and
+      no code is asked for again. (The studio's simulated guests are on numbers no phone can have: without this the
+      form could never be passed.) Nothing is added to either form.
    2. Opening from its own address. ?e=<night> opens that night, ?n=<guests> sets the party, and ?tier=<kind of
       table> lights the open tables of that kind the way the build's own budget search lights its matches: by
       recolouring the tables' own details: their glow, and their seats in their section's own colour. Nothing is
       drawn on top. Tables of that kind that are taken or too small for the party are not lit: they look
-      unavailable, as they do today. The venue opens whole, in its 3D view at an angle, so the guest sees where
-      that section sits; they tap it and pick the exact table, or any other.
+      unavailable, as they do today. The venue opens on the plan of the section where those tables are (Sk, 24 Nov
+      2026; before that, whole and in 3D); the guest picks the exact table there, or any other.
+      ?e=<night>&p=<plan> alone (the message a host forwards) opens on the venue for that night.
       ?pick=1 also proposes one table of that kind (Sk, 23 Nov 2026: a table picked for the guest is shown before
       anything is confirmed, to change or to confirm). The table is selected exactly as a tap selects it, with its
       own sheet open: its own button holds it, and closing the sheet and tapping another table changes it. Nothing
@@ -22,15 +29,49 @@ if(!LIVE)return;
 const q=new URLSearchParams(location.search);
 
 /* ---- 1. signed in from the chat ---- */
+let chatGuest=null;   /* { phone:'+…', name, email }: who bubl says this page was signed in as; only ever set by that sign-in */
+const digits=v=>String(v==null?'':v).replace(/\D/g,'');
 const key=BUBL.auth.takeChatKey();   /* already taken out of the address, the moment the page started (engine/api.js) */
 const entered=(async()=>{
   if(!key)return false;
   if(await BUBL.auth.phone())return false;
   const r=await BUBL.call('concierge-hooks','web/enter',{key:key});
-  return !!(r&&r.ok&&r.session)&&await BUBL.auth.enter(r.session);
+  const ok=!!(r&&r.ok&&r.session)&&await BUBL.auth.enter(r.session);
+  if(ok&&r.guest&&typeof r.guest.phone==='string'&&/^\+\d{5,20}$/.test(r.guest.phone))chatGuest={phone:r.guest.phone,name:typeof r.guest.name==='string'?r.guest.name:'',email:typeof r.guest.email==='string'?r.guest.email:''};
+  return ok;
 })().catch(()=>false);
 const startAsBuilt=window.openGuestLink;
 window.openGuestLink=async function(){await entered;return startAsBuilt.apply(this,arguments);};
+
+/* ---- 1b. what the chat already knows goes into the page's own forms ---- */
+/* the number this page is signed in on, from the guest's own chat: proven already, so every form takes it as it is */
+const parseAsBuilt=BUBL.phone.parse;
+BUBL.phone.parse=function(text,dial){
+  const r=parseAsBuilt.apply(this,arguments);
+  if(!r.ok&&chatGuest){const mine=digits(chatGuest.phone),typed=digits(text);
+    if(typed&&(typed===mine||digits(dial)+typed.replace(/^0+/,'')===mine))return {ok:true,e164:chatGuest.phone,country:null};}
+  return r;
+};
+const fill=(el,v)=>{if(el&&v&&!el.value){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));}};
+/* the hold form: the build opens it empty; what bubl knows is then put in its own boxes */
+const holdFormAsBuilt=window.openGinfo;
+if(typeof holdFormAsBuilt==='function')window.openGinfo=function(){
+  const r=holdFormAsBuilt.apply(this,arguments);
+  if(chatGuest){fill($('#ginfoName'),chatGuest.name);fill($('#ginfoPhone'),chatGuest.phone);fill($('#ginfoEmail'),chatGuest.email);}
+  return r;
+};
+/* the invitation's form (drawn when an invitation is opened): its country box is set where the number's code is one
+   it lists, and the rest of the number goes in the number box */
+function fillInvitation(root){
+  if(!chatGuest||!root||!root.querySelector)return;
+  const tel=root.querySelector('.ip-tel'),cc=root.querySelector('.ip-cc');
+  fill(root.querySelector('.ip-name'),chatGuest.name);fill(root.querySelector('.ip-em'),chatGuest.email);
+  if(tel&&!tel.value){const mine=digits(chatGuest.phone),codes=cc?[...cc.options].map(o=>o.value).sort((a,b)=>b.length-a.length):[],code=codes.find(c=>c&&mine.startsWith(c));
+    if(code){cc.value=code;fill(tel,mine.slice(code.length));}else fill(tel,mine);}
+}
+try{new MutationObserver(list=>{if(!chatGuest)return;for(const m of list)for(const n of m.addedNodes){if(n.nodeType!==1)continue;
+  if((n.matches&&n.matches('.ip-s1'))||(n.querySelector&&n.querySelector('.ip-s1')))fillInvitation(n.closest&&n.closest('#ipv')||n);}}).observe(document.documentElement,{childList:true,subtree:true});}catch(_){}
+entered.then(ok=>{if(ok)fillInvitation(document);});
 
 /* ---- 2. the night, the party and the kind of table bubl spoke of ---- */
 const want={e:q.get('e'),tier:q.get('tier'),n:parseInt(q.get('n')||'',10),pick:q.get('pick')};
@@ -59,34 +100,34 @@ window.syncBudget=function(){syncAsBuilt.apply(this,arguments);
   if(litNow()){dollPost({cmd:'budget',on:true,ids:litIds()});dollPost({cmd:'social',map:seatsAsSent});}
   else if(coloured){coloured=false;dollPost({cmd:'social',map:seatsAsSent});}   /* the suggestion stepped aside: the seats go back to their own */
 };
+/* The venue view can take a while to load on a phone, more so inside the studio's own phone. It is waited for as long
+   as five minutes, not thirty seconds: given up on sooner, the page was left at its top with nothing lit and nothing
+   proposed (Sk, 24 Nov 2026: the link "landed on Buy tickets / Returning guest"). */
 function whenRoomShows(fn){let tries=0;const t=setInterval(()=>{const up=dollReady;   /* the 3D venue has spoken: it is listening */
-  if(up||++tries>300){clearInterval(t);if(up)fn();}},100);}
-/* The whole venue in its 3D view, at an angle with the city line behind it, so the guest sees where the lit section
-   sits (Sk, 23 Nov 2026). The angle is this venue's own: it is given to the 3D venue through the camera hook the
-   build already has, and the venue file itself is not changed. It holds until the guest touches the venue, changes
-   view, or the suggestion steps aside; from then on the 3D view moves as it always does. The guest pinches in or taps
-   the section for the plan, then the table, as always. */
-const OPENING_ANGLE={theta:-2.25,phi:1.33,R:1600,tx:-30,ty:90,tz:470,fov:40};
-let held=null;   /* the 3D venue's own window, while the opening angle is held */
-function letGo(){if(!held)return;const w=held;held=null;try{w.__camO=null;w.removeEventListener('pointerdown',letGo,true);}catch(_){}}
-function holdAngle(){
-  try{const w=dollFrame&&dollFrame.contentWindow;if(!w||held===w)return;letGo();w.__camO=Object.assign({},OPENING_ANGLE);w.addEventListener('pointerdown',letGo,true);held=w;}catch(_){return;}
-  const t=setInterval(()=>{if(!held){clearInterval(t);return;}if(!litNow()||curView()!=='iso'||!dollFrame||dollFrame.contentWindow!==held){letGo();clearInterval(t);}},250);
+  if(up||++tries>3000){clearInterval(t);if(up)fn();}},100);}
+/* The venue opens on the plan of the section where the lit tables are (Sk, 24 Nov 2026: "open the venue on the lit
+   section's plan, not 3D"; before that it opened whole, in 3D at an angle). Where a kind of table sits on both sides,
+   it is the side with more of them open; the build's own "other side" chip shows the rest. The plan and the section
+   are asked of the venue view exactly as a tap on its "Plan" switch and on a section asks them. */
+function litSection(){
+  const n={};litIds().forEach(id=>{const t=T(id);if(t)n[t.sec]=(n[t.sec]||0)+1;});
+  return Object.keys(n).sort((a,b)=>n[b]-n[a]||a.localeCompare(b))[0]||null;
 }
+function toVenue(){const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-150),behavior:'smooth'});}
 function showLit(){
-  if(!litIds().length)return;
-  S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});dollPost({cmd:'focus',zone:'all'});holdAngle();
-  const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-150),behavior:'smooth'});
+  const sec=litSection();if(!sec)return;
+  S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});dollPost({cmd:'focus',zone:sec});
+  toVenue();
 }
 /* The table proposed: the one named if it is still open, or the first open one of the lit kind that fits the party.
    It is shown the way the build's own helper shows a table it found: the venue goes to its section, then the table
    is picked as a tap picks it. Between the two the table is seen glowing where it stands, by the venue view's own
    selection, for a moment: on a phone the table's sheet then covers most of the venue. A guest who taps a table
    themselves in that moment has chosen, and nothing more is proposed. */
-function proposed(){const open=litIds().map(T).filter(t=>t&&(!S.party||fits(t,S.party)));return open.find(t=>t.id===want.pick)||open[0]||null;}
+function proposed(){const open=litIds().map(T).filter(t=>t&&(!S.party||fits(t,S.party))),sec=litSection();return open.find(t=>t.id===want.pick)||open.find(t=>t.sec===sec)||open[0]||null;}
 function propose(){
   const t=proposed();if(!t||S.boothId||!litNow())return;
-  letGo();dollPost({cmd:'focus',zone:t.sec});
+  dollPost({cmd:'focus',zone:t.sec});
   const still=()=>!S.boothId&&litNow()&&!S.pick;
   setTimeout(()=>{if(!still())return;
     /* The venue view answers a selection by opening the table's sheet at once. For the proposed table that answer
@@ -95,7 +136,7 @@ function propose(){
     const giveBack=()=>{done=true;window.onPick=pickAsBuilt;};
     window.onPick=function(id){if(id===t.id&&!done)return;giveBack();return pickAsBuilt.apply(this,arguments);};
     dollPost({cmd:'select',id:t.id});
-    setTimeout(()=>{if(done)return;giveBack();if(still())pickAsBuilt(t.id);},3600);},900);
+    setTimeout(()=>{if(done)return;giveBack();if(still())pickAsBuilt(t.id);},1700);},700);
 }
 function fromChat(){
   if(opened)return;opened=true;
@@ -106,8 +147,13 @@ function fromChat(){
   if(want.n>=2&&want.n<=16&&!S.party){S.party=want.n;$$('.ppill').forEach(p=>p.classList.toggle('sel',p.textContent===String(want.n)));setLbl('#pkParty',String(want.n));if(window.paintGuests)paintGuests();}
   if(want.tier&&TIERS[want.tier]&&!TIERS[want.tier].req)lit=want.tier;
   afterPick();
-  if(lit){S.view='iso';paintVtog();dollPost({cmd:'setView',view:'iso'});}   /* from the first frame: the venue never shows flat first and then turns */
-  if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();if(want.pick)setTimeout(propose,1400);}});
+  if(lit){S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});}   /* the plan from the first frame: the venue never shows one way first and then turns */
+  /* the page goes to the venue at once, while the venue view is still loading: the guest is never left at the top */
+  if(lit||(ev&&q.get('p')))setTimeout(()=>{if(!S.boothId&&!S.tixMode)toVenue();},350);
+  if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();if(want.pick)setTimeout(propose,700);}});
+  /* The night alone, from the message a host forwards ("Are you in?"): the page opens on the venue for that night
+     rather than leaving a friend at the ticket button further up (Sk, 24 Nov 2026). Nothing is lit or proposed. */
+  else if(ev&&q.get('p'))whenRoomShows(()=>{if(!S.boothId&&!S.tixMode)toVenue();});
 }
 const restoreAsBuilt=window.restoreMine;
 window.restoreMine=async function(){const r=await restoreAsBuilt.apply(this,arguments);try{fromChat();}catch(_){}return r;};

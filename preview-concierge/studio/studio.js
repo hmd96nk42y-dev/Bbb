@@ -79,16 +79,26 @@ function rich(text, onLink, onWebLink) {
   const re = /(https:\/\/[^\s]+)|\*(\S(?:[^*\n]*\S)?)\*|_(\S(?:[^_\n]*\S)?)_|~(\S(?:[^~\n]*\S)?)~/g;
   let at = 0;
   for (let m; (m = re.exec(text)); ) {
-    if (m.index > at) frag.append(text.slice(at, m.index));
+    let before = m.index > at ? text.slice(at, m.index) : '';
     if (m[1] !== undefined) {
-      const a = el('a', 'lnk', m[1]);
       const wa = waLink(m[1]);
       const url = safeUrl(m[1]);
+      // A link is drawn by what it does, not by its address (Sk, 24 Nov 2026: "hide raw links and the code"). "In:" and
+      // "Out:" before a link that opens a chat become the link itself; a link to the venue's own page reads as what it
+      // opens. On a real phone WhatsApp always shows a link's address in a forwarded text: the words here are the
+      // studio's own drawing of it. Any other link is shown as it is.
+      const lead = wa ? /(^|\n)([A-Za-z][A-Za-z ]{0,18}):[ \t]*$/.exec(before) : null;
+      if (lead) before = before.slice(0, lead.index + lead[1].length);
+      const label = lead ? lead[2] : url && onWeb(url) ? (/[?&]i=/.test(url) ? 'Open the invitation' : /[?&]v=/.test(url) ? 'See your table' : /[?&]e=/.test(url) ? 'See the night' : 'Open the page') : m[1];
+      if (before) frag.append(before);
+      const a = el('a', label === m[1] ? 'lnk' : 'lnk named', label);
+      if (label !== m[1]) a.title = m[1];
       if (wa && onLink) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onLink(wa); }); }
       else if (url && onWebLink && onWeb(url)) { a.href = '#'; a.addEventListener('click', (e) => { e.preventDefault(); onWebLink(url); }); }
       else if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
       frag.append(a);
     } else {
+      if (before) frag.append(before);
       const n = el(m[2] !== undefined ? 'b' : m[3] !== undefined ? 'i' : 's', '', m[2] ?? m[3] ?? m[4]);
       if (m[2] !== undefined) n.style.fontWeight = '600';
       frag.append(n);
@@ -175,7 +185,7 @@ class Phone {
     });
     const who = el('button', 'web-who', `${r.name || p.name} · +${r.number}`);
     who.type = 'button';
-    who.title = 'The number to type where the page asks for it. Tap to copy.';
+    who.title = 'Who the page is opened as. The page fills in this name and number by itself. Tap to copy the number.';
     who.addEventListener('click', async () => { try { await navigator.clipboard.writeText(`+${r.number}`); say('Number copied.'); } catch { say(`The number is +${r.number}`); } });
     top.append(back, who);
     if (tier) {
@@ -186,7 +196,9 @@ class Phone {
       hold.type = 'button';
       hold.title = 'The page selects a free table of this kind. Confirm it there, or tap another: nothing is held until you do.';
       hold.addEventListener('click', async () => {
-        if (p.busy) return;
+        if (p.busy || hold.disabled) return;
+        // one tap is enough: it says so at once, and cannot be tapped again while the page opens
+        hold.disabled = true; hold.textContent = 'Picking…';
         const again = /[?&]pick=/.test(url) ? url : `${url}${url.includes('?') ? '&' : '?'}pick=1`;
         let next;
         try { next = await source.open(p, again); } catch { next = { ok: false, reason: '' }; }
@@ -195,6 +207,13 @@ class Phone {
         playWebStep(p, tier, url, next.reason);
       });
       top.append(hold);
+      // The studio's own step, should the page not get there: a table of this kind is held for this simulated guest
+      // by the same booking rules, and bubl hears of it as it does for a real guest (the "On the web" card).
+      const here = el('button', 'web-here', 'Hold for me');
+      here.type = 'button';
+      here.title = 'Skip the page: the studio holds a free table of this kind for this guest, by the same booking rules.';
+      here.addEventListener('click', () => { if (p.busy) return; this.closeWeb(); playWebStep(p, tier, url, ''); });
+      top.append(here);
     }
     const frame = el('iframe', 'web-frame');
     frame.title = `The venue's web app, as ${r.name || p.name}`;
@@ -448,7 +467,7 @@ function drawPeople() {
   if (source.chats?.partners) {
     const partner = el('button', 'chip', '+ Partner');
     partner.type = 'button';
-    partner.addEventListener('click', async () => { const p = await askName('A simulated partner', `Their first name. This phone opens the ${source.chats.partners} chat.`, 'partners'); if (p) select(p); });
+    partner.addEventListener('click', async () => { const p = await askPartner(); if (p) select(p); });
     box.append(partner);
   }
 
@@ -456,6 +475,10 @@ function drawPeople() {
 
 /** New messages for a person: drawn if their phone is in view, counted on their name if not. */
 function take(p, rows) {
+  // Two refreshes can overlap (the one every few seconds, and the one after something is sent): a message is drawn
+  // once, whichever brings it (Sk, 24 Nov 2026: "Omar is in." was shown twice).
+  const seen = new Set(p.rows.map((r) => r.id).filter((id) => id != null));
+  rows = rows.filter((r) => r.id == null || !seen.has(r.id));
   if (!rows.length) return;
   for (const r of rows) {
     if (r.direction === 'out' && r.state === 'failed') say(`One of bubl's answers to ${p.name} could not be delivered${r.problem ? `: ${r.problem}` : '.'}`, true);
@@ -516,7 +539,8 @@ async function openWeb(phone, p, url, tier) {
   try { r = await source.open(p, url); } catch { r = { ok: false, reason: '' }; }
   if (r.ok) return phone.showWeb(p, r, tier, url);
   if (tier) return playWebStep(p, tier, url, r.reason);
-  window.open(url, '_blank', 'noopener');
+  // (never a plain new tab: opened there the page would not know this guest, and a simulated number cannot sign in)
+  say(r.reason || 'The page could not be opened as this guest just now. Try again in a moment.', true);
 }
 
 /**
@@ -536,11 +560,10 @@ function playWebStep(p, tier, url, why) {
     card.append(el('p', 'lab', 'Full name, as on ID'), name);
     const go = el('button', 'go', 'Hold a table');
     go.type = 'submit';
-    const open = el('button', 'link', 'Open the venue page instead');
-    open.type = 'button';
-    open.addEventListener('click', () => { window.open(url, '_blank', 'noopener'); close(null); });
+    // (no plain link to the page from here: opened in a tab of its own it would not know this guest, and a simulated
+    // number cannot sign in there)
     const err = el('p', 'err');
-    card.append(go, open, err);
+    card.append(go, err);
     card.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (p.busy) return;
@@ -606,6 +629,46 @@ function nameForm(card, close, title, text, line = 'bubl') {
   setTimeout(() => input.focus(), 0);
 }
 const askName = (title, text, line = 'bubl') => overlay((card, close) => nameForm(card, close, title, text, line));
+/**
+ * "+ Partner": a first name, and who they are. A ready-made promoter, manager, host, runner or door works at once
+ * (the back end makes them that, on staging only); "Nobody yet" is a number bubl partners does not know, for showing
+ * how a venue signs someone in OPS.
+ */
+const askPartner = () => overlay((card, close) => {
+  card.append(el('h1', '', 'A simulated partner'), el('p', '', `This phone opens the ${source.chats.partners} chat.`));
+  const input = el('input');
+  input.type = 'text'; input.maxLength = 24; input.placeholder = 'Karim'; input.autocomplete = 'off'; input.setAttribute('aria-label', 'First name');
+  card.append(el('p', 'lab', 'First name'), input, el('p', 'lab', 'Who are they?'));
+  const list = el('div', 'roles');
+  const options = [...(source.cast ?? []), { role: '', label: 'Nobody yet', note: 'A number bubl partners does not know. Sign it in OPS yourself.' }];
+  options.forEach((c, i) => {
+    const row = el('label', 'role');
+    const radio = el('input');
+    radio.type = 'radio'; radio.name = 'role'; radio.value = c.role; radio.checked = i === 0;
+    const words = el('span', '');
+    words.append(el('b', '', c.label), el('small', '', c.note));
+    row.append(radio, words);
+    list.append(row);
+  });
+  const go = el('button', 'go', 'Add');
+  go.type = 'submit';
+  const err = el('p', 'err');
+  card.append(list, go, err);
+  card.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = input.value.trim();
+    if (!name) return input.focus();
+    const role = (list.querySelector('input:checked') || {}).value || '';
+    go.disabled = true; go.textContent = role ? 'Setting them up…' : 'Adding…';
+    try {
+      const made = await source.newPerson(name, 'partners', role);
+      close(addPerson(made));
+      if (made.role === 'promoter') say(`${name} is a promoter with ${made.tables?.length ?? 0} tables held for the next night. Say hello from their phone.`);
+      else if (made.role) say(`${name} is on the venue’s team as ${made.role}. Say hello from their phone.`);
+    } catch (x) { err.textContent = x.message || 'That could not be done just now.'; go.disabled = false; go.textContent = 'Add'; }
+  });
+  setTimeout(() => input.focus(), 0);
+});
 const chooser = (from) => overlay((card, close) => {
   // a forwarded message goes to a guest's phone (a partner's phone is for its chat with bubl)
   const rest = people.filter((p) => p !== from && !isPartner(p));
@@ -702,19 +765,25 @@ async function liveSource() {
       // (a partner's phone is not asked for by name at first use: it is made with "+ Partner")
       mine = [...mine, ...own('partners')];
       this.chats = Object.fromEntries((s.lines ?? []).filter((l) => l.mode !== 'off').map((l) => [l.key, l.name]));
+      // the ready-made people "+ Partner" offers (a promoter, the venue's team)
+      this.cast = Array.isArray(s.cast) ? s.cast : [];
       this.chat = line?.name ?? 'bubl';
       this.connected = !!line?.connected;
       return { ok: true };
     },
     async people() { return mine; },
-    async newPerson(name, line = 'bubl') {
-      const made = await call('person', { line, name });
+    async newPerson(name, line = 'bubl', role = '') {
+      const made = await call('person', { line, name, ...(role ? { role } : {}) });
       if (!made.ok) throw new Error(made.reason);
-      return { id: made.person.id, name, line, number: made.person.wa_id };
+      return { id: made.person.id, name, line, number: made.person.wa_id, role: made.person.role ?? null, tables: made.person.tables ?? null };
     },
     async start(p) { p.last = 0; const f = await call('feed', { person: p.id }); return f.ok ? fresh(p, f.messages) : []; },
     async act(p, input) {
-      const r = await call('say', { person: p.id, after: p.last, ...(input.tap ? { tap: { id: input.tap.id, title: input.tap.title, kind: input.tap.kind } } : { text: input.text }) });
+      // Each thing a simulated person does has a name of its own. Should the answer not arrive (the connection, or
+      // the back end waking up), the very same thing is asked again, once: the back end keeps it as one message.
+      const body = { person: p.id, after: p.last, key: crypto.randomUUID(), ...(input.tap ? { tap: { id: input.tap.id, title: input.tap.title, kind: input.tap.kind } } : { text: input.text }) };
+      let r = await call('say', body);
+      if (!r.ok && (r.status === 0 || r.status >= 500)) { await new Promise((done) => setTimeout(done, 1500)); r = await call('say', body); }
       return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason, bad: true, keep: true };
     },
     /** The studio holds a table of this kind for a simulated guest (the web step, played here). */
@@ -827,7 +896,8 @@ function gate(src) {
       }
     } catch (x) { err.textContent = says(x); } finally { go.disabled = false; }
   });
-  const out = async () => { try { await src.sb.auth.signOut(); } catch { /* already out */ } location.reload(); };
+  // (out of the studio's own sign-in only: the same person's sign-in in OPS or the guest app is left alone)
+  const out = async () => { try { await src.sb.auth.signOut({ scope: 'local' }); } catch { /* already out */ } location.reload(); };
   $('gateBack').addEventListener('click', () => { if (go.hidden) return out(); number = null; code.value = ''; step(1); });
   $('signout').addEventListener('click', out);
   return enter();

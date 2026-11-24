@@ -50,16 +50,25 @@ function paLiveSync(){PA.list=null;HT.list=null;VL.list=null;}
 paStatus=function(a){return a.status==='revoked'?pill('bad','Ended'):a.status==='paused'?pill('mut','Paused'):pill('ok','Signed for '+esc(VENUE.name.split(' ')[0]));};
 /* the agreement's terms, as the back end keeps them: rates as shares, money in minor units, and the wizard's own
    record beside them so the screen opens it again exactly as it was made */
-function paTerms(d){const r=paRates(d),o=JSON.parse(JSON.stringify(d));['_sent','agent','busy','drafting','drafted','zoom','_bumped','_edit','id','src','status','_terms'].forEach(k=>delete o[k]);
+function paTerms(d){const r=paRates(d),o=JSON.parse(JSON.stringify(d));['_sent','_saving','_saved','agent','busy','drafting','drafted','zoom','_bumped','_edit','id','src','status','_terms'].forEach(k=>delete o[k]);
   return {rates:{tix:r.tix/100,tab:r.tab/100,bar:r.bar/100},bar_base:d.barBase,pay_days:d.payDays,release_hours:d.release||undefined,settle:d.settle,notice_days:d.notice,exclusive:d.kind==='exclusive',greet_vip:d.greetVip===true,
     tickets:d.tix,list_spots:d.list,offers:{allowed:!!(d.offers&&d.offers.on),floor_minor:d.offers?toMinor(d.offers.floor||0):0},ops:o};}
-ON.paSend=()=>{const d=PA.d;for(let k=0;k<3;k++){const e=paCheck(k);if(e){PA.step=k;paRe();toast(e);return;}}
+/* (access is given table by table for now: live-gates.js, "promoterSections". The build's own hint is said without its
+   second half.) */
+(function(){const check=paCheck;paCheck=function(i){const e=check(i);return typeof e==='string'?e.replace(', or switch to sections',''):e;};})();
+ON.paSend=()=>{const d=PA.d;
+  /* signed already, or being saved right now: a second tap signs nothing again (Sk, 24 Nov 2026: one signing made two
+     agreements; the button stayed live for the second or two the save takes) */
+  if(d._sent||d._saving)return;
+  for(let k=0;k<3;k++){const e=paCheck(k);if(e){PA.step=k;paRe();toast(e);return;}}
   if(!paRates(d).tix&&!paRates(d).tab&&!paRates(d).bar){PA.step=3;paRe();toast('Set their cut: every rate is still at nothing.');return;}
   withPin('Sign the agreement for '+VENUE.name,async()=>{
-    const r=await liveDo('agreement-save',{id:d._edit&&d.id?d.id:undefined,kind:'promoter',label:paSrcLabel(d),contact:{name:d.name,company:d.company,phone:d.ph,email:d.email,licence:d.licence},
+    if(d._sent||d._saving)return;d._saving=true;const b=$('[data-act="paSend"]');if(b)b.disabled=true;
+    const r=await liveDo('agreement-save',{id:(d._edit||d._saved)&&d.id?d.id:undefined,kind:'promoter',label:paSrcLabel(d),contact:{name:d.name,company:d.company,phone:d.ph,email:d.email,licence:d.licence},
       terms:paTerms(d),allocation:{tables:d.tmode==='tab'?d.tables:[],sections:d.tmode==='sec'?d.secs:[]},services:d.events.map(id=>EVK[id].sid),contract:paClauses(d).map(c=>c.h+'\n'+c.t).join('\n\n'),pin:pinNow()},
       'Signed for '+esc(VENUE.name)+'.');
-    if(!r)return;d._sent=true;d.id=r.id;d.venueSig={by:BUBL.staff.name,at:Date.now()};haptic(20);paRe();});};
+    d._saving=false;const b2=$('[data-act="paSend"]');if(b2)b2.disabled=false;
+    if(!r)return;d._sent=true;d._saved=true;d.id=r.id;d.venueSig={by:BUBL.staff.name,at:Date.now()};haptic(20);paRe();});};
 /* "Greet as VIP at the door" (Sk, 24 Nov 2026, answer 126): one term of the venue's agreement, changed with the Manager
    PIN and written to the audit log with the terms before and after. The door reads it from the agreement itself. */
 ON.paGreet=el=>{const a=paAll().find(x=>x.id===el.dataset.id),on=el.dataset.v==='1';if(!a||!!a.greetVip===on)return;

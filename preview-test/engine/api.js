@@ -79,7 +79,10 @@
       if (!live) return null;
       try { var s = await sb().auth.getSession(), u = s.data.session && s.data.session.user; return u && u.phone ? '+' + String(u.phone).replace(/^\+/, '') : null; } catch (_) { return null; }
     },
-    async signOut() { if (live) { try { await sb().auth.signOut(); } catch (_) {} } },
+    /* Out of THIS page's own sign-in only. Supabase's sign-out ends every sign-in of the account everywhere unless told
+       otherwise, and the guest app, OPS and the studio can all be open on one browser as the same person (Sk, 24 Nov
+       2026: signing in to OPS signed the studio out). */
+    async signOut() { if (live) { try { await sb().auth.signOut({ scope: 'local' }); } catch (_) {} } },
     /** The key bubl's button carried, once. */
     takeChatKey() { var k = chatKey; chatKey = null; return k; },
     /** A sign-in handed over by bubl concierge, for the guest whose own chat the link came from (js/live-concierge.js). */

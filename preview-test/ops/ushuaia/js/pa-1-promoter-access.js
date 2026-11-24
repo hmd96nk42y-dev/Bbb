@@ -20,7 +20,8 @@ const PA_SUGG=['Pay within 7 days','Add a minimum guarantee of AED 250K','Add a 
 const paSlug=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'promoter';
 const paFirst=s=>String(s||'').trim().split(/\s+/)[0]||'';
 const paPct=v=>(Math.round(v*10)/10).toString().replace(/\.0$/,'')+'%';
-const paEvs=()=>EVENTS.filter(e=>e.announced);
+/* (test and live: a night that is over is not offered for a new access. Sk, 24 Nov 2026: "OPS offers past nights".) */
+const paEvs=()=>EVENTS.filter(e=>e.announced&&!(LIVE&&e.close&&e.close<now()));
 const paSecLabel=k=>SECTIONS[k].label;
 const paSecShort=k=>SECTIONS[k].label.replace('Backstage','BS').replace('Platinum','Plat').replace(' · ',' ');
 const paLink=a=>'https://bubl.app/'+PA_SLUG+'/p/'+paSlug(a.name)+(a.kind==='exclusive'?'/x':'');

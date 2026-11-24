@@ -30,7 +30,12 @@ setInterval(()=>{if(!document.hidden&&!Scan.res)liveRefresh();},15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-_liveAt>4000)liveRefresh();});
 
 /** Asks the back end to do something. Says what happened, reads the night again, and answers with the reply (or null). */
+const LIVE_DOING={};   /* what is being done right now: the very same thing asked again meanwhile is that same asking, not a second one */
 async function liveDo(door,body,okMsg){
+  const key=door+' '+JSON.stringify(body||{});
+  if(LIVE_DOING[key])return LIVE_DOING[key];
+  return LIVE_DOING[key]=liveDoOnce(door,body,okMsg).finally(()=>{delete LIVE_DOING[key];});}
+async function liveDoOnce(door,body,okMsg){
   const r=await BUBL.ops(door,Object.assign({service:W.ev.sid},body||{}));
   if(!r.ok){haptic([30,40,30]);toast(esc(r.reason||'That could not be done.'));await liveRefresh();return null;}
   if(okMsg)toast(typeof okMsg==='function'?okMsg(r):okMsg);await liveRefresh();return r;}

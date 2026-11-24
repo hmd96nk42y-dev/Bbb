@@ -46,6 +46,11 @@ const NOT_YET={
   refunds:'[data-act="qOk"][data-type="refund"],[data-act="qOk"][data-type="dispute"],[data-act="qOk"][data-type="transfer"],[data-act="winT"]',
   /* the Manager agent, intelligence requests and the floor's "Ask" (BUBL Intelligence is not connected: question 71) */
   intelligence:'[data-act="faAsk"],[data-act="faGo"],[data-act="inAsk"],[data-act="inRun"],[data-act="inGo"],[data-act="agOpen"],#paAsk,[data-act="paAsk"],[data-act="paSug"]',
+  /* Promoter access by section, and the exclusive kind (which is by section): a promoter sells through the bubl
+     partners chat, and the chat can only offer tables the venue holds for them by name. A section given this way
+     held nothing, and the promoter was told "no tables are held for you" (Sk, 24 Nov 2026). Until the chat can sell
+     any open table of a section, access is given table by table; both choices come back with that. */
+  promoterSections:'.seg:has(> [data-act="paTm"]),.pa-kind',
   /* partners: sending the access and the desk link, and the link itself (their own apps are step 8) */
   partnerApps:'[data-act="paResend"],[data-act="paCopy"],[data-act="htSendDesk"],[data-act="vlSend"]',
   /* the close-out PDF: built from POS and payment figures the venue has not connected */

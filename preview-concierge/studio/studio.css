@@ -72,6 +72,7 @@ button.cmic{border:0;padding:0;cursor:pointer;flex:none;-webkit-tap-highlight-co
 .tm svg{vertical-align:-1px;margin-left:3px}
 .wa-back{border:0;background:none;padding:0;display:flex;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .lnk{color:#53BDEB;text-decoration:underline;word-break:break-all;font-feature-settings:"calt" 0}
+.lnk.named{word-break:normal;font-weight:600}
 .comp[hidden]{display:none}
 /* a message someone forwarded, and WhatsApp's list of chats (not in the canvas; drawn in its colours and sizes) */
 .fwd{display:flex;align-items:center;gap:4px;color:#8696A0;font-size:11px;font-style:italic;margin-bottom:2px}
@@ -115,6 +116,8 @@ body{background:#FBFAF7;font-family:Inter,system-ui,sans-serif;color:#141413;dis
 .web-back svg{width:18px;height:18px}
 .web-who{flex:1;justify-content:center;color:#AEBAC1!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .web-hold{color:#53BDEB!important;white-space:nowrap}
+.web-hold:disabled{opacity:.6;cursor:default}
+.web-here{color:#AEBAC1!important;white-space:nowrap}
 .web-frame{flex:1;min-height:0;width:100%;border:0;background:#000}
 .card .lab{margin:0 0 6px;font-size:12px;color:#5E5D59}
 .veil{position:fixed;inset:0;background:rgba(20,20,19,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -133,6 +136,14 @@ body{background:#FBFAF7;font-family:Inter,system-ui,sans-serif;color:#141413;dis
 .go:disabled{opacity:.5;cursor:default}
 .card .link{display:block;margin:12px auto 0;border:0;background:none;font:500 12.5px Inter,sans-serif;color:#5E5D59;text-decoration:underline;cursor:pointer}
 .card .err{color:#9B2C20;font-size:12.5px;margin:10px 0 0;min-height:1.2em}
+.card{max-height:calc(100dvh - 32px);overflow-y:auto}
+.card .roles{display:grid;gap:5px;margin:0 0 12px}
+.card .role{display:flex;align-items:flex-start;gap:10px;margin:0;padding:7px 10px;border:1px solid #E3DFD6;border-radius:9px;cursor:pointer}
+.card .role input{width:auto;margin:3px 0 0;flex:none}
+.card .role span{display:grid;gap:1px;min-width:0}
+.card .role b{font:600 13.5px Inter,sans-serif;color:#141413}
+.card .role small{font-size:11.5px;line-height:1.3;color:#5E5D59}
+.card .role:has(input:checked){border-color:#141413}
 
 /* a narrow window: the notes sit above the phone */
 @media (max-width:700px){
