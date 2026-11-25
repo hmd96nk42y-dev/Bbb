@@ -319,13 +319,15 @@ class Phone {
       }
       b.append(rich(words, onLink), stamp(row.at));
       // the message bubl wrote to be forwarded gets WhatsApp's forward button beside it: "Send to…"
-      if (row.what === 'invite' || row.what === 'nudge' || row.what === 'table_offer') {
+      // (the invitations bubl writes once a table is held are forwarded too: one for each share, or the table's own)
+      if (row.what === 'invite' || row.what === 'nudge' || row.what === 'table_offer' || row.what === 'seat_invite') {
         const wrap = el('div', 'fwrap');
         const f = el('button', 'fbtn');
         f.type = 'button';
         f.setAttribute('aria-label', 'Forward');
         f.append(ICON.forward());
-        f.addEventListener('click', () => forward(p, { text: words, image: picture }));
+        // "For Omar: " is bubl's note to the host about whose invitation it is; the friend is sent the invitation itself
+        f.addEventListener('click', () => forward(p, { text: row.what === 'seat_invite' ? words.replace(/^For [^:\n]{1,80}: /, '') : words, image: picture }));
         wrap.append(b, f);
         this.thread.append(wrap);
       } else this.thread.append(b);
@@ -463,6 +465,19 @@ function drawPeople() {
   plus.type = 'button';
   plus.addEventListener('click', async () => { const p = await askName('A simulated friend', 'Their first name, as WhatsApp would show it.'); if (p) select(p); });
   box.append(plus);
+  // A DEMO scene (Sk, 25 Nov 2026): bubl invites the guest in view to a bubl table. Its button opens the venue's own
+  // build at that table. bubl tables are not built in the platform yet, so the message itself says DEMO.
+  if (source.demoScene) {
+    const demo = el('button', 'chip', 'bubl table · DEMO');
+    demo.type = 'button';
+    demo.title = 'bubl sends the guest in view an invitation to a bubl table (a demo scene: it opens the venue’s own build).';
+    demo.addEventListener('click', async () => {
+      const p = current;
+      if (!p || p.line === 'partners' || p.busy) return say('Choose a guest’s phone first.');
+      try { const r = await source.demoScene(p, 'bubl_table'); if (r.note) say(r.note, true); take(p, r.rows ?? []); redraw(p); } catch (e) { say(e.message || 'That could not be done just now.', true); }
+    });
+    box.append(demo);
+  }
   // a phone on the other chat: a promoter, a concierge, someone on the venue's team
   if (source.chats?.partners) {
     const partner = el('button', 'chip', '+ Partner');
@@ -796,6 +811,8 @@ async function liveSource() {
     /** Anything that arrived since (the host being told, or an answer that had to be tried again). */
     async more(p) { const f = await call('feed', { person: p.id, after: p.last }); return f.ok ? fresh(p, f.messages) : []; },
     async reset(p) { const r = await call('reset', { person: p.id }); if (!r.ok) throw new Error(r.reason); },
+    /** A DEMO scene sent to this simulated guest (the back end's "demo"). */
+    async demoScene(p, what) { const r = await call('demo', { person: p.id, what, after: p.last }); return r.ok ? { rows: fresh(p, r.messages) } : { note: r.reason }; },
   };
 }
 
