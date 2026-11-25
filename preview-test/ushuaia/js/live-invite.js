@@ -19,7 +19,7 @@ async function openGuestLink(){
   if(S.ev!==ev){applyEvent(ev);buildEvents();setLbl('#pkDate',ev.short);}
   if(v.your_seat){const me=await BUBL.me();if(me.ok&&me.guest){GUEST.me=me.guest.full_name.split(' ')[0];window.__ipClaimed=true;window.__ipName=GUEST.me;const mine=(me.bookings||[]).find(b=>b.my_seat&&b.my_seat.seat_no===v.your_seat.seat_no&&b.table.key===v.table.key);GUEST.booking=mine||null;GUEST.bookingId=mine?mine.booking_id:null;}}
   S.holdUntil=v.hold_expires_at?Date.parse(v.hold_expires_at):0;
-  window.openInvitePreview();
+  window.openInvitePreview();guestIntro();
   if(GUEST.me)setTimeout(guestClaimedView,0);
   return true;
 }
@@ -29,7 +29,7 @@ async function guestRefresh(){
   GUEST.view=v;GUEST.seat=v.your_seat||GUEST.seat;S.holdUntil=v.hold_expires_at?Date.parse(v.hold_expires_at):0;
   GDEP.paid=!!(GUEST.seat&&(GUEST.seat.card||(GUEST.seat.share_minor>0&&GUEST.seat.paid_minor>=GUEST.seat.share_minor)));
   if(v.your_seat&&['confirmed','arrived','seated'].includes(v.booking_state)&&!(GUEST.booking&&GUEST.booking.entry_token)){const me=await BUBL.me();if(me.ok)GUEST.booking=(me.bookings||[]).find(b=>b.table.key===v.table.key&&b.my_seat&&b.my_seat.seat_no===v.your_seat.seat_no)||null;}
-  ipDepRender();ipWaitRender();
+  ipDepRender();ipWaitRender();guestIntro();
 }
 setInterval(()=>{if(GUEST&&GUEST.me&&!document.hidden&&document.querySelector('.ip-dep'))guestRefresh();},6000);
 
@@ -42,6 +42,7 @@ function wireFormLive(I,ip){
   q('.ip-tel').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';});
   q('.ip-name').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';});
   q('.ip-em').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';});
+  ccWire(q('.ip-cc'),q('.ip-tel'));
   let busy=false;
   q('.ip-s1').addEventListener('submit',async e=>{e.preventDefault();if(busy)return;
     const nm=q('.ip-name').value.trim().replace(/\s+/g,' '),em=q('.ip-em').value.trim(),ph=BUBL.phone.parse(q('.ip-tel').value,q('.ip-cc').value);
@@ -89,7 +90,7 @@ function guestClaimedView(){
   let h='';rows.forEach(([n,s,c],i)=>{h+=`<div class="ip-g"><i class="${c}"></i><b${i===0?' class="host"':''}>${n}</b><span>${s}</span></div>`;});
   for(let i=rows.length;i<party;i++)h+='<div class="ip-g"><i></i><b class="muted">Open place</b><span></span></div>';
   q('.ip-guests').innerHTML=h;q('.ip-count').textContent=`${rows.length} of ${party} confirmed`;
-  ipDepRender();
+  ipDepRender();guestIntro();guestUpdatesButton(R);
 }
 /* my part of the deposit, from the back end's own figures */
 function ipDepRenderLive(box){
@@ -113,4 +114,91 @@ async function ipPayPartLive(){
   const r=await BUBL.pay({booking_id:id});
   if(!r.ok){if(r.code!=='nothing_owed')toast(r.reason);await guestRefresh();return;}
   openPayLive(r,{title:'Your part of the deposit',sub:`${GUEST.view.table.name}, ${S.ev.short}`,held:true,onDone:()=>guestRefresh(),onCancel:()=>guestRefresh()});
+}
+
+/* ---- the first screen: who invites, to which table, and this guest's part (Sk, 25 Nov 2026) ----
+   Under the venue's logo, in the invitation's own words and type. The host and the table are the back end's; the part
+   is the back end's figure for this link's next seat, or for my own seat once I have one. No figure from the back
+   end, or a part of nothing: no word about a part (a nought is never shown). */
+function guestIntro(){
+  const R=document.getElementById('ipv');if(!R||!GUEST||!GUEST.view)return;const v=GUEST.view,brand=R.querySelector('.ip-brand');if(!brand)return;
+  const host=esc((v.host_name||'').trim().split(/\s+/)[0]||''),table=v.table&&v.table.name?esc(v.table.name):'';
+  const part=GUEST.seat?GUEST.seat.share_minor:v.amount_minor;
+  let h=host&&table?`<em>${host}</em> invites you to ${table}.`:host?`<em>${host}</em> invites you.`:table?`You are invited to ${table}.`:'';
+  if(Number.isSafeInteger(part)&&part>0)h+=` Your part of the deposit is ${AED(part)}.`;
+  let box=R.querySelector('.ip-intro');
+  if(!h){if(box)box.remove();return;}
+  if(!box){box=document.createElement('div');box.className='ip-hw ip-intro';box.innerHTML='<p class="ip-why"></p>';brand.insertAdjacentElement('afterend',box);}
+  const p=box.firstChild;if(p.innerHTML!==h)p.innerHTML=h;
+}
+
+/* ---- the country box follows the number (Sk, 25 Nov 2026) ----
+   A number written with its country code (+44…, 0044…) says which country it is: the box beside it shows that country,
+   picked from its own list, or added to it when the list does not have it. A code that is no country's (the studio's
+   simulated +999 numbers) shows a plain "+", never a country the number is not from. Once the number no longer starts
+   with a code, the box goes back to what the guest had chosen. Choosing a country by hand keeps the rest of the number. */
+function ccRead(text){
+  const t=String(text||'').trim().replace(/^00/,'+');if(t.charAt(0)!=='+')return null;
+  let code='',country=null,rest='';try{const a=new libphonenumber.AsYouType();a.input(t);code=a.getCallingCode()||'';country=a.getCountry()||null;rest=a.getNationalNumber()||'';}catch(_){}
+  return {code,country,rest,digits:t.replace(/\D/g,'')};
+}
+function ccFollow(cc,tel){
+  if(!cc||!tel)return;const n=ccRead(tel.value),own=()=>{if(cc.__own&&cc.__own.isConnected&&!cc.__own.selected){cc.__own.remove();cc.__own=null;}};
+  if(!n){if(cc.__was!=null){cc.value=cc.__was;cc.__was=null;if(cc.selectedIndex<0)cc.selectedIndex=0;}own();return;}
+  if(!n.code&&n.digits.length<4)return;   /* a country code is one to three digits: too early to say */
+  if(cc.__was==null)cc.__was=cc.value;
+  const listed=n.code?[...cc.options].find(o=>o!==cc.__own&&o.value===n.code):null;
+  if(listed){cc.value=n.code;own();return;}
+  if(!cc.__own||!cc.__own.isConnected){cc.__own=document.createElement('option');cc.appendChild(cc.__own);}
+  const flag=n.country&&/^[A-Z]{2}$/.test(n.country)?String.fromCodePoint(...[...n.country].map(c=>0x1F1E6+c.charCodeAt(0)-65))+' ':'';
+  cc.__own.value=n.code;cc.__own.textContent=n.code?flag+'+'+n.code:'+';cc.__own.selected=true;
+}
+function ccWire(cc,tel){
+  if(!cc||!tel)return;
+  tel.addEventListener('input',()=>ccFollow(cc,tel));
+  cc.addEventListener('change',()=>{const n=ccRead(tel.value);cc.__was=null;
+    if(n)tel.value=n.code?n.rest:n.digits;   /* the guest chose the country themselves: the number keeps its own part */
+    if(cc.__own&&!cc.__own.selected){cc.__own.remove();cc.__own=null;}});
+  ccFollow(cc,tel);
+}
+
+/* ---- "Get updates on WhatsApp", once a friend has their seat (Sk, 25 Nov 2026) ----
+   A guest who writes to bubl first may be written back to (WhatsApp's 24-hour rule). The button opens WhatsApp on
+   bubl's own number, which only the back end knows, with the message ready to send. No number (the line is not
+   connected), or no table name to put in the message: no button. */
+let _bublLine=null;
+function bublLine(){
+  return _bublLine||(_bublLine=BUBL.call('concierge-hooks','web/line',{}).then(r=>r&&r.ok&&typeof r.number==='string'&&/^[0-9]{6,20}$/.test(r.number)?r.number:null,()=>null)
+    .then(n=>{if(!n)_bublLine=null;return n;}));
+}
+function guestUpdatesButton(R){
+  const table=GUEST&&GUEST.view&&GUEST.view.table&&GUEST.view.table.name;if(!R||!table||R.querySelector('.ip-wa')||R.__waAsked)return;
+  R.__waAsked=true;
+  bublLine().then(n=>{R.__waAsked=false;
+    const row=R.querySelector('.ip-done .ip-row');if(!n||!row||!R.isConnected||R.querySelector('.ip-wa'))return;
+    row.insertAdjacentHTML('afterend','<div class="ip-row" style="margin-top:10px"><button class="ip-btn ip-wa" type="button">Get updates on WhatsApp</button></div>');
+    R.querySelector('.ip-wa').addEventListener('click',()=>{try{window.open('https://wa.me/'+n+'?text='+encodeURIComponent('Keep me posted on '+table),'_blank');}catch(_){}toast('Opening WhatsApp');});
+  });
+}
+
+/* ---- "Tables booked" is not shown at 0% (Sk, 25 Nov 2026) ----
+   On the invitation and on the page, in test and live mode: the figure is real, and it is shown as soon as it is more
+   than nought. A row left with nothing in it is not shown either. */
+if(LIVE){
+  const nightAsBuilt=window.fillIpNight;
+  window.fillIpNight=function(el){
+    const r=nightAsBuilt.apply(this,arguments);
+    try{const box=el.querySelector('.ipn-stats');
+      if(box){[...box.children].forEach(d=>{const b=d.querySelector('b'),l=d.querySelector('span');if(b&&l&&l.textContent==='Tables booked'&&b.textContent.trim()==='0%')d.style.display='none';});
+        if([...box.children].every(d=>d.style.display==='none'))box.style.display='none';}}catch(_){}
+    return r;
+  };
+  const statsAsBuilt=window.refreshRoomStats;
+  window.refreshRoomStats=function(){
+    const r=statsAsBuilt.apply(this,arguments);
+    try{const w=$('#roomStats'),b=$('#rsTaken');
+      if(w&&b){b.parentNode.style.display=b.textContent.trim()==='0%'?'none':'';
+        if(!w.hidden&&[...w.querySelectorAll('.rs')].every(x=>getComputedStyle(x).display==='none'))w.hidden=true;}}catch(_){}
+    return r;
+  };
 }

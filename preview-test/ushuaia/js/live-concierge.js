@@ -67,7 +67,7 @@ function fillInvitation(root){
   const tel=root.querySelector('.ip-tel'),cc=root.querySelector('.ip-cc');
   fill(root.querySelector('.ip-name'),chatGuest.name);fill(root.querySelector('.ip-em'),chatGuest.email);
   if(tel&&!tel.value){const mine=digits(chatGuest.phone),codes=cc?[...cc.options].map(o=>o.value).sort((a,b)=>b.length-a.length):[],code=codes.find(c=>c&&mine.startsWith(c));
-    if(code){cc.value=code;fill(tel,mine.slice(code.length));}else fill(tel,mine);}
+    if(code){cc.value=code;fill(tel,mine.slice(code.length));}else fill(tel,'+'+mine);}   /* a code the box does not list: the number goes in whole, and the box follows it (live-invite.js) */
 }
 try{new MutationObserver(list=>{if(!chatGuest)return;for(const m of list)for(const n of m.addedNodes){if(n.nodeType!==1)continue;
   if((n.matches&&n.matches('.ip-s1'))||(n.querySelector&&n.querySelector('.ip-s1')))fillInvitation(n.closest&&n.closest('#ipv')||n);}}).observe(document.documentElement,{childList:true,subtree:true});}catch(_){}
@@ -159,8 +159,8 @@ const restoreAsBuilt=window.restoreMine;
 window.restoreMine=async function(){const r=await restoreAsBuilt.apply(this,arguments);try{fromChat();}catch(_){}return r;};
 
 /* ---- 3. the page's own WhatsApp button, pointed at bubl ---- */
-BUBL.call('concierge-hooks','web/line',{}).then(r=>{
-  const n=r&&r.ok&&typeof r.number==='string'&&/^[0-9]{6,20}$/.test(r.number)?r.number:null,box=$('#waBox');if(!n||!box)return;
+bublLine().then(n=>{   /* asked once for the whole page (live-invite.js) */
+  const box=$('#waBox');if(!n||!box)return;
   const shown=$('#waNum');if(shown)shown.textContent=BUBL.phone.pretty('+'+n);   /* written the way the page writes every number */
   box.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{window.open('https://wa.me/'+n,'_blank');}catch(_){}toast('Opening WhatsApp');},true);
   /* the button was hidden only because the build's number was a placeholder (live-gates.js): it is offered again */
