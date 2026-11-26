@@ -97,6 +97,7 @@ body{background:#FBFAF7;font-family:Inter,system-ui,sans-serif;color:#141413;dis
 .grow{flex:1;min-width:0}
 .sbtn{font:500 12px Inter,sans-serif;padding:6px 11px;border-radius:8px;border:1px solid #DDD8CE;background:#fff;color:#141413;cursor:pointer;white-space:nowrap;flex:none}
 .sbtn:active{background:#F4F2EE}
+.sbtn:disabled{opacity:.45;cursor:default}
 /* The phone is shown at its true size (360 x 760). Only when the window is too short to hold it is the whole
    phone made smaller, in proportion (never squeezed): --k is set by studio.js and is 1 whenever it fits. */
 .stage{flex:1;min-height:0;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:36px;padding:20px 16px;box-sizing:border-box;overflow:auto}

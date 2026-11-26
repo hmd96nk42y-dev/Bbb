@@ -263,8 +263,9 @@ class Phone {
       r.addEventListener('click', () => { p.view = open; this.draw(); });
       this.thread.append(r);
     };
-    const lastOf = (rows) => { const m = rows.at(-1)?.message; return m ? String(m.text?.body ?? m.interactive?.body?.text ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? '').split('\n')[0] : 'business account'; };
-    row(chatName(p), lastOf(p.rows), 'bubl', true);
+    const lastOf = (rows) => { const m = rows.at(-1)?.message; return m ? String(m.text?.body ?? m.image?.caption ?? m.interactive?.body?.text ?? m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? '').split('\n')[0] : 'business account'; };
+    // the line under the chat is its newest message that is in the chat: never one that was not delivered
+    row(chatName(p), lastOf(p.rows.filter(shown)), 'bubl', true);
     for (const [name, list] of p.peers) row(name, list.at(-1).text.split('\n')[0], name, false);
   }
 
@@ -488,6 +489,11 @@ function drawPeople() {
 
 }
 
+/** Whether a message is in the person's chat: everything they wrote, and what bubl wrote that was delivered. */
+const shown = (r) => r.direction === 'in' || r.state !== 'failed';
+/** WhatsApp's 24-hour rule (bubl may only write to someone who wrote to it in the last day): how things stand, not a fault. */
+const dayRule = (r) => /24 hours/i.test(String(r.problem ?? ''));
+
 /** New messages for a person: drawn if their phone is in view, counted on their name if not. */
 function take(p, rows) {
   // Two refreshes can overlap (the one every few seconds, and the one after something is sent): a message is drawn
@@ -496,7 +502,7 @@ function take(p, rows) {
   rows = rows.filter((r) => r.id == null || !seen.has(r.id));
   if (!rows.length) return;
   for (const r of rows) {
-    if (r.direction === 'out' && r.state === 'failed') say(`One of bubl's answers to ${p.name} could not be delivered${r.problem ? `: ${r.problem}` : '.'}`, true);
+    if (r.direction === 'out' && r.state === 'failed') say(`One of bubl's answers to ${p.name} could not be delivered${r.problem ? `: ${r.problem}` : '.'}`, !dayRule(r));
     p.rows.push(r);
   }
   const fromBubl = rows.filter((r) => r.direction === 'out' && r.state !== 'failed').length;
@@ -531,7 +537,15 @@ async function act(p, input, shown) {
     redraw(p);
   }
 }
-async function others(except) { for (const p of people) if (p !== except && !p.busy) take(p, await source.more(p)); }
+async function others(except) {
+  for (const p of people) {
+    if (p === except || p.busy) continue;
+    // an answer asked for before a Reset belongs to the chat that was emptied: it is not put back
+    const was = resets;
+    const rows = await source.more(p);
+    if (was === resets) take(p, rows);
+  }
+}
 
 // ---------- the web step, played by the studio for a simulated guest ----------
 
@@ -817,24 +831,35 @@ async function liveSource() {
 }
 
 // ---------- the page ----------
+// Reset can be tapped only once the chats are loaded: tapped while they were still arriving, it emptied them and the
+// load then put them back, so the first tap looked ignored (Sk, 26 Nov 2026). Until then the button is shown greyed.
+let loaded = false;
+let resetting = false;
+let resets = 0;
+function resetReady() { $('reset').disabled = !loaded || resetting; }
 $('reset').addEventListener('click', async () => {
-  if (!source || people.some((p) => p.busy)) return;
+  if (!source || !loaded || resetting) return;
+  // never a tap that does nothing: it says why
+  if (people.some((p) => p.busy)) return say('bubl is still answering. Tap Reset again in a moment.');
+  resetting = true; resetReady();
   try {
-    for (const p of people) { await source.reset(p); p.rows = []; p.peers = new Map(); p.view = 'bubl'; p.draft = ''; p.unread = 0; }
+    for (const p of people) { await source.reset(p); resets++; p.rows = []; p.peers = new Map(); p.view = 'bubl'; p.draft = ''; p.unread = 0; }
     layout();
     say('Started again from empty chats.');
-  } catch (e) { say(e.message || 'Reset did not work just now.', true); }
+  } catch (e) { layout(); say(e.message || 'Reset did not work just now.', true); } finally { resetting = false; resetReady(); }
 });
 
 async function open(src) {
   source = src;
   $('gate').hidden = true;
   $('stage').hidden = false;
+  resetReady();
   $('reset').hidden = false;
   for (const p of await src.people()) addPerson(p);
   current = people[0];
   for (const p of people) p.rows = await src.start(p);
   layout();
+  loaded = true; resetReady();
   if (src.demo) {
     const strip = $('strip');
     strip.hidden = false;
