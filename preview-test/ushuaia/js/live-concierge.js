@@ -41,13 +41,15 @@ const entered=(async()=>{
   return ok;
 })().catch(()=>false);
 const startAsBuilt=window.openGuestLink;
-window.openGuestLink=async function(){await entered;return startAsBuilt.apply(this,arguments);};
+/* The page's own start calls this the moment it has drawn itself. A button from the chat is acted on right there,
+   before anything is waited for (Sk, 26 Nov 2026: "open on the picked table straight away"): see fromChat below. */
+window.openGuestLink=async function(){try{if(!q.get('i')&&!q.get('v')){early=true;fromChat();}}catch(_){}await entered;return startAsBuilt.apply(this,arguments);};
 
 /* ---- 1b. what the chat already knows goes into the page's own forms ---- */
 /* the number this page is signed in on, from the guest's own chat: proven already, so every form takes it as it is */
 const parseAsBuilt=BUBL.phone.parse;
 BUBL.phone.parse=function(text,dial){
-  const r=parseAsBuilt.apply(this,arguments);
+  let r;try{r=parseAsBuilt.apply(this,arguments);}catch(_){r={ok:false,reason:'That does not look like a mobile number. Check it and try again.'};}
   if(!r.ok&&chatGuest){const mine=digits(chatGuest.phone),typed=digits(text);
     if(typed&&(typed===mine||digits(dial)+typed.replace(/^0+/,'')===mine))return {ok:true,e164:chatGuest.phone,country:null};}
   return r;
@@ -66,8 +68,9 @@ function fillInvitation(root){
   if(!chatGuest||!root||!root.querySelector)return;
   const tel=root.querySelector('.ip-tel'),cc=root.querySelector('.ip-cc');
   fill(root.querySelector('.ip-name'),chatGuest.name);fill(root.querySelector('.ip-em'),chatGuest.email);
-  if(tel&&!tel.value){const mine=digits(chatGuest.phone),codes=cc?[...cc.options].map(o=>o.value).sort((a,b)=>b.length-a.length):[],code=codes.find(c=>c&&mine.startsWith(c));
-    if(code){cc.value=code;fill(tel,mine.slice(code.length));}else fill(tel,'+'+mine);}   /* a code the box does not list: the number goes in whole, and the box follows it (live-invite.js) */
+  /* the country goes in the box and the rest of the number beside it, also for a code the box does not list; a
+     simulated number shows "+999" in the box (ccPut, live-invite.js). The two boxes always add up to the number. */
+  if(tel&&!tel.value&&!(cc&&typeof ccPut==='function'&&ccPut(cc,tel,chatGuest.phone)))fill(tel,chatGuest.phone);
 }
 try{new MutationObserver(list=>{if(!chatGuest)return;for(const m of list)for(const n of m.addedNodes){if(n.nodeType!==1)continue;
   if((n.matches&&n.matches('.ip-s1'))||(n.querySelector&&n.querySelector('.ip-s1')))fillInvitation(n.closest&&n.closest('#ipv')||n);}}).observe(document.documentElement,{childList:true,subtree:true});}catch(_){}
@@ -75,7 +78,8 @@ entered.then(ok=>{if(ok)fillInvitation(document);});
 
 /* ---- 2. the night, the party and the kind of table bubl spoke of ---- */
 const want={e:q.get('e'),tier:q.get('tier'),n:parseInt(q.get('n')||'',10),pick:q.get('pick')};
-let lit=null,opened=false;   /* lit: the kind of table bubl suggested, by the venue's own key */
+let lit=null,opened=false,early=false,putAt=null;   /* early: acted on at the page's start; putAt: where the page was put then */
+/* lit: the kind of table bubl suggested, by the venue's own key */
 const litIds=()=>TABLES.filter(t=>t.tier===lit&&!t.req&&tableOpen(t)).map(t=>t.id);
 /* the suggestion steps aside once the guest has a table, is buying tickets, or searches by budget themselves */
 const litNow=()=>!!lit&&!S.boothId&&!S.tixMode&&!BUD.on&&!BUD.search;
@@ -113,11 +117,15 @@ function litSection(){
   const n={};litIds().forEach(id=>{const t=T(id);if(t)n[t.sec]=(n[t.sec]||0)+1;});
   return Object.keys(n).sort((a,b)=>n[b]-n[a]||a.localeCompare(b))[0]||null;
 }
-function toVenue(){const a=$('#app'),rc=$('#roomCanvas');if(a&&rc)a.scrollTo({top:Math.max(0,rc.offsetTop-150),behavior:'smooth'});}
+/* The page is put on the venue in one step, not slid there: while the venue view loads the phone is too busy to slide,
+   and the guest was left looking at the event's cover until it had finished (Sk, 26 Nov 2026). */
+function toVenue(){const a=$('#app'),rc=$('#roomCanvas');if(a&&rc){const top=Math.max(0,rc.offsetTop-150);try{a.scrollTo({top:top,behavior:'instant'});}catch(_){a.scrollTop=top;}putAt=a.scrollTop;}}
+/* the venue view has loaded: the page is put on the venue once more, and again when what loads after it has arrived */
+function settle(){[0,700,1800,3500].forEach(ms=>setTimeout(()=>{if(!S.boothId&&!S.tixMode&&!moved())toVenue();},ms));}
 function showLit(){
   const sec=litSection();if(!sec)return;
   S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});dollPost({cmd:'focus',zone:sec});
-  toVenue();
+  settle();
 }
 /* The table proposed: the one named if it is still open, or the first open one of the lit kind that fits the party.
    It is shown the way the build's own helper shows a table it found: the venue goes to its section, then the table
@@ -129,15 +137,20 @@ function propose(){
   const t=proposed();if(!t||S.boothId||!litNow())return;
   dollPost({cmd:'focus',zone:t.sec});
   const still=()=>!S.boothId&&litNow()&&!S.pick;
-  setTimeout(()=>{if(!still())return;
-    /* The venue view answers a selection by opening the table's sheet at once. For the proposed table that answer
-       is held back for a moment (a tap on any other table is not), then given exactly as built. */
-    const pickAsBuilt=window.onPick;let done=false;
-    const giveBack=()=>{done=true;window.onPick=pickAsBuilt;};
-    window.onPick=function(id){if(id===t.id&&!done)return;giveBack();return pickAsBuilt.apply(this,arguments);};
-    dollPost({cmd:'select',id:t.id});
-    setTimeout(()=>{if(done)return;giveBack();if(still())pickAsBuilt(t.id);},1700);},700);
+  if(!still())return;
+  /* The venue view answers a selection by opening the table's sheet at once. For the proposed table that answer
+     is held back for a moment (a tap on any other table is not), then given exactly as built. The table is selected
+     the moment the venue view listens, and its sheet follows after the same moment as before: there is no other wait
+     (Sk, 26 Nov 2026; before that the table was selected 1.4 seconds after the venue view listened). */
+  const pickAsBuilt=window.onPick;let done=false;
+  const giveBack=()=>{done=true;window.onPick=pickAsBuilt;};
+  window.onPick=function(id){if(id===t.id&&!done)return;giveBack();return pickAsBuilt.apply(this,arguments);};
+  dollPost({cmd:'select',id:t.id});
+  setTimeout(()=>{if(done)return;giveBack();if(still())pickAsBuilt(t.id);},1700);
 }
+/* Run at the page's start, before the sign-in and the guest's own tables are known: the night, the party and the
+   page's place on the venue wait for nothing. (They used to wait for the back end's answer, which the phone could not
+   take in until the venue view had finished loading: many seconds on the event's cover.) */
 function fromChat(){
   if(opened)return;opened=true;
   if(S.boothId||window.GUEST)return;   /* the guest already has a table, or opened an invitation: the page shows that, as it always does */
@@ -149,14 +162,26 @@ function fromChat(){
   afterPick();
   if(lit){S.view='top';paintVtog();dollPost({cmd:'setView',view:'top'});}   /* the plan from the first frame: the venue never shows one way first and then turns */
   /* the page goes to the venue at once, while the venue view is still loading: the guest is never left at the top */
-  if(lit||(ev&&q.get('p')))setTimeout(()=>{if(!S.boothId&&!S.tixMode)toVenue();},350);
-  if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();if(want.pick)setTimeout(propose,700);}});
+  /* and again as the parts of the page above the venue arrive and push it down, for as long as the guest has not
+     scrolled the page themselves */
+  if(lit||(ev&&q.get('p'))){toVenue();let n=0;const t=setInterval(()=>{if(++n>24||S.boothId||S.tixMode||moved())clearInterval(t);else toVenue();},350);}
+  if(lit)whenRoomShows(()=>{if(litNow()){syncBudget();showLit();if(want.pick)propose();}});
   /* The night alone, from the message a host forwards ("Are you in?"): the page opens on the venue for that night
      rather than leaving a friend at the ticket button further up (Sk, 24 Nov 2026). Nothing is lit or proposed. */
-  else if(ev&&q.get('p'))whenRoomShows(()=>{if(!S.boothId&&!S.tixMode)toVenue();});
+  else if(ev&&q.get('p'))whenRoomShows(()=>{settle();});
 }
+/* the guest has scrolled the page themselves: it is left where they put it. (Told by their own finger, tap or wheel, not by
+   where the page is: the page also shifts by itself as the parts above the venue arrive.) */
+let touched=false;
+['touchmove','wheel','pointerdown'].forEach(k=>{try{window.addEventListener(k,()=>{touched=true;},{passive:true,capture:true});}catch(_){}});
+function moved(){return touched;}
 const restoreAsBuilt=window.restoreMine;
-window.restoreMine=async function(){const r=await restoreAsBuilt.apply(this,arguments);try{fromChat();}catch(_){}return r;};
+window.restoreMine=async function(){const r=await restoreAsBuilt.apply(this,arguments);
+  try{fromChat();
+    /* the guest turned out to have a table already: the page shows that from its top, as it always does */
+    if(early&&S.boothId){lit=null;}
+    if(early&&S.boothId&&putAt!=null&&!moved()){const a=$('#app');putAt=null;if(a){try{a.scrollTo({top:0,behavior:'instant'});}catch(_){a.scrollTop=0;}}}
+  }catch(_){}return r;};
 
 /* ---- 3. the page's own WhatsApp button, pointed at bubl ---- */
 bublLine().then(n=>{   /* asked once for the whole page (live-invite.js) */

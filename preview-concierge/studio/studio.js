@@ -446,7 +446,11 @@ function drawPeople() {
   box.replaceChildren();
   if (!source || source.demo) { box.hidden = true; return; }
   box.hidden = false;
-  for (const p of people) {
+  // always in the same order (Sk, 27 Nov 2026): guests first, then partners, each in the order they were made (their
+  // simulated numbers are given out in order), whatever order the back end lists them in and whoever is in view
+  const made = (p) => { try { return BigInt(String(p.number ?? '').replace(/\D/g, '') || '0'); } catch { return 0n; } };
+  const inOrder = [...people].sort((a, b) => (isPartner(a) - isPartner(b)) || (made(a) < made(b) ? -1 : made(a) > made(b) ? 1 : 0) || String(a.name).localeCompare(String(b.name)));
+  for (const p of inOrder) {
     const c = el('button', `chip${p === current ? ' on' : ''}`, isPartner(p) ? `${p.name} · partner` : p.name);
     c.type = 'button';
     if (p.unread && !phoneOf(p)) c.append(el('span', 'dot', String(p.unread)));

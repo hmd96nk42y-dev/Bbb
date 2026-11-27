@@ -20,8 +20,26 @@ async function openGuestLink(){
   if(v.your_seat){const me=await BUBL.me();if(me.ok&&me.guest){GUEST.me=me.guest.full_name.split(' ')[0];window.__ipClaimed=true;window.__ipName=GUEST.me;const mine=(me.bookings||[]).find(b=>b.my_seat&&b.my_seat.seat_no===v.your_seat.seat_no&&b.table.key===v.table.key);GUEST.booking=mine||null;GUEST.bookingId=mine?mine.booking_id:null;}}
   S.holdUntil=v.hold_expires_at?Date.parse(v.hold_expires_at):0;
   window.openInvitePreview();guestIntro();
-  if(GUEST.me)setTimeout(guestClaimedView,0);
+  if(GUEST.me){try{guestOwnPlace();}catch(_){}setTimeout(guestClaimedView,0);}
   return true;
+}
+/* A guest who already has their seat at this table opens the link on their own place, not on the sealed envelope
+   (Sk, 26 Nov 2026): "You're on the table, <name>.", with their part of the deposit and its button in view. The back
+   end says whose seat it is from the sign-in and the table, so any link of that table does this, not only the one
+   they joined through. The envelope is opened by the build's own key for it, with its picture never shown; a guest
+   who has not joined gets the envelope as always. */
+function guestOwnPlace(){
+  const R=document.getElementById('ipv');if(!R)return;
+  const stage=R.querySelector('.ip-stage'),env=R.querySelector('.ip-env'),sc=R.querySelector('.ip-scroll');
+  if(stage)stage.style.display='none';
+  if(env)env.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+  R.classList.remove('sealed');R.classList.add('open');
+  guestClaimedView();
+  let touched=false;['touchmove','wheel','pointerdown'].forEach(k=>R.addEventListener(k,()=>{touched=true;},{passive:true,capture:true}));
+  const put=()=>{const c=R.querySelector('.ip-claim');if(touched||!R.isConnected||!sc||!c)return;
+    const top=Math.max(0,Math.round(sc.scrollTop+c.getBoundingClientRect().top-sc.getBoundingClientRect().top+20));
+    try{sc.scrollTo({top:top,behavior:'instant'});}catch(_){sc.scrollTop=top;}};
+  put();[60,400,1200,2500,4500,7000].forEach(ms=>setTimeout(put,ms));   /* again as the parts above it arrive */
 }
 /* what the back end now says about this link and my seat */
 async function guestRefresh(){
@@ -37,11 +55,12 @@ setInterval(()=>{if(GUEST&&GUEST.me&&!document.hidden&&document.querySelector('.
 function wireFormLive(I,ip){
   const q=ip.q,R=ip.R;
   if(!window.GUEST){const c=q('.ip-claim');if(c)c.style.display='none';return;}   /* the host previewing: nothing to claim */
-  if(GUEST.view.status==='full'&&!GUEST.me){q('.ip-s1').hidden=true;q('.ip-why').textContent=LINK_SAYS.full;return;}
+  if(GUEST.view.status==='full'&&!GUEST.me){q('.ip-s1').hidden=true;q('.ip-claim .ip-why').textContent=LINK_SAYS.full;return;}
   const e1=q('.ip-e1'),say=(m,el)=>{e1.textContent=m;if(el){el.classList.add('bad');el.focus();}};
   q('.ip-tel').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';});
   q('.ip-name').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';});
-  q('.ip-em').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';});
+  q('.ip-em').addEventListener('input',e=>{e.target.classList.remove('bad');e1.textContent='';emFit(e.target);});
+  setTimeout(()=>{if(R.isConnected)emFit(q('.ip-em'));},400);
   ccWire(q('.ip-cc'),q('.ip-tel'));
   let busy=false;
   q('.ip-s1').addEventListener('submit',async e=>{e.preventDefault();if(busy)return;
@@ -70,6 +89,12 @@ function wireFormLive(I,ip){
     await guestRefresh();ip.named(GUEST.me);guestClaimedView();
   });
 }
+/* A long email address is written a little smaller so that all of it is seen in its box, rather than cut off at the
+   box's right edge (Sk, 26 Nov 2026: "the email is clipped on the right"). The box itself does not change. */
+function emFit(el){
+  if(!el)return;el.style.fontSize='';if(!el.value||!el.clientWidth)return;
+  for(let px=16;px>=12&&el.scrollWidth>el.clientWidth;px--)el.style.fontSize=px+'px';
+}
 /* the code part alone (the join call saves the guest's details itself) → true: proven; false: "use a different number"; {ok:false}: could not send */
 async function provePhoneFor(e164,ui){
   if((await BUBL.auth.phone())===e164)return true;
@@ -82,7 +107,9 @@ function guestClaimedView(){
   window.__ipClaimed=true;window.__ipName=GUEST.me;R.querySelectorAll('.ip-claimbtn').forEach(b=>b.remove());
   const cb=q('.ip-close2');if(cb)cb.textContent='Continue';
   q('.ip-dh').textContent=`You're on the table, ${GUEST.me}.`;q('.ip-dp').innerHTML=`<em>${host}</em> can see you're coming.`;
-  q('.ip-ch').style.display='none';q('.ip-why').style.display='none';q('.ip-s1').hidden=true;q('.ip-s2').hidden=true;q('.ip-done').hidden=false;
+  /* the claim form's own line, not the first ".ip-why" on the page: that one is now the intro under the logo, and
+     hiding it left the form's line showing above "You're on the table" (Sk, 26 Nov 2026) */
+  q('.ip-ch').style.display='none';R.querySelectorAll('.ip-claim .ip-why').forEach(p=>{p.style.display='none';});q('.ip-s1').hidden=true;q('.ip-s2').hidden=true;q('.ip-done').hidden=false;
   if(!q('.ip-dep'))q('.ip-done').insertAdjacentHTML('beforeend','<div class="ip-dep"></div>');
   /* the list "At the table" now has me on it */
   const first=host,joined=guestsButMe(GUEST.view),party=Math.max(2,GUEST.view.party_size||2);
@@ -92,6 +119,10 @@ function guestClaimedView(){
   q('.ip-guests').innerHTML=h;q('.ip-count').textContent=`${rows.length} of ${party} confirmed`;
   ipDepRender();guestIntro();guestUpdatesButton(R);
 }
+/* The booking fee is shown wherever the guest's share is (Sk, 26 Nov 2026), and only ever as the back end's own
+   figure: the page works no fee out. Without one from the back end, nothing is said of a fee here; the card step
+   shows it, as it always has. */
+function feeOk(f){return Number.isSafeInteger(f)&&f>0;}
 /* my part of the deposit, from the back end's own figures */
 function ipDepRenderLive(box){
   if(!GUEST||!GUEST.seat){box.innerHTML='';return;}
@@ -101,7 +132,7 @@ function ipDepRenderLive(box){
   if(s.requested_minor!=null&&!paid)   /* the host changed the split: a higher amount is only ever taken with the guest's own yes (Sk, 17 Nov 2026) */
     box.innerHTML=`<div class="ipd"><small>Your part of the deposit</small><b>${AED(s.requested_minor)}</b><span>${host} changed the split. Your part was ${AED(s.share_minor)}. It only changes if you accept.</span><button type="button" class="ip-btn ipd-yes">Accept ${AED(s.requested_minor)}</button><button type="button" class="ip-link ipd-no">Keep ${AED(s.share_minor)}</button></div>`;
   else if(paid)box.innerHTML=`<div class="ipd ok"><b>Your part is ${s.card==='charged'?'paid':'held'}</b><span>${AED(s.share_minor)} toward the table's deposit. ${s.card==='charged'?'Your spot is locked.':'Your card is held, not charged, until the table is secured.'}</span>${qr}</div>`;
-  else if(owes>0)box.innerHTML=`<div class="ipd"><small>Your part of the deposit</small><b>${AED(owes)}</b><span class="ipd-t" id="ipdT">Due in ${hms(holdLeft())}, or the spot is released</span><button type="button" class="ip-btn ipd-go">Pay your part</button></div>`;
+  else if(owes>0)box.innerHTML=`<div class="ipd"><small>Your part of the deposit</small><b>${AED(owes)}</b>${feeOk(s.fee_minor)?`<span>Plus a ${AED(s.fee_minor)} booking fee.</span>`:''}<span class="ipd-t" id="ipdT">Due in ${hms(holdLeft())}, or the spot is released</span><button type="button" class="ip-btn ipd-go">Pay your part</button></div>`;
   else if(ok)box.innerHTML=`<div class="ipd ok"><b>${host} covered the deposit</b><span>Nothing for you to pay. Your spot is locked.</span>${qr}</div>`;
   else if(v.own_link)box.innerHTML=`<div class="ipd soft"><small>Your part of the deposit</small><b>Not split yet</b><span>${host} hasn’t split the table’s deposit yet. Your part shows up right here, on this invite, the moment they do.</span></div>`;
   else box.innerHTML=`<div class="ipd soft"><small>Your part of the deposit</small><b>Nothing to pay</b><span>${host} sent you an invite link: you join free. Your entry QR appears here once the table is confirmed.</span></div>`;
@@ -125,7 +156,8 @@ function guestIntro(){
   const host=esc((v.host_name||'').trim().split(/\s+/)[0]||''),table=v.table&&v.table.name?esc(v.table.name):'';
   const part=GUEST.seat?GUEST.seat.share_minor:v.amount_minor;
   let h=host&&table?`<em>${host}</em> invites you to ${table}.`:host?`<em>${host}</em> invites you.`:table?`You are invited to ${table}.`:'';
-  if(Number.isSafeInteger(part)&&part>0)h+=` Your part of the deposit is ${AED(part)}.`;
+  const fee=GUEST.seat?GUEST.seat.fee_minor:v.fee_minor;   /* BUBL's fee on that part: the back end's own figure, or no word of a fee */
+  if(Number.isSafeInteger(part)&&part>0)h+=` Your part of the deposit is ${AED(part)}${feeOk(fee)?`, plus a ${AED(fee)} booking fee`:''}.`;
   let box=R.querySelector('.ip-intro');
   if(!h){if(box)box.remove();return;}
   if(!box){box=document.createElement('div');box.className='ip-hw ip-intro';box.innerHTML='<p class="ip-why"></p>';brand.insertAdjacentElement('afterend',box);}
@@ -152,6 +184,22 @@ function ccFollow(cc,tel){
   if(!cc.__own||!cc.__own.isConnected){cc.__own=document.createElement('option');cc.appendChild(cc.__own);}
   const flag=n.country&&/^[A-Z]{2}$/.test(n.country)?String.fromCodePoint(...[...n.country].map(c=>0x1F1E6+c.charCodeAt(0)-65))+' ':'';
   cc.__own.value=n.code;cc.__own.textContent=n.code?flag+'+'+n.code:'+';cc.__own.selected=true;
+}
+/* A whole number bubl already knows (the invitation's form, opened from the chat) is put in the two boxes the way the
+   build shows a number: its country in the box, the rest of it in the number box (Sk, 26 Nov 2026: "the country box
+   shows '+' alone, the full number is in the second box"). A number that is no country's (the studio's simulated +999
+   numbers) shows its own first three digits in the box, "+999", and the rest beside it: the two together are always
+   the number itself. → true when the number was put in. */
+function ccPut(cc,tel,number){
+  const n=ccRead(number);if(!cc||!tel||!n||n.digits.length<5)return false;
+  const code=n.code||n.digits.slice(0,3),rest=n.code&&n.rest?n.rest:n.digits.slice(code.length);
+  const listed=[...cc.options].find(o=>o!==cc.__own&&o.value===code);
+  if(listed){cc.value=code;if(cc.__own&&cc.__own.isConnected){cc.__own.remove();cc.__own=null;}}
+  else{if(!cc.__own||!cc.__own.isConnected){cc.__own=document.createElement('option');cc.appendChild(cc.__own);}
+    const flag=n.code&&n.country&&/^[A-Z]{2}$/.test(n.country)?String.fromCodePoint(...[...n.country].map(c=>0x1F1E6+c.charCodeAt(0)-65))+' ':'';
+    cc.__own.value=code;cc.__own.textContent=flag+'+'+code;cc.__own.selected=true;}
+  cc.__was=null;tel.value=rest;tel.dispatchEvent(new Event('input',{bubbles:true}));
+  return true;
 }
 function ccWire(cc,tel){
   if(!cc||!tel)return;
@@ -187,7 +235,11 @@ function guestUpdatesButton(R){
 if(LIVE){
   const nightAsBuilt=window.fillIpNight;
   window.fillIpNight=function(el){
-    const r=nightAsBuilt.apply(this,arguments);
+    /* "Your night starts in" counts to the night's doors, as the back end gives them (Sk, 26 Nov 2026). The build
+       counts to the arrive-by time (22:00 on a night whose doors are 20:00), and at nought says "Doors are open". */
+    const whenAsBuilt=window.arrivalAt,doors=S.ev&&S.ev.doorsAt;let r;
+    if(typeof whenAsBuilt==='function'&&Number.isFinite(doors))window.arrivalAt=()=>new Date(doors);
+    try{r=nightAsBuilt.apply(this,arguments);}finally{window.arrivalAt=whenAsBuilt;}
     try{const box=el.querySelector('.ipn-stats');
       if(box){[...box.children].forEach(d=>{const b=d.querySelector('b'),l=d.querySelector('span');if(b&&l&&l.textContent==='Tables booked'&&b.textContent.trim()==='0%')d.style.display='none';});
         if([...box.children].every(d=>d.style.display==='none'))box.style.display='none';}}catch(_){}

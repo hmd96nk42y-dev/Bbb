@@ -14,7 +14,13 @@ const NOT_YET=LIVE?{
   spent:'#minSpend>.sec-hd,#minSpend .ms-nums,#msBar,#msOver,#msNote,#msPre,#hostBlock .vp-stats>div:nth-child(3)'   /* spend toward the minimum: needs pre-orders or the POS; a nought is never shown in its place. The table votes in the same section are real */
 }:null;
 if(NOT_YET){const st=document.createElement('style');st.id='not-yet-css';st.textContent=Object.keys(NOT_YET).map(k=>NOT_YET[k]).join(',')+'{display:none!important}'
-  +'.ip-preview .ip-claimbtn,.ip-preview .ip-claim{display:none!important}';   /* the host previewing their invitation has nothing to claim */
+  +'.ip-preview .ip-claimbtn,.ip-preview .ip-claim{display:none!important}'   /* the host previewing their invitation has nothing to claim */
+  /* "Browse the menu" is not offered yet, so the table sheet's row of two buttons has one: it takes the whole row, on
+     one line (Sk, 26 Nov 2026: "'Hold this table' is half width and wraps onto two lines") */
+  +'#tsMenu+#tsHold{grid-column:1/-1;white-space:nowrap}'
+  /* the page's header hides what scrolls beneath it: the page's own black, with a short fade at its lower edge
+     (Sk, 26 Nov 2026: "the web header lets content show through"). No new colour. */
+  +'.hdr{background:linear-gradient(180deg,#000 86%,rgba(0,0,0,0))}';
   document.head.appendChild(st);}
 /* the same question, for code: is this part offered here? (always yes in demo) */
 const offered=k=>!NOT_YET||!(k in NOT_YET);

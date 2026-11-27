@@ -19,6 +19,14 @@ function ginfoShut(){if(GI.ui&&GI.ui.cancel)GI.ui.cancel();ginfoCodeMode(false);
 /* what the back end said, in the guest's words: most refusals already are a sentence fit to show */
 const HOLD_SAYS={taken:'That table was just taken. Pick another one.',sign_up_needed:'Add your name and email first.',pending_hold_limit:'You already have a table waiting for its deposit. Settle that one first.',
   table_limit:'This number already has a table on this night.',not_on_sale:'This night is not on sale.',booking_closed:'Online booking has closed for this night.',ended:'This night is over.'};
+/* The form names only what is still missing (Sk, 26 Nov 2026: "Tick the box to accept the terms"), never the whole list. */
+function ginfoMissing(name,phone,email,terms){
+  const w=[];if(name)w.push('name');if(phone)w.push('number');if(email)w.push('email');
+  if(!w.length)return terms?'Tick the box to accept the terms.':'';
+  if(w.length===1&&!terms)return name?'Add your full name, as on your ID.':phone?'Add your mobile number.':'Add your email address.';
+  const list=w.length===1?w[0]:w.slice(0,-1).join(', ')+' and '+w[w.length-1];
+  return 'Add your '+list+(terms?', and tick the box to accept the terms.':'.');
+}
 async function liveHoldCta(){
   if(GI.busy||GI.code)return;const t=_pending;if(!t)return;
   const label=$('#ginfoCta').textContent;
@@ -26,7 +34,7 @@ async function liveHoldCta(){
   const ph=BUBL.phone.parse(p);
   $('#ginfoName').classList.toggle('err',!n||nv==='blocked');$('#ginfoPhone').classList.toggle('err',!ph.ok);$('#ginfoEmail').classList.toggle('err',!eok);
   if(n&&nv==='blocked')return ginfoSay(NAME_BLOCKED);
-  if(!n||!p||!eok||!tc)return ginfoSay(em&&!eok?'Check your email address.':'Add your name, number and email, and accept the terms.');
+  if(!n||!p||!eok||!tc)return ginfoSay(em&&!eok?'Check your email address.':ginfoMissing(!n,!p,!em,!tc));
   if(!ph.ok)return ginfoSay(ph.reason);
   GI.busy=true;const cta=$('#ginfoCta');cta.disabled=true;cta.textContent='One moment';
   GI.ui={codeBox:ginfoCodeMode(false),verifyBtn:cta,show:on=>{ginfoCodeMode(on);cta.textContent=on?label:'One moment';cta.disabled=true;}};
